@@ -7,6 +7,8 @@ import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
 
 public class MainActivity extends Activity {
@@ -31,6 +33,12 @@ public class MainActivity extends Activity {
         }
     };
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Load OpenCV for Android
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+    }
 
 
     @Override
@@ -49,4 +57,5 @@ public class MainActivity extends Activity {
 
     public native int getMessage();
 
+    //public native void gaussianBlur(long matAddr);
 }

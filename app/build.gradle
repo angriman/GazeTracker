@@ -5,13 +5,14 @@ model {
         compileSdkVersion = 23
         buildToolsVersion = "23.0.2"
 
-        defaultConfig {
-            applicationId = "com.google.sample.helloandroidjni"
+        defaultConfig.with {
+            applicationId = "com.teaminfernale.gazetracker"
             minSdkVersion.apiLevel = 19
             targetSdkVersion.apiLevel = 23
             versionCode = 1
             versionName = "1.0"
         }
+
         buildTypes {
             release {
                 minifyEnabled = false
@@ -21,6 +22,16 @@ model {
 
         ndk {
             moduleName = "main-jni"
+            cppFlags.add("-std=c++11")
+       		cppFlags.add("-fexceptions")
+      	    cppFlags.add("-I${file("src/main/jni//include")}".toString())
+            ldLibs.add("android")
+            ldLibs.add("EGL")
+            ldLibs.add("GLESv2")
+            ldLibs.add("dl")
+            ldLibs.add("log")
+            ldLibs.add("z")
+            stl = "gnustl_shared"
         }
     }
 }
