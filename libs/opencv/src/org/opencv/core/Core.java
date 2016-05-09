@@ -1328,7 +1328,7 @@ public class Core {
     //
 
     //javadoc: flip(src, dst, flipCode)
-    public static void flip()
+    public static void flip(Mat src, Mat dst, int flipCode)
     {
         
         flip_0(src.nativeObj, dst.nativeObj, flipCode);
