@@ -41,8 +41,15 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+
         // Load OpenCV for Android
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 
     private Bitmap lena = null;
@@ -52,12 +59,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+       /* ImageView imageView = (ImageView) findViewById(R.id.imageView);
         lena = BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
         imageView.setImageBitmap(lena);
 
         gaussianBlur();
-
+*/
         ((TextView) findViewById(R.id.textView)).setText("" + getMessage());
 
     }
@@ -69,7 +76,7 @@ public class MainActivity extends Activity {
         Utils.bitmapToMat(lena, targetImage);
         Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_BGR2RGB);
 
-        detectAndDisplay(targetImage.getNativeObjAddr());
+      //  detectAndDisplay(targetImage.getNativeObjAddr());
 
         Bitmap bitmap = Bitmap.createBitmap(targetImage.cols(), targetImage.rows(), Bitmap.Config.RGB_565);
         Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_RGB2BGR);
