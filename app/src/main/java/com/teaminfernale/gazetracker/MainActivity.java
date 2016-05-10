@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -59,12 +60,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       /* ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
         lena = BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
         imageView.setImageBitmap(lena);
 
         gaussianBlur();
-*/
+
         ((TextView) findViewById(R.id.textView)).setText("" + getMessage());
 
     }
@@ -76,7 +77,8 @@ public class MainActivity extends Activity {
         Utils.bitmapToMat(lena, targetImage);
         Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_BGR2RGB);
 
-      //  detectAndDisplay(targetImage.getNativeObjAddr());
+
+        filterImage(targetImage.getNativeObjAddr());
 
         Bitmap bitmap = Bitmap.createBitmap(targetImage.cols(), targetImage.rows(), Bitmap.Config.RGB_565);
         Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_RGB2BGR);
@@ -86,11 +88,14 @@ public class MainActivity extends Activity {
 
 
     static {
+
         System.loadLibrary("main-jni");
+        System.loadLibrary("libmain-jni.so");
+        System.loadLibrary("libopencv_java3.so");
     }
 
     public native int getMessage();
-    public native void detectAndDisplay(long matAddr);
 
-    //public native void gaussianBlur(long matAddr);
+    public native void filterImage(long matAddr);
+
 }

@@ -27,9 +27,7 @@ android {
             resources.srcDirs = ['src']
             res.srcDirs = ['res']
             aidl.srcDirs = ['src']
-
+            jniLibs.srcDir 'src/main/jniLibs'
         }
     }
-
-
 }
