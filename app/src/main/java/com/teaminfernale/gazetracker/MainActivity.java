@@ -22,7 +22,6 @@ public class MainActivity extends Activity {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
 
-
                 }
                 break;
                 default: {
@@ -56,6 +55,6 @@ public class MainActivity extends Activity {
     }
 
     public native int getMessage();
-
+    public native Mat detectAndDisplay(long matAddr);
     //public native void gaussianBlur(long matAddr);
 }
