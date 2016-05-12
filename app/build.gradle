@@ -1,6 +1,49 @@
 apply plugin: 'com.android.model.application'
 
+def opencvdirectory = "/Users/Eugenio/AndroidStudioProjects/OpenCV-android-sdk/sdk/native"
+def eigen3dir = "/home/matteo/Android/eigen-eigen-07105f7124f9"
+def tbbdir = "/home/matteo/Android/tbb44_20160413oss"
+
 model {
+
+    repositories {
+        libs(PrebuiltLibraries) {
+            ocv_core {
+                headers.srcDir "${opencvdirectory}/jni/include/opencv2/core"
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("${opencvdirectory}/libs/${targetPlatform.getName()}/libopencv_core.a")
+                }
+            }
+
+            ocv_feature2d {
+                headers.srcDir "${opencvdirectory}/jni/include/opencv2/features2d"
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("${opencvdirectory}/libs/${targetPlatform.getName()}/libopencv_features2d.a")
+                }
+            }
+
+            ocv_imgproc {
+                headers.srcDir "${opencvdirectory}/jni/include/opencv2/imgproc"
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("${opencvdirectory}/libs/${targetPlatform.getName()}/libopencv_imgproc.a")
+                }
+            }
+
+            ocv_ml {
+                headers.srcDir "${opencvdirectory}/jni/include/opencv2/ml"
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("${opencvdirectory}/libs/${targetPlatform.getName()}/libopencv_ml.a")
+                }
+            }
+
+            ocv_java3 {
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${opencvdirectory}/libs/${targetPlatform.getName()}/libopencv_java3.so")
+                }
+            }
+        }
+    }
+
     android {
         compileSdkVersion = 23
         buildToolsVersion = "23.0.2"
@@ -22,6 +65,8 @@ model {
 
         ndk {
             moduleName = "main-jni"
+            toolchain = 'clang' //this option said what compiler to use
+            stl = "gnustl_shared" //this option permits to include the static C++ standard library and others things ..(see http://developer.android.com/ndk/guides/cpp-support.html)
             cppFlags.add("-std=c++11")
        		cppFlags.add("-fexceptions")
       	    cppFlags.add("-I${file("src/main/jni/include")}".toString())
@@ -32,19 +77,12 @@ model {
             ldLibs.add("log")
             ldLibs.add("z")
             stl = "gnustl_shared"
-        }
 
-
-    }
-
-    android.productFlavors {
-
-        create("arm") {
-            ndk.with {
+           /* with {
                 abiFilters.add("armeabi")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\armeabi\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/armeabi/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -72,15 +110,13 @@ model {
                 ldFlags.add(libsDir + "libopencv_videoio.a")
                 ldFlags.add(libsDir + "libopencv_videostab.a")
                 ldFlags.add(libsDir + "libopencv_java3.so")
-
             }
-        }
-        create("arm7") {
-            ndk.with {
+
+            with {
                 abiFilters.add("armeabi-v7a")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\armeabi-v7a\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/armeabi-v7a/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -110,13 +146,12 @@ model {
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
             }
-        }
-        create("arm8") {
-            ndk.with {
+
+            with {
                 abiFilters.add("arm64-v8a")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\arm64-v8a\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/arm64-v8a/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -146,14 +181,12 @@ model {
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
             }
-        }
-
-        create("x86") {
-            ndk.with {
+        
+            with {
                 abiFilters.add("x86")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\x86\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/x86/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -183,13 +216,11 @@ model {
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
             }
-        }
-        create("x86-64") {
-            ndk.with {
+            with {
                 abiFilters.add("x86_64")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\x86_64\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/x86_64/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -219,14 +250,11 @@ model {
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
             }
-        }
-
-        create("mips") {
-            ndk.with {
+            with {
                 abiFilters.add("mips")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\mips\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/mips/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -256,13 +284,11 @@ model {
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
             }
-        }
-        create("mips-64") {
-            ndk.with {
+            with {
                 abiFilters.add("mips64")
                 File curDir = file('./')
                 curDir = file(curDir.absolutePath)
-                String libsDir = curDir.absolutePath+"\\src\\main\\jniLibs\\mips64\\"
+                String libsDir = curDir.absolutePath+"/src/main/jniLibs/mips64/"
 
                 ldFlags.add(libsDir + "libopencv_core.a")
                 ldFlags.add(libsDir + "libIlmImf.a")
@@ -291,10 +317,66 @@ model {
                 ldFlags.add(libsDir + "libopencv_videostab.a")
                 ldFlags.add(libsDir + "libopencv_java3.so")
 
+            }*/
+        }
+
+        sources {
+            main {
+                jni {
+                    dependencies {
+                        library 'ocv_feature2d' linkage 'static'
+                        library 'ocv_core' linkage 'static'
+                        library 'ocv_imgproc' linkage 'static'
+                        library 'ocv_ml' linkage 'static'
+                        library 'ocv_java3' linkage 'shared'
+                        //library 'tbblibrary' linkage 'shared'
+                    }
+                }
             }
         }
-        create("all")
+
+        buildTypes {
+            release {
+                minifyEnabled = false
+                proguardFiles.add(file('proguard-rules.txt'))
+            }
+        }
+
+        productFlavors {
+            // for detailed abiFilter descriptions, refer to "Supported ABIs" @
+            // https://developer.android.com/ndk/guides/abis.html#sa
+            /*
+             * Each combination of CPU and instruction sets has its own Application Binary Interface, or ABI
+             *
+             */
+            create("arm") {
+                ndk.abiFilters.add("armeabi")
+            }
+            create("arm7") {
+                ndk.abiFilters.add("armeabi-v7a")
+            }
+            create("arm8") {
+                ndk.abiFilters.add("arm64-v8a") // we have disabled it for linker problems
+            }
+            create("x86") {
+                ndk.abiFilters.add("x86")
+            }
+            create("x86-64") {
+                ndk.abiFilters.add("x86_64")
+            }
+            create("mips") {
+                ndk.abiFilters.add("mips")
+            }
+            create("mips-64") {
+                ndk.abiFilters.add("mips64")
+            }
+            // To include all cpu architectures, leaves abiFilters empty
+            create("all")
+
+        }
     }
+
+
 }
 
 dependencies {

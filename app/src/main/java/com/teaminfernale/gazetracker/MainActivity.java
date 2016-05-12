@@ -90,8 +90,7 @@ public class MainActivity extends Activity {
     static {
 
         System.loadLibrary("main-jni");
-        System.loadLibrary("libmain-jni.so");
-        System.loadLibrary("libopencv_java3.so");
+
     }
 
     public native int getMessage();

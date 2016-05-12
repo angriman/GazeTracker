@@ -9,7 +9,7 @@ Java_com_teaminfernale_gazetracker_MainActivity_filterImage(JNIEnv *env, jobject
                                                             jlong matAddr) {
 
     cv::Mat& src_img  = *(cv::Mat*)matAddr;
-   // cv::GaussianBlur(src_img, src_img, cv::Size(51,3), 80, 3);
+    cv::GaussianBlur(src_img, src_img, cv::Size(51,3), 80, 3);
 //    cv::cvtColor( src_img, src_img, CV_BGR2GRAY );
 }
 
