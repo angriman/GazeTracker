@@ -152,11 +152,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     }
 
                     //Initialize camera
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
                 }
-
                 break;
                 default: {
                     super.onManagerConnected(status);
@@ -174,37 +173,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        // Load OpenCV for Android
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mOpenCvCameraView.disableView();
-    }
-
-
-    private Bitmap lena = null;
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -218,7 +186,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
 
         mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
-        //  mValue = (TextView) findViewById(R.id.method);
+        mValue = (TextView) findViewById(R.id.method);
 
         mMethodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -261,6 +229,34 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             }
         });
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Load OpenCV for Android
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mOpenCvCameraView.disableView();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -493,8 +489,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         }
 
         Point matchLoc_tx = new Point(matchLoc.x + area.x, matchLoc.y + area.y);
-        Point matchLoc_ty = new Point(matchLoc.x + mTemplate.cols() + area.x,
-                matchLoc.y + mTemplate.rows() + area.y);
+        Point matchLoc_ty = new Point(matchLoc.x + mTemplate.cols() + area.x, matchLoc.y + mTemplate.rows() + area.y);
 
         Imgproc.rectangle(mRgba, matchLoc_tx, matchLoc_ty, new Scalar(255, 255, 0,
                 255));
@@ -502,12 +497,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
 
     }
-
-    public void onRecreateClick(View v) {
-        learn_frames = 0;
-    }
-
-
 
     static {
         System.loadLibrary("main-jni");
