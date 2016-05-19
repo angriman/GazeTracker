@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -16,7 +18,9 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -34,9 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
+public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
-    private static final String TAG = ":MainActivity";
+    private static final String TAG = "MainActivity";
     private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
@@ -89,6 +93,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
+
+
                     try {
                         // load cascade file from application resources
                         InputStream is = getResources().openRawResource(
@@ -150,11 +156,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         e.printStackTrace();
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
-
-                    //Initialize camera
                     mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
+
                 }
                 break;
                 default: {
@@ -172,18 +177,20 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
+    /** Called when the activity is first created. */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_main);
 
+        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
-
 
         mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
         mValue = (TextView) findViewById(R.id.method);
@@ -226,22 +233,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         mValue.setText("TM_CCORR_NORMED");
                         break;
                 }
+
+
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // Load OpenCV for Android
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
     }
 
     @Override
@@ -252,61 +247,34 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
     public void onDestroy() {
         super.onDestroy();
         mOpenCvCameraView.disableView();
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "called onCreateOptionsMenu");
-        mItemFace50 = menu.add("Face size 50%");
-        mItemFace40 = menu.add("Face size 40%");
-        mItemFace30 = menu.add("Face size 30%");
-        mItemFace20 = menu.add("Face size 20%");
-        mItemType = menu.add(mDetectorName[mDetectorType]);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
-        if (item == mItemFace50)
-            setMinFaceSize(0.5f);
-        else if (item == mItemFace40)
-            setMinFaceSize(0.4f);
-        else if (item == mItemFace30)
-            setMinFaceSize(0.3f);
-        else if (item == mItemFace20)
-            setMinFaceSize(0.2f);
-        else if (item == mItemType) {
-            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
-            item.setTitle(mDetectorName[tmpDetectorType]);
-        }
-        return true;
-    }
-
-    private void setMinFaceSize(float faceSize) {
-        mRelativeFaceSize = faceSize;
-        mAbsoluteFaceSize = 0;
-    }
-
-
-    @Override
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
     }
 
-    @Override
     public void onCameraViewStopped() {
         mGray.release();
         mRgba.release();
+        mZoomWindow.release();
+        mZoomWindow2.release();
     }
 
-
-    @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
         mRgba = inputFrame.rgba();
@@ -387,8 +355,60 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         }
 
+        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mZoomWindow.clone(), le);
+                Utils.matToBitmap(mZoomWindow2.clone(), re);
+                ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
+                ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+
+            }
+        };
+        mainHandler.post(myRunnable);
+
         return mRgba;
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i(TAG, "called onCreateOptionsMenu");
+        mItemFace50 = menu.add("Face size 50%");
+        mItemFace40 = menu.add("Face size 40%");
+        mItemFace30 = menu.add("Face size 30%");
+        mItemFace20 = menu.add("Face size 20%");
+        mItemType = menu.add(mDetectorName[mDetectorType]);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
+        if (item == mItemFace50)
+            setMinFaceSize(0.5f);
+        else if (item == mItemFace40)
+            setMinFaceSize(0.4f);
+        else if (item == mItemFace30)
+            setMinFaceSize(0.3f);
+        else if (item == mItemFace20)
+            setMinFaceSize(0.2f);
+        else if (item == mItemType) {
+            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
+            item.setTitle(mDetectorName[tmpDetectorType]);
+        }
+        return true;
+    }
+
+    private void setMinFaceSize(float faceSize) {
+        mRelativeFaceSize = faceSize;
+        mAbsoluteFaceSize = 0;
+    }
+
 
     private void CreateAuxiliaryMats() {
         if (mGray.empty())
@@ -404,45 +424,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     + cols / 10, cols);
         }
 
-    }
-
-
-    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
-        Mat template = new Mat();
-        Mat mROI = mGray.submat(area);
-        MatOfRect eyes = new MatOfRect();
-        Point iris = new Point();
-        Rect eye_template = new Rect();
-        clasificator.detectMultiScale(mROI, eyes, 1.15, 2,
-                Objdetect.CASCADE_FIND_BIGGEST_OBJECT
-                        | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30),
-                new Size());
-
-        Rect[] eyesArray = eyes.toArray();
-        for (int i = 0; i < eyesArray.length;) {
-            Rect e = eyesArray[i];
-            e.x = area.x + e.x;
-            e.y = area.y + e.y;
-            Rect eye_only_rectangle = new Rect((int) e.tl().x,
-                    (int) (e.tl().y + e.height * 0.4), (int) e.width,
-                    (int) (e.height * 0.6));
-            mROI = mGray.submat(eye_only_rectangle);
-            Mat vyrez = mRgba.submat(eye_only_rectangle);
-
-
-            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
-
-            Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
-            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
-            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
-            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y
-                    - size / 2, size, size);
-            Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(),
-                    new Scalar(255, 0, 0, 255), 2);
-            template = (mGray.submat(eye_template)).clone();
-            return template;
-        }
-        return template;
     }
 
     private void match_eye(Rect area, Mat mTemplate, int type) {
@@ -489,7 +470,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         }
 
         Point matchLoc_tx = new Point(matchLoc.x + area.x, matchLoc.y + area.y);
-        Point matchLoc_ty = new Point(matchLoc.x + mTemplate.cols() + area.x, matchLoc.y + mTemplate.rows() + area.y);
+        Point matchLoc_ty = new Point(matchLoc.x + mTemplate.cols() + area.x,
+                matchLoc.y + mTemplate.rows() + area.y);
 
         Imgproc.rectangle(mRgba, matchLoc_tx, matchLoc_ty, new Scalar(255, 255, 0,
                 255));
@@ -498,8 +480,46 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     }
 
-    static {
-        System.loadLibrary("main-jni");
-        System.loadLibrary("opencv_java3");
+    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
+        Mat template = new Mat();
+        Mat mROI = mGray.submat(area);
+        MatOfRect eyes = new MatOfRect();
+        Point iris = new Point();
+        Rect eye_template = new Rect();
+        clasificator.detectMultiScale(mROI, eyes, 1.15, 2,
+                Objdetect.CASCADE_FIND_BIGGEST_OBJECT
+                        | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30),
+                new Size());
+
+        Rect[] eyesArray = eyes.toArray();
+        for (int i = 0; i < eyesArray.length;) {
+            Rect e = eyesArray[i];
+            e.x = area.x + e.x;
+            e.y = area.y + e.y;
+            Rect eye_only_rectangle = new Rect((int) e.tl().x,
+                    (int) (e.tl().y + e.height * 0.4), (int) e.width,
+                    (int) (e.height * 0.6));
+            mROI = mGray.submat(eye_only_rectangle);
+            Mat vyrez = mRgba.submat(eye_only_rectangle);
+
+
+            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
+
+            Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
+            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
+            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
+            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y
+                    - size / 2, size, size);
+            Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(),
+                    new Scalar(255, 0, 0, 255), 2);
+            template = (mGray.submat(eye_template)).clone();
+            return template;
+        }
+        return template;
+    }
+
+    public void onRecreateClick(View v)
+    {
+        learn_frames = 0;
     }
 }
