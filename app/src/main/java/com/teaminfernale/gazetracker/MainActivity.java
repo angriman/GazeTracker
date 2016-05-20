@@ -8,6 +8,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,12 +40,11 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    //prova new branch
-
                     // Initialize camera
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
+                    //mOpenCvCameraView.setVisibility(SurfaceView.INVISIBLE);
 
                 }
                 break;
@@ -91,12 +91,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-      //  mOpenCvCameraView.setCvCameraViewListener(this);
-
-
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
-        ((TextView) findViewById(R.id.textView)).setText("" + getMessage());
+        //((TextView) findViewById(R.id.textView)).setText("" + getMessage());
 
     }
 
@@ -118,8 +114,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
-
-        ImageView imageView = (ImageView) findViewById(R.id.fd_activity_surface_view);
+        Log.e("ONCAMERAFRAME", "ONCAMERAFRAME");
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
         Utils.matToBitmap(mRgba, lena); //BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
         imageView.setImageBitmap(lena);
 
@@ -138,7 +134,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         Bitmap bitmap = Bitmap.createBitmap(targetImage.cols(), targetImage.rows(), Bitmap.Config.RGB_565);
         Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_RGB2BGR);
         Utils.matToBitmap(targetImage, bitmap);
-        ((ImageView) findViewById(R.id.fd_activity_surface_view)).setImageBitmap(bitmap);
+        ((ImageView) findViewById(R.id.imageView)).setImageBitmap(bitmap);
     }
 
 

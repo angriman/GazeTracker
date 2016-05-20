@@ -16,10 +16,12 @@
         android:layout_height="wrap_content"
         android:text="Hello World!"/>
 
-<!--    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>-->
+   <ImageView
+       android:id="@+id/imageView"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:layout_alignEnd="@+id/textView"/>
+
     <org.opencv.android.JavaCameraView
         android:id="@+id/fd_activity_surface_view"
         android:layout_width="fill_parent"
