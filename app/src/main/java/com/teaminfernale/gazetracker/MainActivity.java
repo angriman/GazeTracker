@@ -39,6 +39,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
+                    //prova new branch
 
                     // Initialize camera
                     mOpenCvCameraView.setCameraIndex(0);
