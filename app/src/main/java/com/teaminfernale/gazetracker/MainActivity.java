@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat mRgba;
     private Mat mGray;
+    private long frameCounter = 0;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -93,6 +94,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         setContentView(R.layout.activity_main);
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         //((TextView) findViewById(R.id.textView)).setText("" + getMessage());
+        //lena = BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
+        //ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        //Utils.matToBitmap(mRgba, lena); //BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
+        //imageView.setImageBitmap(lena);
 
     }
 
@@ -114,10 +119,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
-        Log.e("ONCAMERAFRAME", "ONCAMERAFRAME");
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        Utils.matToBitmap(mRgba, lena); //BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
-        imageView.setImageBitmap(lena);
+
 
      //   gaussianBlur();
 

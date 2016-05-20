@@ -13,9 +13,9 @@ Java_com_teaminfernale_gazetracker_MainActivity_filterImage(JNIEnv *env, jobject
 //    cv::cvtColor( src_img, src_img, CV_BGR2GRAY );
 }
 
-JNIEXPORT jint JNICALL
+/*JNIEXPORT jint JNICALL
     Java_com_teaminfernale_gazetracker_MainActivity_getMessage(JNIEnv *env, jobject instance) {
 
         return 8;
-    }
+    }*/
 }
