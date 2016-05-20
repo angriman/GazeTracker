@@ -41,7 +41,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     Log.i(TAG, "OpenCV loaded successfully");
 
                     // Initialize camera
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
