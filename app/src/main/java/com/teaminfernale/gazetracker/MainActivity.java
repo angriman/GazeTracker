@@ -44,7 +44,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     // Initialize camera
                     mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableFpsMeter();
-                    mOpenCvCameraView.enableView();
+                    //mOpenCvCameraView.enableView();
                     //mOpenCvCameraView.setVisibility(SurfaceView.INVISIBLE);
 
                 }
@@ -94,10 +94,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         setContentView(R.layout.activity_main);
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         //((TextView) findViewById(R.id.textView)).setText("" + getMessage());
-        //lena = BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
-        //ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        lena = BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        //mRgba = new Mat();
         //Utils.matToBitmap(mRgba, lena); //BitmapFactory.decodeResource(getResources(), R.drawable.lena1);
-        //imageView.setImageBitmap(lena);
+        imageView.setImageBitmap(lena);
+        gaussianBlur();
 
     }
 
@@ -129,14 +131,16 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private void gaussianBlur() {
         Mat targetImage = new Mat();
         Utils.bitmapToMat(lena, targetImage);
-        Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_BGR2RGB);
 
+        //Native filtering of the image (blur and greyscale)
         filterImage(targetImage.getNativeObjAddr());
-
+        //Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_BGR2RGB);
         Bitmap bitmap = Bitmap.createBitmap(targetImage.cols(), targetImage.rows(), Bitmap.Config.RGB_565);
-        Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_RGB2BGR);
+        //Imgproc.cvtColor(targetImage, targetImage, Imgproc.COLOR_RGB2BGR);
         Utils.matToBitmap(targetImage, bitmap);
         ((ImageView) findViewById(R.id.imageView)).setImageBitmap(bitmap);
+        int r = findGaze(targetImage.getNativeObjAddr());
+        Log.d(TAG, "risultato" + r);
     }
 
 
@@ -145,8 +149,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         System.loadLibrary("opencv_java3");
     }
 
-    public native int getMessage();
+    //public native int getMessage();
 
     public native void filterImage(long matAddr);
+
+    public native int findGaze(long matAddr);
 
 }
