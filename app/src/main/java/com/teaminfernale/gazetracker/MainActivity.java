@@ -96,11 +96,9 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
                     try {
                         // load cascade file from application resources
-                        InputStream is = getResources().openRawResource(
-                                R.raw.lbpcascade_frontalface);
+                        InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
                         File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                        mCascadeFile = new File(cascadeDir,
-                                "lbpcascade_frontalface.xml");
+                        mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
                         FileOutputStream os = new FileOutputStream(mCascadeFile);
 
                         byte[] buffer = new byte[4096];
@@ -111,8 +109,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         is.close();
                         os.close();
 
-                        // --------------------------------- load left eye
-                        // classificator -----------------------------------
+                        // Load left eye classificator
                         InputStream iser = getResources().openRawResource(
                                 R.raw.haarcascade_lefteye_2splits);
                         File cascadeDirER = getDir("cascadeER",
@@ -144,10 +141,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                             Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetectorEye = null;
                         } else
-                            Log.i(TAG, "Loaded cascade classifier from "
-                                    + mCascadeFile.getAbsolutePath());
-
-
+                            Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
 
                         cascadeDir.delete();
 
