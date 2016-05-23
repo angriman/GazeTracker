@@ -30,7 +30,7 @@ public class AskPermissionActivity extends Activity {
             //launch main activity
             Intent launchMainIntent = new Intent(AskPermissionActivity.this, MainActivity.class);
             AskPermissionActivity.this.startActivity(launchMainIntent);
-            //finish();
+            finish();
         }
     }
 
@@ -56,7 +56,7 @@ public class AskPermissionActivity extends Activity {
                 Log.i(TAG, "CAMERA permission has been GRANTED.");
                 Intent launchMainIntent = new Intent(AskPermissionActivity.this, MainActivity.class);
                 AskPermissionActivity.this.startActivity(launchMainIntent);
-                //finish();
+                finish();
 
                 // You can now access the camera
                 //Snackbar.make(mLayout, R.string.permission_available_camera,

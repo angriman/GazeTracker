@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Surface;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
@@ -44,7 +47,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     Log.i(TAG, "OpenCV loaded successfully");
 
                     // Initialize camera
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
@@ -91,7 +94,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //Intent intent = getIntent();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -129,6 +131,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         return mRgba;
     }
+
 
     private void gaussianBlur() {
         Mat targetImage = new Mat();
