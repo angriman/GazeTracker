@@ -1,13 +1,18 @@
 package com.teaminfernale.gazetracker;
 
 import android.app.Activity;
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Surface;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
@@ -93,11 +99,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
       //  mOpenCvCameraView.setCvCameraViewListener(this);
 
-
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         ((TextView) findViewById(R.id.textView)).setText("" + getMessage());
-
     }
+
 
     @Override
     public void onCameraViewStarted(int width, int height) {
@@ -126,6 +131,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         return mRgba;
     }
+
 
     private void gaussianBlur() {
         Mat targetImage = new Mat();
