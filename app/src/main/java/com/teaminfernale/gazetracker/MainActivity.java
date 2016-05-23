@@ -20,7 +20,6 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -194,7 +193,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
-        mValue = (TextView) findViewById(R.id.method);
 
         mMethodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -299,26 +297,16 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         }
 
         Rect[] facesArray = faces.toArray();
-        for (int i = 0; i < facesArray.length; i++) {
-            //Imgproc.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), FACE_RECT_COLOR, 3);
-            //xCenter = (facesArray[i].x + facesArray[i].width + facesArray[i].x) / 2;
-            //yCenter = (facesArray[i].y + facesArray[i].y + facesArray[i].height) / 2;
-            //Point center = new Point(xCenter, yCenter);
+        //Log.i(TAG, "FacesArray length = " + facesArray.length);
+        if (facesArray.length > 0) {
+            //for (int i = 0; i < facesArray.length; i++) {
 
-           // Imgproc.circle(mRgba, center, 10, new Scalar(255, 0, 0, 255), 3);
-
-           // Imgproc.putText(mRgba, "[" + center.x + "," + center.y + "]", new Point(center.x + 20, center.y + 20), Core.FONT_HERSHEY_SIMPLEX, 0.7, new Scalar(255, 255, 255, 255));
-
-            Rect r = facesArray[i];
-            // compute the eye area
-           // Rect eyearea = new Rect(r.x + r.width / 8, (int) (r.y + (r.height / 4.5)), r.width - 2 * r.width / 8, (int) (r.height / 3.0));
+            Rect r = facesArray[0];
+            // Compute both eyes area
+            // Rect eyearea = new Rect(r.x + r.width / 8, (int) (r.y + (r.height / 4.5)), r.width - 2 * r.width / 8, (int) (r.height / 3.0));
             // split it
             Rect eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
             Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
-            // draw the area - mGray is working grayscale mat, if you want to
-            // see area in rgb preview, change mGray to mRgba
-            //Imgproc.rectangle(mRgba, eyearea_left.tl(), eyearea_left.br(), new Scalar(255, 0, 0, 255), 2);
-            //Imgproc.rectangle(mRgba, eyearea_right.tl(), eyearea_right.br(), new Scalar(255, 0, 0, 255), 2);
 
             if (learn_frames < 5) {
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
@@ -327,16 +315,15 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             }
             else {
                 // Learning finished, use the new templates for template matching
-                match_eye(eyearea_right, teplateR, method);
-                match_eye(eyearea_left, teplateL, method);
-
+                match_eye(eyearea_left, teplateL, method, mJavaDetectorEye);
+                match_eye(eyearea_right, teplateR, method, mJavaDetectorEye);
             }
 
-            // cut eye areas and put them to zoom windows
-            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+            // Cut eye areas and put them to zoom windows
             Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
-
+            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
         }
+      //  }
 
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
@@ -351,7 +338,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 Utils.matToBitmap(mZoomWindow2.clone(), re);
                 ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
                 ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
-
             }
         };
 
@@ -389,11 +375,110 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         return true;
     }
 
+    // Called after model training is completed
+    private void match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator) {
+        //Point matchLoc;
+        Mat mROI = mGray.submat(area);
+        int result_cols = mROI.cols() - mTemplate.cols() + 1;
+        int result_rows = mROI.rows() - mTemplate.rows() + 1;
+
+        // Check for bad template size
+        if (mTemplate.cols() == 0 || mTemplate.rows() == 0) {
+            return;
+        }
+
+        Mat mResult = new Mat(result_cols, result_rows, CvType.CV_8U);
+
+        switch (type) {
+            case TM_SQDIFF:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_SQDIFF);
+                break;
+            case TM_SQDIFF_NORMED:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_SQDIFF_NORMED);
+                break;
+            case TM_CCOEFF:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCOEFF);
+                break;
+            case TM_CCOEFF_NORMED:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCOEFF_NORMED);
+                break;
+            case TM_CCORR:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCORR);
+                break;
+            case TM_CCORR_NORMED:
+                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCORR_NORMED);
+                break;
+        }
+
+
+        MatOfRect eyes = new MatOfRect();
+        Point iris = new Point();
+        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
+
+        // It is > 0 if it detects an eye (I suppose). Recorded value: 0 or 1
+        Rect[] eyesArray = eyes.toArray();
+
+        if (eyesArray.length > 0) {
+            Rect e = eyesArray[0];
+            e.x += area.x;
+            e.y += area.y;
+
+            Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), e.width, (int) (e.height * 0.6));
+            Mat mROI2 = mGray.submat(eye_only_rectangle);
+            Mat yyrez = mRgba.submat(eye_only_rectangle);
+
+            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI2);
+            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
+            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
+            Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
+            Log.i(TAG, "Eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
+
+            // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
+            // Tracciare i vari punti sullo schermo
+        }
+
+    }
+
+    // First 6 frames to train the model
+    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
+        Mat template = new Mat();
+        Mat mROI = mGray.submat(area);
+        MatOfRect eyes = new MatOfRect();
+        Point iris = new Point();
+        Rect eye_template;
+        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
+
+        Rect[] eyesArray = eyes.toArray();
+        for (int i = 0; i < eyesArray.length;) {
+            Rect e = eyesArray[i];
+            e.x = area.x + e.x;
+            e.y = area.y + e.y;
+            Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), (int) e.width, (int) (e.height * 0.6));
+            mROI = mGray.submat(eye_only_rectangle);
+            Mat vyrez = mRgba.submat(eye_only_rectangle);
+
+            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
+
+            // Draws a point in the center of the eye
+            //Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
+            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
+            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
+            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
+
+            // Draws a red rectangle around the center of the eye
+           // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
+            template = (mGray.submat(eye_template)).clone();
+
+            return template;
+        }
+
+        return template;
+    }
+
     private void setMinFaceSize(float faceSize) {
         mRelativeFaceSize = faceSize;
         mAbsoluteFaceSize = 0;
     }
-
 
     private void CreateAuxiliaryMats() {
         if (mGray.empty())
@@ -403,102 +488,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         int cols = mGray.cols();
 
         if (mZoomWindow == null) {
-            mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2
-                    + cols / 10, cols);
-            mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2
-                    + cols / 10, cols);
+            mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
+            mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
         }
 
-    }
-
-    private void match_eye(Rect area, Mat mTemplate, int type) {
-        Point matchLoc;
-        Mat mROI = mGray.submat(area);
-        int result_cols = mROI.cols() - mTemplate.cols() + 1;
-        int result_rows = mROI.rows() - mTemplate.rows() + 1;
-
-        // Check for bad template size
-        if (mTemplate.cols() == 0 || mTemplate.rows() == 0) {
-            return ;
-        }
-        Mat mResult = new Mat(result_cols, result_rows, CvType.CV_8U);
-
-        switch (type) {
-            case TM_SQDIFF:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_SQDIFF);
-                break;
-            case TM_SQDIFF_NORMED:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult,
-                        Imgproc.TM_SQDIFF_NORMED);
-                break;
-            case TM_CCOEFF:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCOEFF);
-                break;
-            case TM_CCOEFF_NORMED:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult,
-                        Imgproc.TM_CCOEFF_NORMED);
-                break;
-            case TM_CCORR:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult, Imgproc.TM_CCORR);
-                break;
-            case TM_CCORR_NORMED:
-                Imgproc.matchTemplate(mROI, mTemplate, mResult,
-                        Imgproc.TM_CCORR_NORMED);
-                break;
-        }
-
-        Core.MinMaxLocResult mmres = Core.minMaxLoc(mResult);
-        // there is difference in matching methods - best match is max/min value
-        if (type == TM_SQDIFF || type == TM_SQDIFF_NORMED) {
-            matchLoc = mmres.minLoc;
-        } else {
-            matchLoc = mmres.maxLoc;
-        }
-
-       /* Point matchLoc_tx = new Point(matchLoc.x + area.x, matchLoc.y + area.y);
-        Point matchLoc_ty = new Point(matchLoc.x + mTemplate.cols() + area.x, matchLoc.y + mTemplate.rows() + area.y);
-*/
-        //Imgproc.rectangle(mRgba, matchLoc_tx, matchLoc_ty, new Scalar(255, 255, 0, 255));
-        //Rect rec = new Rect(matchLoc_tx,matchLoc_ty);
-
-
-    }
-
-    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
-        Mat template = new Mat();
-        Mat mROI = mGray.submat(area);
-        MatOfRect eyes = new MatOfRect();
-        Point iris = new Point();
-        Rect eye_template;
-        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30),
-                new Size());
-
-        Rect[] eyesArray = eyes.toArray();
-        for (int i = 0; i < eyesArray.length;) {
-            Rect e = eyesArray[i];
-            e.x = area.x + e.x;
-            e.y = area.y + e.y;
-            Rect eye_only_rectangle = new Rect((int) e.tl().x,
-                    (int) (e.tl().y + e.height * 0.4), (int) e.width,
-                    (int) (e.height * 0.6));
-            mROI = mGray.submat(eye_only_rectangle);
-            Mat vyrez = mRgba.submat(eye_only_rectangle);
-
-
-            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
-
-            Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
-            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
-            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
-            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
-            Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
-            template = (mGray.submat(eye_template)).clone();
-
-
-            return template;
-        }
-
-        return template;
     }
 
     public void onRecreateClick(View v)
