@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -40,7 +41,6 @@ import java.io.InputStream;
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MainActivity";
-    private static final Scalar FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -67,7 +67,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private Mat mZoomWindow;
     private Mat mZoomWindow2;
 
-    private File mCascadeFile;
     private CascadeClassifier mJavaDetector;
     private CascadeClassifier mJavaDetectorEye;
 
@@ -80,7 +79,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
-    private SeekBar mMethodSeekbar;
     private TextView mValue;
 
     double xCenter = -1;
@@ -98,8 +96,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         // load cascade file from application resources
                         InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
                         File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                        mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-                        FileOutputStream os = new FileOutputStream(mCascadeFile);
+                        File cascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+                        FileOutputStream os = new FileOutputStream(cascadeFile);
 
                         byte[] buffer = new byte[4096];
                         int bytesRead;
@@ -127,13 +125,13 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         oser.close();
 
                         mJavaDetector = new CascadeClassifier(
-                                mCascadeFile.getAbsolutePath());
+                                cascadeFile.getAbsolutePath());
                         if (mJavaDetector.empty()) {
                             Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetector = null;
                         } else
                             Log.i(TAG, "Loaded cascade classifier from "
-                                    + mCascadeFile.getAbsolutePath());
+                                    + cascadeFile.getAbsolutePath());
 
                         mJavaDetectorEye = new CascadeClassifier(
                                 cascadeFileER.getAbsolutePath());
@@ -141,7 +139,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                             Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetectorEye = null;
                         } else
-                            Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+                            Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
 
                         cascadeDir.delete();
 
@@ -171,6 +169,9 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
+    private boolean calibrating = false;
+    private int calibration_phase = 0;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -187,12 +188,19 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
 
+        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                calibrating = !calibrating;
+            }
+        });
+
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
+        SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
 
-        mMethodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        methodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -303,6 +311,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             // Compute both eyes area
             // Rect eyearea = new Rect(r.x + r.width / 8, (int) (r.y + (r.height / 4.5)), r.width - 2 * r.width / 8, (int) (r.height / 3.0));
             // split it
+
+            // TODO: capire perché vengono usati questi numeri e salvarli in variabili (per capire meglio il codice)
             Rect eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
             Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
 
@@ -313,8 +323,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             }
             else {
                 // Learning finished, use the new templates for template matching
-                match_eye(eyearea_left, teplateL, method, mJavaDetectorEye);
-                match_eye(eyearea_right, teplateR, method, mJavaDetectorEye);
+                match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
             }
 
             // Cut eye areas and put them to zoom windows
@@ -374,7 +384,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
     // Called after model training is completed
-    private void match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator) {
+    private void match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
         //Point matchLoc;
         Mat mROI = mGray.submat(area);
         int result_cols = mROI.cols() - mTemplate.cols() + 1;
@@ -431,10 +441,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
             Log.i(TAG, "Eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
+            if (calibrating) {
+                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
+            }
             // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
             // Tracciare i vari punti sullo schermo
         }
-
     }
 
     // First 6 frames to train the model
@@ -496,4 +508,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     {
         learn_frames = 0;
     }
+
+
 }

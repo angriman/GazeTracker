@@ -90,4 +90,32 @@ public class TrainedEyesContainer {
         return L_downLeft;
     }
 
+    // 0 for left, 1 for right
+    public void addSample(int eye, int position, Point center) {
+        if (eye == 0) { // left eye
+            switch (position) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+            }
+        }
+        else { // right eye
+            switch (position) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+            }
+        }
+    }
+
 }
