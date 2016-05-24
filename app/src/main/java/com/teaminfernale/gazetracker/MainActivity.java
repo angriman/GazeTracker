@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MainActivity";
+    private static final String TAG1 = "MainActivity_calibr";
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -50,6 +52,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private static final int TM_CCORR_NORMED = 5;
 
     private TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+    private boolean calibrating = false;
+    private int calibration_phase = 0;
     private int learn_frames = 0;
     private Mat teplateR;
     private Mat teplateL;
@@ -169,8 +173,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
-    private boolean calibrating = false;
-    private int calibration_phase = 0;
+
 
     /** Called when the activity is first created. */
     @Override
@@ -191,7 +194,36 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (calibrating){
+                    int next_calibration_phase = calibration_phase + 1;
+                    if (next_calibration_phase == 4){
+                        mTrainedEyesContainer.meanSamples();
+
+                        Point R_upRight = mTrainedEyesContainer.getR_upRight();
+                        Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
+
+                        Point L_upRight = mTrainedEyesContainer.getL_upRight();
+                        Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
+
+                        Point R_upLeft = mTrainedEyesContainer.getR_upLeft();
+                        Log.d(TAG1, "Point R_upLeft "+R_upLeft.toString());
+
+                        Point L_upLeft = mTrainedEyesContainer.getL_upLeft();
+                        Log.d(TAG1, "Point L_upLeft "+L_upLeft.toString());
+
+                    }
+                    calibration_phase = next_calibration_phase%4;
+                    Log.d(TAG, "Calibration phase: "+calibration_phase);
+                    String toast_text = "Inizio acquisizione fase " + calibration_phase;
+                    Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
+                    t.show();
+                }else{
+                    String toast_text = "Fine acquisizione fase " + calibration_phase;
+                    Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
+                    t.show();
+                }
                 calibrating = !calibrating;
+
             }
         });
 
