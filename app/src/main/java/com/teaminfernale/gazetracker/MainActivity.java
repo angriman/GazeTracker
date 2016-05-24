@@ -49,7 +49,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-
+    private TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
     private int learn_frames = 0;
     private Mat teplateR;
     private Mat teplateL;
@@ -150,7 +150,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
@@ -182,6 +182,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);

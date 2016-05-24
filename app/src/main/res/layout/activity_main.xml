@@ -10,10 +10,51 @@
         android:alpha="0"/>
 
     <ImageView
+        android:id="@+id/top_right_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@id/fd_activity_surface_view"
+        android:layout_alignRight="@id/fd_activity_surface_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/top_left_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@id/fd_activity_surface_view"
+        android:layout_alignLeft="@id/fd_activity_surface_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/down_right_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@id/fd_activity_surface_view"
+        android:layout_alignRight="@id/fd_activity_surface_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/down_left_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@id/fd_activity_surface_view"
+        android:layout_alignLeft="@id/fd_activity_surface_view"
+        android:scaleType="fitXY" />
+
+    <Button
+        android:id="@+id/start_training_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/fd_activity_surface_view"
+        android:layout_centerHorizontal="true"
+        android:onClick="onRecreateClick"
+        android:text="Start training" />
+
+    <ImageView
         android:id="@+id/left_eye"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignTop="@id/fd_activity_surface_view"
+        android:layout_centerVertical="true"
         android:layout_alignLeft="@id/fd_activity_surface_view"
         android:scaleType="fitXY" />
 
@@ -21,14 +62,14 @@
         android:id="@+id/right_eye"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignTop="@id/fd_activity_surface_view"
+        android:layout_centerVertical="true"
         android:layout_alignRight="@id/fd_activity_surface_view"
         android:scaleType="fitXY" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:onClick="onRecreateClick"
         android:text="Recreate" />
