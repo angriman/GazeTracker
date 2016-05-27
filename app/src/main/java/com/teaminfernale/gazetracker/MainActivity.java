@@ -152,7 +152,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
@@ -191,12 +191,16 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
 
+        calibrating = true;
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (calibrating){
+                if (calibrating) {
+
                     int next_calibration_phase = calibration_phase + 1;
-                    if (next_calibration_phase == 4){
+
+                    if (next_calibration_phase == 4) { // Calibration completed
+
                         mTrainedEyesContainer.meanSamples();
 
                         Point R_upRight = mTrainedEyesContainer.getR_upRight();
@@ -211,16 +215,23 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Point L_upLeft = mTrainedEyesContainer.getL_upLeft();
                         Log.d(TAG1, "Point L_upLeft "+L_upLeft.toString());
 
+                        calibration_phase = 0;
+
+
                     }
-                    calibration_phase = next_calibration_phase%4;
-                    Log.d(TAG, "Calibration phase: "+calibration_phase);
+
+                    Log.d(TAG, "Calibration phase: " + calibration_phase);
                     String toast_text = "Inizio acquisizione fase " + calibration_phase;
                     Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
                     t.show();
-                }else{
+                }
+
+                else {
+
                     String toast_text = "Fine acquisizione fase " + calibration_phase;
                     Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
                     t.show();
+                    calibration_phase++;
                 }
                 calibrating = !calibrating;
 
@@ -270,8 +281,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         mValue.setText("TM_CCORR_NORMED");
                         break;
                 }
-
-
             }
         });
     }
