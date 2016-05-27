@@ -2,6 +2,7 @@ package com.teaminfernale.gazetracker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,10 +34,14 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 import static com.teaminfernale.gazetracker.GazeCalculator.*;
 import static com.teaminfernale.gazetracker.GazeCalculator.ScreenRegion.*;
@@ -177,6 +182,36 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
 
+    private String readFromFile() {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = openFileInput("calibFile.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -198,6 +233,30 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+
+                SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+                String savedStringX = prefs.getString("stringX", "");
+                String savedStringY = prefs.getString("stringY", "");
+                StringTokenizer stX = new StringTokenizer(savedStringX, ",");
+                StringTokenizer stY = new StringTokenizer(savedStringY, ",");
+                int[] savedListX = new int[8];
+                int[] savedListY = new int[8];
+                for (int i = 0; i < 8; i++) {
+                    savedListX[i] = Integer.parseInt(stX.nextToken());
+                    savedListY[i] = Integer.parseInt(stY.nextToken());
+                }
+
+                R_upRight = new Point(savedListX[0],savedListY[0]);
+                L_upRight = new Point(savedListX[1],savedListY[1]);
+                R_upLeft = new Point(savedListX[2],savedListY[2]);
+                L_upLeft = new Point(savedListX[3],savedListY[3]);
+                R_downRight = new Point(savedListX[4],savedListY[4]);
+                L_downRight = new Point(savedListX[5],savedListY[5]);
+                R_downLeft= new Point(savedListX[6],savedListY[6]);
+                L_downLeft = new Point(savedListX[7],savedListY[7]);
+
                 if (calibrating) {
 
                     int next_calibration_phase = calibration_phase + 1;
@@ -206,22 +265,34 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
                         mTrainedEyesContainer.meanSamples();
 
-                        Point R_upRight = mTrainedEyesContainer.getR_upRight();
+                        R_upRight = mTrainedEyesContainer.getR_upRight();
                         Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
 
-                        Point L_upRight = mTrainedEyesContainer.getL_upRight();
+                        L_upRight = mTrainedEyesContainer.getL_upRight();
                         Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
 
-                        Point R_upLeft = mTrainedEyesContainer.getR_upLeft();
+                        R_upLeft = mTrainedEyesContainer.getR_upLeft();
                         Log.d(TAG1, "Point R_upLeft "+ R_upLeft.toString());
 
-                        Point L_upLeft = mTrainedEyesContainer.getL_upLeft();
+                        L_upLeft = mTrainedEyesContainer.getL_upLeft();
                         Log.d(TAG1, "Point L_upLeft "+ L_upLeft.toString());
 
-                        Point R_downRight = mTrainedEyesContainer.getR_downRight();
-                        Point L_downRight = mTrainedEyesContainer.getL_downRight();
-                        Point R_downLeft = mTrainedEyesContainer.getR_downLeft();
-                        Point L_downLeft = mTrainedEyesContainer.getL_downLeft();
+                        R_downRight = mTrainedEyesContainer.getR_downRight();
+                        L_downRight = mTrainedEyesContainer.getL_downRight();
+                        R_downLeft = mTrainedEyesContainer.getR_downLeft();
+                        L_downLeft = mTrainedEyesContainer.getL_downLeft();
+
+                        StringBuilder str_X = new StringBuilder();
+                        StringBuilder str_Y = new StringBuilder();
+
+                        Point[] pointsArray = {R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
+                        for (int i=0; i<pointsArray.length; i++)
+                        {
+                            str_X.append(pointsArray[i].x).append(",");
+                            str_Y.append(pointsArray[i].y).append(",");
+                        }
+                        prefs.edit().putString("stringX", str_X.toString());
+                        prefs.edit().putString("stringY", str_Y.toString());
 
                         calibration_phase = 0;
                         calibrated = true;
