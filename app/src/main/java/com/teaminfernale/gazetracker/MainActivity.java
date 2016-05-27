@@ -52,6 +52,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private static final int TM_CCORR_NORMED = 5;
 
     private TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+    private  GazeCalculator mGazeCalculator;
     private boolean calibrating = false;
     private int calibration_phase = 0;
     private int learn_frames = 0;
@@ -199,7 +200,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
                     int next_calibration_phase = calibration_phase + 1;
 
-                    if (next_calibration_phase == 4) { // Calibration completed
+                    if (next_calibration_phase > 4) { // Calibration completed
 
                         mTrainedEyesContainer.meanSamples();
 
@@ -210,13 +211,23 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
 
                         Point R_upLeft = mTrainedEyesContainer.getR_upLeft();
-                        Log.d(TAG1, "Point R_upLeft "+R_upLeft.toString());
+                        Log.d(TAG1, "Point R_upLeft "+ R_upLeft.toString());
 
                         Point L_upLeft = mTrainedEyesContainer.getL_upLeft();
-                        Log.d(TAG1, "Point L_upLeft "+L_upLeft.toString());
+                        Log.d(TAG1, "Point L_upLeft "+ L_upLeft.toString());
+
+                        Point R_downRight = mTrainedEyesContainer.getR_downRight();
+                        Point L_downRight = mTrainedEyesContainer.getL_downRight();
+                        Point R_downLeft = mTrainedEyesContainer.getR_downLeft();
+                        Point L_downLeft = mTrainedEyesContainer.getL_downLeft();
 
                         calibration_phase = 0;
 
+                        Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
+                        //calibrateButton.setOnClickListener(null); // Deletes the current listener
+                        calibrateButton.setText("Start simulation");
+
+                        mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
 
                     }
 
@@ -480,7 +491,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             iris.x = mmG.minLoc.x + eye_only_rectangle.x;
             iris.y = mmG.minLoc.y + eye_only_rectangle.y;
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
-            Log.i(TAG, "Eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
+            Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
             if (calibrating) {
                 mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
