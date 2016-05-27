@@ -10,7 +10,6 @@ public class GazeCalculator {
 
     public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
 
-
     private Point R_upRight;
     private Point L_upRight;
 
@@ -40,14 +39,21 @@ public class GazeCalculator {
         this.L_downLeft = L_downLeft;
     }
 
-    public int computeCorner(Point p_left, Point p_right) {
+    public ScreenRegion computeCorner(Point p_left, Point p_right) {
 
-        if ((int)p_left.x <= ((int)R_upRight.x + 5) && (int)p_left.y >= (int)R_upRight.y - 5)
-            return 0;
+        if (((int)p_left.x <= ((int)R_upRight.x + 5) && (int)p_left.y >= (int)R_upRight.y - 5) || ((int)p_right.x <= ((int)R_upRight.x + 5) && (int)p_left.y >= (int)R_upRight.y - 5))
+            return ScreenRegion.UP_RIGHT;
 
+        if (((int)p_left.x >= ((int)R_upLeft.x - 5) && (int)p_left.y >= (int)R_upLeft.y - 5) || ((int)p_right.x >= ((int)R_upLeft.x - 5) && (int)p_left.y >= (int)R_upLeft.y - 5))
+            return ScreenRegion.UP_LEFT;
 
+        if (((int)p_left.x <= ((int)R_downRight.x + 5) && (int)p_left.y <= (int)R_downRight.y + 5) || ((int)p_right.x <= ((int)R_downRight.x + 5) && (int)p_left.y >= (int)R_downRight.y + 5))
+            return ScreenRegion.DOWN_RIGHT;
 
+        if (((int)p_left.x >= ((int)R_downLeft.x - 5) && (int)p_left.y <= (int)R_downLeft.y + 5) || ((int)p_right.x >= ((int)R_downLeft.x - 5) && (int)p_left.y <= (int)R_downLeft.y + 5))
+            return ScreenRegion.UP_LEFT;
 
-        return 0;
+        return null;
+
     }
 }
