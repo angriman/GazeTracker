@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">GazeTracker</string>
+    <string name="recreate_button">Recreate</string>
+    <string name="reset_calibration_button">Reset calibration</string>
+    <string name="start_calibration_button">Start calibration</string>
+    <string name="start_simulation_button">Start simulation</string>
+    <string name="save_calibration_button">Save calibration</string>
 </resources>

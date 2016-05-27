@@ -38,6 +38,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.teaminfernale.gazetracker.GazeCalculator.*;
+import static com.teaminfernale.gazetracker.GazeCalculator.ScreenRegion.*;
+
 
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
@@ -84,10 +87,9 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
-    private TextView mValue;
+    private boolean calibrated = false;
+    private boolean monitoring = false;
 
-    double xCenter = -1;
-    double yCenter = -1;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -175,7 +177,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
 
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -193,6 +194,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
 
         calibrating = true;
+
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -222,19 +224,20 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Point L_downLeft = mTrainedEyesContainer.getL_downLeft();
 
                         calibration_phase = 0;
+                        calibrated = true;
 
-                        Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
-                        //calibrateButton.setOnClickListener(null); // Deletes the current listener
-                        calibrateButton.setText("Start simulation");
+                        redefineButtonListener();
 
                         mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
 
                     }
 
-                    Log.d(TAG, "Calibration phase: " + calibration_phase);
-                    String toast_text = "Inizio acquisizione fase " + calibration_phase;
-                    Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
-                    t.show();
+                    if (!calibrated) {
+                        Log.d(TAG, "Calibration phase: " + calibration_phase);
+                        String toast_text = "Inizio acquisizione fase " + calibration_phase;
+                        Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
+                        t.show();
+                    }
                 }
 
                 else {
@@ -246,6 +249,15 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 }
                 calibrating = !calibrating;
 
+            }
+        });
+
+        findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                calibrating = false;
+                calibration_phase = 0;
+                calibrated = false;
             }
         });
 
@@ -271,27 +283,21 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                method = progress;
-                switch (method) {
-                    case 0:
-                        mValue.setText("TM_SQDIFF");
-                        break;
-                    case 1:
-                        mValue.setText("TM_SQDIFF_NORMED");
-                        break;
-                    case 2:
-                        mValue.setText("TM_CCOEFF");
-                        break;
-                    case 3:
-                        mValue.setText("TM_CCOEFF_NORMED");
-                        break;
-                    case 4:
-                        mValue.setText("TM_CCORR");
-                        break;
-                    case 5:
-                        mValue.setText("TM_CCORR_NORMED");
-                        break;
-                }
+
+
+            }});
+    }
+
+    private void redefineButtonListener() {
+
+        Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
+        calibrateButton.setText(getResources().getString(R.string.start_simulation_button));
+
+        calibrateButton.setOnClickListener(null);
+        calibrateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                monitoring = true;
             }
         });
     }
@@ -354,10 +360,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
         }
 
+        Point lMatchedEye = new Point();
+        Point rMatchedEye = new Point();
+
         Rect[] facesArray = faces.toArray();
         //Log.i(TAG, "FacesArray length = " + facesArray.length);
         if (facesArray.length > 0) {
-            //for (int i = 0; i < facesArray.length; i++) {
 
             Rect r = facesArray[0];
             // Compute both eyes area
@@ -372,18 +380,17 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
                 teplateL = get_template(mJavaDetectorEye, eyearea_left, 24);
                 learn_frames++;
-            }
-            else {
+            } else {
                 // Learning finished, use the new templates for template matching
-                match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
-                match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
+                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
             }
 
             // Cut eye areas and put them to zoom windows
             Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
             Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
         }
-      //  }
+
 
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
@@ -402,6 +409,48 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         };
 
         mainHandler.post(myRunnable);
+
+        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;
+
+        Runnable changePicture = new Runnable() {
+            @Override
+            public void run() {
+                if (monitoring) {
+
+                    if (finalLMatchedEye != null && finalRMatchedEye != null) {
+                        String result = "You are watching ";
+                        ImageView imageView = null;
+                        switch (mGazeCalculator.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
+                            case UP_LEFT:
+                                Log.i(TAG, result + "up left");
+                                imageView = (ImageView) findViewById(R.id.top_left_image);
+                                break;
+                            case UP_RIGHT:
+                                Log.i(TAG, result + "up right");
+                                imageView = (ImageView) findViewById(R.id.top_right_image);
+                                break;
+                            case DOWN_LEFT:
+                                Log.i(TAG, result + "down left");
+                                imageView = (ImageView) findViewById(R.id.down_left_image);
+                                break;
+                            case DOWN_RIGHT:
+                                Log.i(TAG, result + "down right");
+                                imageView = (ImageView) findViewById(R.id.top_right_image);
+                                break;
+                            default:
+                                Log.i(TAG, "somewhere I don't know");
+                                break;
+                        }
+
+                        imageView.setImageResource(R.drawable.arianna);
+
+                    }
+                }
+            }
+        };
+
+        mainHandler.post(changePicture);
 
         return mRgba;
     }
@@ -436,7 +485,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
     // Called after model training is completed
-    private void match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
+    private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
         //Point matchLoc;
         Mat mROI = mGray.submat(area);
         int result_cols = mROI.cols() - mTemplate.cols() + 1;
@@ -444,7 +493,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         // Check for bad template size
         if (mTemplate.cols() == 0 || mTemplate.rows() == 0) {
-            return;
+            return null;
         }
 
         Mat mResult = new Mat(result_cols, result_rows, CvType.CV_8U);
@@ -491,14 +540,18 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             iris.x = mmG.minLoc.x + eye_only_rectangle.x;
             iris.y = mmG.minLoc.y + eye_only_rectangle.y;
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
-            Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
+            //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
             if (calibrating) {
                 mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
             }
+
+            return mmG.minLoc;
             // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
             // Tracciare i vari punti sullo schermo
         }
+
+        return null;
     }
 
     // First 6 frames to train the model
