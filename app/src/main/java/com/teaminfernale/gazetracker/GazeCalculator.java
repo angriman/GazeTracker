@@ -2,10 +2,15 @@ package com.teaminfernale.gazetracker;
 
 import org.opencv.core.Point;
 
+
 /**
- * Created by Eugenio on 5/27/16.
+ * Created by elisabetta on 5/27/16.
  */
 public class GazeCalculator {
+
+    public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
+
+
     private Point R_upRight;
     private Point L_upRight;
 
@@ -33,5 +38,16 @@ public class GazeCalculator {
 
         this.R_downLeft = R_downLeft;
         this.L_downLeft = L_downLeft;
+    }
+
+    public int computeCorner(Point p_left, Point p_right) {
+
+        if ((int)p_left.x <= ((int)R_upRight.x + 5) && (int)p_left.y >= (int)R_upRight.y - 5)
+            return 0;
+
+
+
+
+        return 0;
     }
 }
