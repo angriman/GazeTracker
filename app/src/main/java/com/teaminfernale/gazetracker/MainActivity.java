@@ -544,7 +544,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                                 break;
                             case DOWN_RIGHT:
                                 Log.i(TAG, result + "down right");
-                                imageView = (ImageView) findViewById(R.id.top_right_image);
+                                imageView = (ImageView) findViewById(R.id.down_right_image);
                                 break;
                             default:
                                 Log.i(TAG, "somewhere I don't know");
