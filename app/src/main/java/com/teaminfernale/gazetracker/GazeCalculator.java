@@ -71,15 +71,16 @@ public class GazeCalculator {
     }
 
     private int minIndex(double a, double b, double c, double d){
-
-        if ((a <= b) && (a <=c) && (a <=d))
-            return 0;
-        else if ((b <= a) && (b <= c) && (b <= d))
-                return 1;
-        else if ((c <= a) && (c <=b) && (c <=d))
-                return 2;
-        else return 3;
-
+        double[] minimum = {a, b, c, d};
+        double min = a;
+        int minIn = 0;
+        for (int i = 1; i < 4; i++) {
+            if (minimum[i] < min) {
+                min = minimum[i];
+                minIn = i;
+            }
+        }
+        return  minIn;
     }
 
     private double distance(Point pRegion, Point p){
