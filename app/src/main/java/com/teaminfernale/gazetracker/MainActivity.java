@@ -51,9 +51,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     private static final String TAG = "MainActivity";
     private static final String TAG1 = "MainActivity_calibr";
-
-    private static final int mSamplesPerEye = 20;
-
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -99,7 +96,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private boolean monitoring = false;
 
     private boolean wantToSave = false;
-    private int currentSamples = 0;
 
     private int imageID = 0;
 
@@ -145,7 +141,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         iser.close();
                         oser.close();
 
-                        mJavaDetector = new CascadeClassifier(cascadeFile.getAbsolutePath());
+                        mJavaDetector = new CascadeClassifier(
+                                cascadeFile.getAbsolutePath());
                         if (mJavaDetector.empty()) {
                             Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetector = null;
@@ -168,12 +165,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
                 }
                 break;
-
                 default: {
                     super.onManagerConnected(status);
                 }
@@ -190,6 +187,36 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
 
+    private String readFromFile() {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = openFileInput("calibFile.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -198,19 +225,14 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
+        calibrating = true;
 
-        // Setting images preview
         ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-
-        findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
 
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
         String savedStringX = prefs.getString("stringX", "");
@@ -223,11 +245,13 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
             int[] savedListX = new int[8];
             int[] savedListY = new int[8];
-            Toast.makeText(MainActivity.this, "Calibration loaded", Toast.LENGTH_SHORT).show();
+            String toast_text = "Calibration loaded";
+            Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT).show();
 
             for (int i = 0; i < 8; i++) {
                 savedListX[i] = Integer.parseInt(stX.nextToken());
                 savedListY[i] = Integer.parseInt(stY.nextToken());
+
             }
 
             R_upRight = new Point(savedListX[0],savedListY[0]);
@@ -262,6 +286,14 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.i(TAG, "reset pressed");
+                startCalibrationListener();
+            }
+        });
+
+        findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 startCalibrationListener();
             }
         });
@@ -284,27 +316,69 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
     private void startCalibrationListener() {
-
-        Log.i(TAG, "Start calibration listener");
         calibrated = false;
-        calibrating = false;
+        calibrating = true;
         calibration_phase = 0;
-
 
         ((Button)findViewById(R.id.calibrate_button)).setText(getResources().getString(R.string.start_calibration_button));
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                calibrating = true;
-                calibration_phase = 0;
-                toggleImage();
-                Log.i(TAG, "Start calibrating");
+
+                if (calibrating) {
+
+                    int next_calibration_phase = calibration_phase + 1;
+
+                    if (next_calibration_phase > 4) { // Calibration completed
+
+                        mTrainedEyesContainer.meanSamples();
+
+                        R_upRight = mTrainedEyesContainer.getR_upRight();
+                        Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
+
+                        L_upRight = mTrainedEyesContainer.getL_upRight();
+                        Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
+
+                        R_upLeft = mTrainedEyesContainer.getR_upLeft();
+                        Log.d(TAG1, "Point R_upLeft " + R_upLeft.toString());
+
+                        L_upLeft = mTrainedEyesContainer.getL_upLeft();
+                        Log.d(TAG1, "Point L_upLeft " + L_upLeft.toString());
+
+                        R_downRight = mTrainedEyesContainer.getR_downRight();
+                        L_downRight = mTrainedEyesContainer.getL_downRight();
+                        R_downLeft = mTrainedEyesContainer.getR_downLeft();
+                        L_downLeft = mTrainedEyesContainer.getL_downLeft();
+
+                        calibration_phase = 0;
+                        calibrated = true;
+
+                        redefineButtonListener();
+
+                        mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
+
+                    }
+
+                    if (!calibrated) {
+                        Log.d(TAG, "Calibration phase: " + calibration_phase);
+                        String toast_text = "Inizio acquisizione fase " + calibration_phase;
+                        Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
+                        t.show();
+                    }
+                } else {
+
+                    String toast_text = "Fine acquisizione fase " + calibration_phase;
+                    Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
+                    t.show();
+                    calibration_phase++;
+                }
+                calibrating = !calibrating;
             }
         });
     }
 
     private void redefineButtonListener() {
-        Log.i(TAG, "Redefining button listener");
+
         Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
         calibrateButton.setText(getResources().getString(R.string.start_simulation_button));
 
@@ -317,7 +391,59 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         });
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
 
+        if (wantToSave) {
+            SharedPreferences sp = getPreferences(MODE_PRIVATE);
+
+            Point[] pointsArray = {R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
+
+            StringBuilder str_X = new StringBuilder();
+            StringBuilder str_Y = new StringBuilder();
+
+            for (Point aPointsArray : pointsArray) {
+                str_X.append((int)aPointsArray.x).append(",");
+                str_Y.append((int)aPointsArray.y).append(",");
+            }
+            sp.edit().putString("stringX", str_X.toString()).apply();
+            sp.edit().putString("stringY", str_Y.toString()).apply();
+
+            Log.i(TAG, "Calibration saved");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        mOpenCvCameraView.disableView();
+    }
+
+    public void onCameraViewStarted(int width, int height) {
+        mGray = new Mat();
+        mRgba = new Mat();
+    }
+
+    public void onCameraViewStopped() {
+        mGray.release();
+        mRgba.release();
+        mZoomWindow.release();
+        mZoomWindow2.release();
+    }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
@@ -435,12 +561,40 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 }
             }
         };
+
         mainHandler.post(changePicture);
 
         return mRgba;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i(TAG, "called onCreateOptionsMenu");
+        mItemFace50 = menu.add("Face size 50%");
+        mItemFace40 = menu.add("Face size 40%");
+        mItemFace30 = menu.add("Face size 30%");
+        mItemFace20 = menu.add("Face size 20%");
+        mItemType = menu.add(mDetectorName[mDetectorType]);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
+        if (item == mItemFace50)
+            setMinFaceSize(0.5f);
+        else if (item == mItemFace40)
+            setMinFaceSize(0.4f);
+        else if (item == mItemFace30)
+            setMinFaceSize(0.3f);
+        else if (item == mItemFace20)
+            setMinFaceSize(0.2f);
+        else if (item == mItemType) {
+            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
+            item.setTitle(mDetectorName[tmpDetectorType]);
+        }
+        return true;
+    }
 
     // Called after model training is completed
     private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
@@ -502,122 +656,14 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
             if (calibrating) {
                 mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
-                currentSamples++;
-
-                if (currentSamples == mSamplesPerEye) {
-                    Log.i(TAG, "Calibration phase " + calibration_phase + " completed");
-                    calibration_phase++;
-                    currentSamples = 0;
-                    toggleImage();
-
-                    if (calibration_phase == 4) {
-                        calibrated = true;
-                        calibrating = false;
-                        completeCalibration();
-                    }
-                }
             }
 
             return mmG.minLoc;
+            // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
+            // Tracciare i vari punti sullo schermo
         }
 
         return null;
-    }
-
-    private void completeCalibration() {
-        mTrainedEyesContainer.meanSamples();
-
-        R_upRight = mTrainedEyesContainer.getR_upRight();
-        Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
-
-        L_upRight = mTrainedEyesContainer.getL_upRight();
-        Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
-
-        R_upLeft = mTrainedEyesContainer.getR_upLeft();
-        Log.d(TAG1, "Point R_upLeft " + R_upLeft.toString());
-
-        L_upLeft = mTrainedEyesContainer.getL_upLeft();
-        Log.d(TAG1, "Point L_upLeft " + L_upLeft.toString());
-
-        R_downRight = mTrainedEyesContainer.getR_downRight();
-        L_downRight = mTrainedEyesContainer.getL_downRight();
-        R_downLeft = mTrainedEyesContainer.getR_downLeft();
-        L_downLeft = mTrainedEyesContainer.getL_downLeft();
-
-        calibrated = true;
-        calibrating = false;
-        mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-
-        //redefineButtonListener();
-
-    }
-
-    private void toggleImage() {
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-        Runnable changePicture = new Runnable() {
-            @Override
-            public void run() {
-
-                Log.i(TAG, "Toggling to " + calibration_phase);
-                switch (calibration_phase) {
-                    case 0:
-                        findViewById(R.id.top_left_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 1:
-                        findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.top_right_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 2:
-                        findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.down_right_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 3:
-                        findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.down_left_image).setVisibility(View.VISIBLE);
-                        break;
-
-                    default:
-                        findViewById(R.id.down_left_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.down_right_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.top_left_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.top_right_image).setVisibility(View.VISIBLE);
-                        break;
-                }
-
-            }
-        };
-
-        mainHandler.post(changePicture);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "called onCreateOptionsMenu");
-        mItemFace50 = menu.add("Face size 50%");
-        mItemFace40 = menu.add("Face size 40%");
-        mItemFace30 = menu.add("Face size 30%");
-        mItemFace20 = menu.add("Face size 20%");
-        mItemType = menu.add(mDetectorName[mDetectorType]);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
-        if (item == mItemFace50)
-            setMinFaceSize(0.5f);
-        else if (item == mItemFace40)
-            setMinFaceSize(0.4f);
-        else if (item == mItemFace30)
-            setMinFaceSize(0.3f);
-        else if (item == mItemFace20)
-            setMinFaceSize(0.2f);
-        else if (item == mItemType) {
-            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
-            item.setTitle(mDetectorName[tmpDetectorType]);
-        }
-        return true;
     }
 
     // First 6 frames to train the model
@@ -680,58 +726,5 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         learn_frames = 0;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-
-        if (wantToSave) {
-            SharedPreferences sp = getPreferences(MODE_PRIVATE);
-
-            Point[] pointsArray = {R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
-
-            StringBuilder str_X = new StringBuilder();
-            StringBuilder str_Y = new StringBuilder();
-
-            for (Point aPointsArray : pointsArray) {
-                str_X.append((int)aPointsArray.x).append(",");
-                str_Y.append((int)aPointsArray.y).append(",");
-            }
-            sp.edit().putString("stringX", str_X.toString()).apply();
-            sp.edit().putString("stringY", str_Y.toString()).apply();
-
-            Log.i(TAG, "Calibration saved");
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        mOpenCvCameraView.disableView();
-    }
-
-    public void onCameraViewStarted(int width, int height) {
-        mGray = new Mat();
-        mRgba = new Mat();
-    }
-
-    public void onCameraViewStopped() {
-        mGray.release();
-        mRgba.release();
-        mZoomWindow.release();
-        mZoomWindow2.release();
-    }
 
 }
