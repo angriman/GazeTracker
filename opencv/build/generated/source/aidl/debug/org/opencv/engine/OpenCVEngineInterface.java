@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/elisabetta/AndroidStudioProjects/GazeTracker/opencv/src/org/opencv/engine/OpenCVEngineInterface.aidl
+ * Original file: /Users/Eugenio/AndroidStudioProjects/GazeTracker/opencv/src/org/opencv/engine/OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**
