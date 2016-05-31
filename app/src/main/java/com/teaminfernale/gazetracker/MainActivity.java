@@ -47,7 +47,7 @@ import static com.teaminfernale.gazetracker.GazeCalculator.*;
 import static com.teaminfernale.gazetracker.GazeCalculator.ScreenRegion.*;
 
 
-public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public abstract class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MainActivity";
     private static final String TAG1 = "MainActivity_calibr";
@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-    private TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
     private  GazeCalculator mGazeCalculator;
     private boolean calibrating = false;
     private int calibration_phase = 0;
@@ -97,9 +97,9 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     private boolean wantToSave = false;
 
-    private int imageID = 0;
-
     Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+
+    protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -187,6 +187,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
 
+
+
     private String readFromFile() {
 
         String ret = "";
@@ -217,91 +219,28 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         return ret;
     }
 
+    //Serve affinchè venga settato il layout con la fd_activity_surface_view per poter lanciare la fotocamera
+    //comando setContentView(R.layout.XXX_activity_layout);
+    protected abstract void setLayout();
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_main);
+        setLayout();
 
         calibrating = true;
 
-        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-
-        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        String savedStringX = prefs.getString("stringX", "");
-        String savedStringY = prefs.getString("stringY", "");
-
-        if (savedStringX.length() > 0 && savedStringY.length() > 0) {
-
-            StringTokenizer stX = new StringTokenizer(savedStringX, ",");
-            StringTokenizer stY = new StringTokenizer(savedStringY, ",");
-
-            int[] savedListX = new int[8];
-            int[] savedListY = new int[8];
-            String toast_text = "Calibration loaded";
-            Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT).show();
-
-            for (int i = 0; i < 8; i++) {
-                savedListX[i] = Integer.parseInt(stX.nextToken());
-                savedListY[i] = Integer.parseInt(stY.nextToken());
-
-            }
-
-            R_upRight = new Point(savedListX[0],savedListY[0]);
-            L_upRight = new Point(savedListX[1],savedListY[1]);
-            R_upLeft = new Point(savedListX[2],savedListY[2]);
-            L_upLeft = new Point(savedListX[3],savedListY[3]);
-            R_downRight = new Point(savedListX[4],savedListY[4]);
-            L_downRight = new Point(savedListX[5],savedListY[5]);
-            R_downLeft= new Point(savedListX[6],savedListY[6]);
-            L_downLeft = new Point(savedListX[7],savedListY[7]);
-
-            calibrated = true;
-
-            mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-
-        }
-
-        findViewById(R.id.save_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                wantToSave = true;
-            }
-        });
-
-        if (!calibrated) {
-            startCalibrationListener();
-        }
-        else {
-            redefineButtonListener();
-        }
-
-        findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i(TAG, "reset pressed");
-                startCalibrationListener();
-            }
-        });
-
-        findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startCalibrationListener();
-            }
-        });
-
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+        Log.i(TAG, "PROVA");
         mOpenCvCameraView.setCvCameraViewListener(this);
+        Log.i(TAG, "PROVA2");
 
-        SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
+
+        //setLayout();
+        /*SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
 
         methodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -312,72 +251,14 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
     }
 
-    private void startCalibrationListener() {
-        calibrated = false;
-        calibrating = true;
-        calibration_phase = 0;
 
-        ((Button)findViewById(R.id.calibrate_button)).setText(getResources().getString(R.string.start_calibration_button));
-        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                if (calibrating) {
 
-                    int next_calibration_phase = calibration_phase + 1;
-
-                    if (next_calibration_phase > 4) { // Calibration completed
-
-                        mTrainedEyesContainer.meanSamples();
-
-                        R_upRight = mTrainedEyesContainer.getR_upRight();
-                        Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
-
-                        L_upRight = mTrainedEyesContainer.getL_upRight();
-                        Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
-
-                        R_upLeft = mTrainedEyesContainer.getR_upLeft();
-                        Log.d(TAG1, "Point R_upLeft " + R_upLeft.toString());
-
-                        L_upLeft = mTrainedEyesContainer.getL_upLeft();
-                        Log.d(TAG1, "Point L_upLeft " + L_upLeft.toString());
-
-                        R_downRight = mTrainedEyesContainer.getR_downRight();
-                        L_downRight = mTrainedEyesContainer.getL_downRight();
-                        R_downLeft = mTrainedEyesContainer.getR_downLeft();
-                        L_downLeft = mTrainedEyesContainer.getL_downLeft();
-
-                        calibration_phase = 0;
-                        calibrated = true;
-
-                        redefineButtonListener();
-
-                        mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-
-                    }
-
-                    if (!calibrated) {
-                        Log.d(TAG, "Calibration phase: " + calibration_phase);
-                        String toast_text = "Inizio acquisizione fase " + calibration_phase;
-                        Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
-                        t.show();
-                    }
-                } else {
-
-                    String toast_text = "Fine acquisizione fase " + calibration_phase;
-                    Toast t = Toast.makeText(MainActivity.this, toast_text, Toast.LENGTH_SHORT);
-                    t.show();
-                    calibration_phase++;
-                }
-                calibrating = !calibrating;
-            }
-        });
-    }
-
-    private void redefineButtonListener() {
+    //TUTTO IN CALIBRATION
+    /*private void redefineButtonListener() {
 
         Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
         calibrateButton.setText(getResources().getString(R.string.start_simulation_button));
@@ -389,31 +270,13 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 monitoring = true;
             }
         });
-    }
+    }*/
 
     @Override
     public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
-
-        if (wantToSave) {
-            SharedPreferences sp = getPreferences(MODE_PRIVATE);
-
-            Point[] pointsArray = {R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
-
-            StringBuilder str_X = new StringBuilder();
-            StringBuilder str_Y = new StringBuilder();
-
-            for (Point aPointsArray : pointsArray) {
-                str_X.append((int)aPointsArray.x).append(",");
-                str_Y.append((int)aPointsArray.y).append(",");
-            }
-            sp.edit().putString("stringX", str_X.toString()).apply();
-            sp.edit().putString("stringY", str_Y.toString()).apply();
-
-            Log.i(TAG, "Calibration saved");
-        }
     }
 
     @Override
@@ -502,6 +365,9 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
 
+        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;
+
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
@@ -510,59 +376,16 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                 Utils.matToBitmap(mZoomWindow.clone(), le);
                 Utils.matToBitmap(mZoomWindow2.clone(), re);
-                ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-                ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+                //((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
+                //((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+
+                onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
             }
         };
 
         mainHandler.post(myRunnable);
 
-        final Point finalLMatchedEye = lMatchedEye;
-        final Point finalRMatchedEye = rMatchedEye;
 
-        Runnable changePicture = new Runnable() {
-            @Override
-            public void run() {
-
-                if (monitoring) {
-
-                    if (finalLMatchedEye != null && finalRMatchedEye != null) {
-                        String result = "You are watching ";
-                        ImageView imageView = null;
-                        switch (mGazeCalculator.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
-                            case UP_LEFT:
-                                Log.i(TAG, result + "up left");
-                                imageView = (ImageView) findViewById(R.id.top_left_image);
-                                break;
-                            case UP_RIGHT:
-                                Log.i(TAG, result + "up right");
-                                imageView = (ImageView) findViewById(R.id.top_right_image);
-                                break;
-                            case DOWN_LEFT:
-                                Log.i(TAG, result + "down left");
-                                imageView = (ImageView) findViewById(R.id.down_left_image);
-                                break;
-                            case DOWN_RIGHT:
-                                Log.i(TAG, result + "down right");
-                                imageView = (ImageView) findViewById(R.id.down_right_image);
-                                break;
-                            default:
-                                Log.i(TAG, "somewhere I don't know");
-                                break;
-                        }
-
-                        if (imageID != 0) {
-                            ((ImageView)findViewById(imageID)).setImageResource(R.drawable.lena1);
-                        }
-                        imageID = imageView.getId();
-                        imageView.setImageResource(R.drawable.arianna);
-
-                    }
-                }
-            }
-        };
-
-        mainHandler.post(changePicture);
 
         return mRgba;
     }
@@ -654,6 +477,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
+            //DA SPOSTARE IN CALIBRATION!!!!
             if (calibrating) {
                 mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
             }
