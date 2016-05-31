@@ -494,8 +494,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
             if (calibrating) {
-                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
-                currentSamples++;
+                if (mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc)) {
+                    Log.i(TAG, "Sample added");
+                    currentSamples++;
+                }
 
                 if (currentSamples == mSamplesPerEye) {
                     Log.i(TAG, "Calibration phase " + calibration_phase + " completed");

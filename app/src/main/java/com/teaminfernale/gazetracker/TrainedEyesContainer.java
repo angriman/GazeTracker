@@ -1,5 +1,7 @@
 package com.teaminfernale.gazetracker;
 
+import android.util.Log;
+
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -24,17 +26,17 @@ public class TrainedEyesContainer {
 
 
 
-    private ArrayList<Point> R_upRight_a = new ArrayList<Point>();
-    private ArrayList<Point> L_upRight_a = new ArrayList<Point>();
+    private ArrayList<Point> R_upRight_a = new ArrayList<>();
+    private ArrayList<Point> L_upRight_a = new ArrayList<>();
 
-    private ArrayList<Point> R_upLeft_a = new ArrayList<Point>();
-    private ArrayList<Point> L_upLeft_a = new ArrayList<Point>();
+    private ArrayList<Point> R_upLeft_a = new ArrayList<>();
+    private ArrayList<Point> L_upLeft_a = new ArrayList<>();
 
-    private ArrayList<Point> R_downRight_a = new ArrayList<Point>();
-    private ArrayList<Point> L_downRight_a = new ArrayList<Point>();
+    private ArrayList<Point> R_downRight_a = new ArrayList<>();
+    private ArrayList<Point> L_downRight_a = new ArrayList<>();
 
-    private ArrayList<Point> R_downLeft_a = new ArrayList<Point>();
-    private ArrayList<Point> L_downLeft_a = new ArrayList<Point>();
+    private ArrayList<Point> R_downLeft_a = new ArrayList<>();
+    private ArrayList<Point> L_downLeft_a = new ArrayList<>();
 
     //Set methods
 
@@ -137,39 +139,43 @@ public class TrainedEyesContainer {
     }
 
     // 0 for left, 1 for right
-    public void addSample(int eye, int position, Point center) {
-        if (eye == 0) { // left eye
-            switch (position) {
-                case 0://up left
-                    L_upLeft_a.add(center);
-                    break;
-                case 1://up right
-                    L_upRight_a.add(center);
-                    break;
-                case 2://down right
-                    L_downRight_a.add(center);
-                    break;
-                case 3://down left
-                    L_downLeft_a.add(center);
-                    break;
+    public boolean addSample(int eye, int position, Point center) {
+
+        if (center.x != 0 && center.y != 0) {
+            if (eye == 0) { // left eye
+                switch (position) {
+                    case 0://up left
+                        L_upLeft_a.add(center);
+                        break;
+                    case 1://up right
+                        L_upRight_a.add(center);
+                        break;
+                    case 2://down right
+                        L_downRight_a.add(center);
+                        break;
+                    case 3://down left
+                        L_downLeft_a.add(center);
+                        break;
+                }
+            } else { // right eye
+                switch (position) {
+                    case 0://up left
+                        R_upLeft_a.add(center);
+                        break;
+                    case 1://up right
+                        R_upRight_a.add(center);
+                        break;
+                    case 2://down right
+                        R_downRight_a.add(center);
+                        break;
+                    case 3://down left
+                        R_downLeft_a.add(center);
+                        break;
+                }
             }
+            return true;
         }
-        else { // right eye
-            switch (position) {
-                case 0://up left
-                    R_upLeft_a.add(center);
-                    break;
-                case 1://up right
-                    R_upRight_a.add(center);
-                    break;
-                case 2://down right
-                    R_downRight_a.add(center);
-                    break;
-                case 3://down left
-                    R_downLeft_a.add(center);
-                    break;
-            }
-        }
+        return false;
     }
 
 }
