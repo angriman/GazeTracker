@@ -22,17 +22,16 @@ public class CalibrationActivity extends MainActivity{
 
     private static int mSamplePerEye = 20;
     private static int doneSamplePerEye = 0;
-    public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE};
+    public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
     SRegion currentRegion = SRegion.UP_LEFT;
     TrainedEyesContainer mTrainedEyesContainer;
-    private static boolean captionStarted = false;
 
     private boolean wantToSave = false;
     private static final String TAG = "CalibrationActivity";
 
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
-        captionStarted = true;
+
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
         //to show the eyes for debug
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
@@ -85,9 +84,6 @@ public class CalibrationActivity extends MainActivity{
             default:
                 break;
         }
-
-
-
     }
 
     @Override
@@ -101,8 +97,6 @@ public class CalibrationActivity extends MainActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setCameraViewListener(this);
-        //SETTARE LAYOUT
 
         findViewById(R.id.save_calibration).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,14 +106,13 @@ public class CalibrationActivity extends MainActivity{
         });
 
         mTrainedEyesContainer = new TrainedEyesContainer();
-
     }
 
 
     @Override
     public void onPause() {
         super.onPause();
-        //DA SPOSTARE IN CALIBRATION
+
         if (wantToSave) {
             SharedPreferences sp = getPreferences(MODE_PRIVATE);
 

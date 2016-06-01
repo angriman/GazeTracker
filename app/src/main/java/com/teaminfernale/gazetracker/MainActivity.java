@@ -165,7 +165,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableFpsMeter();
                     mOpenCvCameraView.enableView();
 
@@ -365,26 +365,25 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
 
-        final Point finalLMatchedEye = lMatchedEye;
-        final Point finalRMatchedEye = rMatchedEye;
+/*        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;*/
 
-        Runnable myRunnable = new Runnable() {
+/*        Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
 
-                Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(mZoomWindow.clone(), le);
-                Utils.matToBitmap(mZoomWindow2.clone(), re);
-                //((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-                //((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
-                onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
             }
         };
 
-        mainHandler.post(myRunnable);
+        mainHandler.post(myRunnable);*/
 
+        Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+        Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mZoomWindow.clone(), le);
+        Utils.matToBitmap(mZoomWindow2.clone(), re);
+
+        onEyeFound(lMatchedEye, rMatchedEye, le, re);
 
 
         return mRgba;

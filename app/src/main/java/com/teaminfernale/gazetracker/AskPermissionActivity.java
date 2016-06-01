@@ -27,7 +27,8 @@ public class AskPermissionActivity extends Activity {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
             requestCameraPermission();
         else {
-            //launch main activity
+
+            // Launch Calibration or Recognition activity
             Intent launchMainIntent = new Intent(AskPermissionActivity.this, CalibrationActivity.class);
             AskPermissionActivity.this.startActivity(launchMainIntent);
             finish();
@@ -36,7 +37,7 @@ public class AskPermissionActivity extends Activity {
 
 
     private void requestCameraPermission(){
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
             //SPIEGA A COSA TI SERVONO I PERMESSI (MOSTRALO ALL'UTENTE)
         }
         ActivityCompat.requestPermissions(AskPermissionActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
