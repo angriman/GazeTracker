@@ -10,6 +10,9 @@ import java.util.ArrayList;
  * initial 4-points acquisition.
  */
 public class TrainedEyesContainer {
+
+    public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
+
     private Point R_upRight;
     private Point L_upRight;
 
@@ -35,6 +38,26 @@ public class TrainedEyesContainer {
 
     private ArrayList<Point> R_downLeft_a = new ArrayList<Point>();
     private ArrayList<Point> L_downLeft_a = new ArrayList<Point>();
+
+    //Constructors
+    public TrainedEyesContainer() {}
+
+    public TrainedEyesContainer(Point R_upRight, Point L_upRight, Point R_upLeft, Point L_upLeft, Point R_downRight, Point L_downRight, Point R_downLeft, Point L_downLeft) {
+        this.R_upRight = R_upRight;
+        this.L_upRight = L_upRight;
+
+        this.R_upLeft = R_upLeft;
+        this.L_upLeft = L_upLeft;
+
+        this.R_downRight = R_downRight;
+        this.L_downRight = L_downRight;
+
+        this.R_upRight = R_upRight;
+        this.R_upRight = R_upRight;
+
+        this.R_downLeft = R_downLeft;
+        this.L_downLeft = L_downLeft;
+    }
 
     //Set methods
 
@@ -170,6 +193,41 @@ public class TrainedEyesContainer {
                     break;
             }
         }
+    }
+
+
+    public ScreenRegion computeCorner(Point p_left, Point p_right) {
+
+        int min_LR = minIndex(
+                distance(L_upLeft, p_left) + distance(R_upLeft,p_right),
+                distance(L_upRight,p_left) + distance(R_upRight, p_right),
+                distance(L_downRight, p_left) + distance(R_downRight, p_right),
+                distance(L_downLeft, p_left) + distance(R_downLeft, p_right));
+
+
+        if (min_LR == 0) return ScreenRegion.UP_LEFT;
+        if (min_LR == 1) return ScreenRegion.UP_RIGHT;
+        if (min_LR == 2) return ScreenRegion.DOWN_RIGHT;
+        return ScreenRegion.DOWN_LEFT;
+    }
+
+    private int minIndex(double a, double b, double c, double d){
+        double[] minimum = {a, b, c, d};
+        double min = a;
+        int minIn = 0;
+        for (int i = 1; i < 4; i++) {
+            if (minimum[i] < min) {
+                min = minimum[i];
+                minIn = i;
+            }
+        }
+        return  minIn;
+    }
+
+    private double distance(Point pRegion, Point p){
+
+        return Math.sqrt((double)((pRegion.x-p.x)*(pRegion.x-p.x)) + (double)((pRegion.y-p.y)*(pRegion.y-p.y)));
+
     }
 
 }
