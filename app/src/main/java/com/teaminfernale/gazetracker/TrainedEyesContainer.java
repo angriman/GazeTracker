@@ -54,11 +54,24 @@ public class TrainedEyesContainer implements Serializable {
         this.R_downRight = R_downRight;
         this.L_downRight = L_downRight;
 
-        this.R_upRight = R_upRight;
-        this.R_upRight = R_upRight;
-
         this.R_downLeft = R_downLeft;
         this.L_downLeft = L_downLeft;
+    }
+
+    public TrainedEyesContainer(Point[] points) {
+        if (points.length == 8) {
+            this.R_upRight = points[0];
+            this.L_upRight = points[1];
+
+            this.R_upLeft = points[2];
+            this.L_upLeft = points[3];
+
+            this.R_downRight = points[4];
+            this.L_downRight = points[5];
+
+            this.R_downLeft = points[6];
+            this.L_downLeft = points[7];
+        }
     }
 
     //Set methods
@@ -143,6 +156,10 @@ public class TrainedEyesContainer implements Serializable {
 
         R_downLeft = meanPointArrayList(R_downLeft_a);
         L_downLeft = meanPointArrayList(L_downLeft_a);
+    }
+
+    public Point[] getPoints() {
+        return new Point[]{R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
     }
 
     private Point meanPointArrayList(ArrayList<Point> arr){

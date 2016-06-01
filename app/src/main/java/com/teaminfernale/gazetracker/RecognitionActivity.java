@@ -84,15 +84,13 @@ public class RecognitionActivity extends MainActivity {
         };
 
         mainHandler.post(changePicture);
-
-
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent i = getIntent();
-        TrainedEyesContainer mTrainedEyesContainer = (TrainedEyesContainer)i.getSerializableExtra("trainedEyesContainer");
+        mTrainedEyesContainer = (TrainedEyesContainer)i.getSerializableExtra("trainedEyesContainer");
         //SETTARE LAYOUT
 
         //INIZIALIZZARE mGazeCalculator!!!!
