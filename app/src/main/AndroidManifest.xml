@@ -25,6 +25,8 @@
         </activity>
         <activity android:label="@string/app_name" android:name=".CalibrationActivity"
                   android:screenOrientation="landscape"/>
+        <activity android:label="@string/app_name" android:name=".RecognitionActivity"
+                  android:screenOrientation="landscape"/>
     </application>
 
 </manifest>
