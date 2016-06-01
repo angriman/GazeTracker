@@ -1,7 +1,6 @@
 package com.teaminfernale.gazetracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +14,7 @@ import org.opencv.core.Point;
  */
 public class CalibrationActivity extends MainActivity{
 
-    private static final int mSamplePerEye = 20;
+    private static final int mSamplePerEye = 30;
     private static int currentEyeSamples = 0;
     private boolean calibrating = false;
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
