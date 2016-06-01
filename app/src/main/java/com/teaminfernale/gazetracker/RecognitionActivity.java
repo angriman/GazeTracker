@@ -10,8 +10,9 @@ import android.widget.ImageView;
 import org.opencv.core.Point;
 
 /**
- * Created by Leonardo on 31/05/2016.
+ * Created by the awesome Leonardo on 31/05/2016.
  */
+
 public class RecognitionActivity extends MainActivity {
 
     private  TrainedEyesContainer mTrainedEyesContainer;
@@ -34,7 +35,7 @@ public class RecognitionActivity extends MainActivity {
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
-        //to show the eyes for debug
+        // To show the eyes for debug
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 

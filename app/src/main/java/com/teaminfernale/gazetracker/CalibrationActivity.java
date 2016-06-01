@@ -143,7 +143,7 @@ public class CalibrationActivity extends MainActivity{
     public void onPause() {
         super.onPause();
 
-        if (wantToSave) {
+/*        if (wantToSave) {
             SharedPreferences sp = getPreferences(MODE_PRIVATE);
 
             Point[] pointsArray = {R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
@@ -159,6 +159,6 @@ public class CalibrationActivity extends MainActivity{
             sp.edit().putString("stringY", str_Y.toString()).apply();
 
             Log.i(TAG, "Calibration saved");
-        }
+        }*/
     }
 }
