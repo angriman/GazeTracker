@@ -16,7 +16,7 @@ import org.opencv.core.Point;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
- * Created by Leonardo on 31/05/2016.
+ * Created by the awesome Leonardo on 31/05/2016.
  */
 public class CalibrationActivity extends MainActivity{
 
