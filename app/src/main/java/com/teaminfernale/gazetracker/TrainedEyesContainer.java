@@ -10,6 +10,7 @@ import java.util.ArrayList;
  * Class used to store the first 8 points (4 for left eye and 4 for right eye) acquired during the
  * initial 4-points acquisition.
  */
+@SuppressWarnings("serial")
 public class TrainedEyesContainer implements Serializable {
 
     public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
@@ -28,17 +29,17 @@ public class TrainedEyesContainer implements Serializable {
 
 
 
-    private ArrayList<Point> R_upRight_a = new ArrayList<Point>();
-    private ArrayList<Point> L_upRight_a = new ArrayList<Point>();
+    private ArrayList<Point> R_upRight_a = new ArrayList<>();
+    private ArrayList<Point> L_upRight_a = new ArrayList<>();
 
-    private ArrayList<Point> R_upLeft_a = new ArrayList<Point>();
-    private ArrayList<Point> L_upLeft_a = new ArrayList<Point>();
+    private ArrayList<Point> R_upLeft_a = new ArrayList<>();
+    private ArrayList<Point> L_upLeft_a = new ArrayList<>();
 
-    private ArrayList<Point> R_downRight_a = new ArrayList<Point>();
-    private ArrayList<Point> L_downRight_a = new ArrayList<Point>();
+    private ArrayList<Point> R_downRight_a = new ArrayList<>();
+    private ArrayList<Point> L_downRight_a = new ArrayList<>();
 
-    private ArrayList<Point> R_downLeft_a = new ArrayList<Point>();
-    private ArrayList<Point> L_downLeft_a = new ArrayList<Point>();
+    private ArrayList<Point> R_downLeft_a = new ArrayList<>();
+    private ArrayList<Point> L_downLeft_a = new ArrayList<>();
 
     //Constructors
     public TrainedEyesContainer() {}

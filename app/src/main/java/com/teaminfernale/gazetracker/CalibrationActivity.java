@@ -98,7 +98,7 @@ public class CalibrationActivity extends MainActivity{
     private void launchRecognitionActivity() {
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer);
-        CalibrationActivity.this.startActivity(launchMainIntent);
+        startActivity(launchMainIntent);
         finish();
     }
 
