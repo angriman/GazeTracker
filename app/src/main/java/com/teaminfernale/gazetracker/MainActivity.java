@@ -352,8 +352,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(mZoomWindow.clone(), le);
                     Utils.matToBitmap(mZoomWindow2.clone(), re);
-                    //((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-                    //((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
                     onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
                 }
                 catch (IllegalArgumentException e) {
@@ -366,38 +364,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         mainHandler.post(myRunnable);
 
-
-
         return mRgba;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "called onCreateOptionsMenu");
-        mItemFace50 = menu.add("Face size 50%");
-        mItemFace40 = menu.add("Face size 40%");
-        mItemFace30 = menu.add("Face size 30%");
-        mItemFace20 = menu.add("Face size 20%");
-        mItemType = menu.add(mDetectorName[mDetectorType]);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
-        if (item == mItemFace50)
-            setMinFaceSize(0.5f);
-        else if (item == mItemFace40)
-            setMinFaceSize(0.4f);
-        else if (item == mItemFace30)
-            setMinFaceSize(0.3f);
-        else if (item == mItemFace20)
-            setMinFaceSize(0.2f);
-        else if (item == mItemType) {
-            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
-            item.setTitle(mDetectorName[tmpDetectorType]);
-        }
-        return true;
     }
 
     // Called after model training is completed
@@ -481,8 +448,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
 
         Rect[] eyesArray = eyes.toArray();
-        for (int i = 0; i < eyesArray.length;) {
-            Rect e = eyesArray[i];
+        if (eyesArray.length > 0) {
+            Rect e = eyesArray[0];
             e.x = area.x + e.x;
             e.y = area.y + e.y;
             Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), (int) e.width, (int) (e.height * 0.6));
@@ -524,6 +491,36 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
         }
 
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i(TAG, "called onCreateOptionsMenu");
+        mItemFace50 = menu.add("Face size 50%");
+        mItemFace40 = menu.add("Face size 40%");
+        mItemFace30 = menu.add("Face size 30%");
+        mItemFace20 = menu.add("Face size 20%");
+        mItemType = menu.add(mDetectorName[mDetectorType]);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
+        if (item == mItemFace50)
+            setMinFaceSize(0.5f);
+        else if (item == mItemFace40)
+            setMinFaceSize(0.4f);
+        else if (item == mItemFace30)
+            setMinFaceSize(0.3f);
+        else if (item == mItemFace20)
+            setMinFaceSize(0.2f);
+        else if (item == mItemType) {
+            int tmpDetectorType = (mDetectorType + 1) % mDetectorName.length;
+            item.setTitle(mDetectorName[tmpDetectorType]);
+        }
+        return true;
     }
 
     public void onRecreateClick(View v)

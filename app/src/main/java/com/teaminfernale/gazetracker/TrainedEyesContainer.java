@@ -244,8 +244,10 @@ public class TrainedEyesContainer {
 
     private double distance(Point pRegion, Point p){
 
-        return Math.sqrt((double)((pRegion.x-p.x)*(pRegion.x-p.x)) + (double)((pRegion.y-p.y)*(pRegion.y-p.y)));
-
+        if (pRegion != null && p != null) {
+            return Math.sqrt(((pRegion.x - p.x) * (pRegion.x - p.x)) + ((pRegion.y - p.y) * (pRegion.y - p.y)));
+        }
+        return 1000;
     }
 
 }
