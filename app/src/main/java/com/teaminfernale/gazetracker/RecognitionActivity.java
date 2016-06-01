@@ -1,5 +1,6 @@
 package com.teaminfernale.gazetracker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -17,12 +18,18 @@ import java.util.StringTokenizer;
  */
 public class RecognitionActivity extends MainActivity {
 
-    private  GazeCalculator mGazeCalculator;
+    private  TrainedEyesContainer mTrainedEyesContainer;
     private static final String TAG = "RecognitionActivity";
     private int imageID = 0;
 
     @Override
     protected void setLayout() {
+        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
         setContentView(R.layout.recognition_activity_layout);
     }
 
@@ -44,7 +51,7 @@ public class RecognitionActivity extends MainActivity {
                 if (finalLMatchedEye != null && finalRMatchedEye != null) {
                     String result = "You are watching ";
                     ImageView imageView = null;
-                    switch (mGazeCalculator.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
+                    switch (mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
                         case UP_LEFT:
                             Log.i(TAG, result + "up left");
                             imageView = (ImageView) findViewById(R.id.top_left_image);
@@ -84,6 +91,8 @@ public class RecognitionActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent i = getIntent();
+        TrainedEyesContainer mTrainedEyesContainer = (TrainedEyesContainer)i.getSerializableExtra("trainedEyesContainer");
         //SETTARE LAYOUT
 
         //INIZIALIZZARE mGazeCalculator!!!!
