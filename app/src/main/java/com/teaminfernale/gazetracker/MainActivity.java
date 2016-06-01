@@ -186,38 +186,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
 
-
-
-    private String readFromFile() {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = openFileInput("calibFile.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
-
     //Serve affinchè venga settato il layout con la fd_activity_surface_view per poter lanciare la fotocamera
     //comando setContentView(R.layout.XXX_activity_layout);
     protected abstract void setLayout();
@@ -227,15 +195,16 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "On create called");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
         calibrating = true;
 
+        Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
-        Log.i(TAG, "PROVA");
         mOpenCvCameraView.setCvCameraViewListener(this);
-        Log.i(TAG, "PROVA2");
+        Log.i(TAG, "camera view cameraview initializated");
 
 
         //setLayout();
@@ -253,29 +222,18 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
     }
 
-
-
-
-    //TUTTO IN CALIBRATION
-    /*private void redefineButtonListener() {
-
-        Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
-        calibrateButton.setText(getResources().getString(R.string.start_simulation_button));
-
-        calibrateButton.setOnClickListener(null);
-        calibrateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                monitoring = true;
-            }
-        });
-    }*/
+    public void closeCamera() {
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+        Log.i(TAG, "Camera closed");
+    }
 
     @Override
     public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        Log.i(TAG, "On pause called");
     }
 
     @Override
@@ -292,7 +250,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     public void onDestroy() {
         super.onDestroy();
-        mOpenCvCameraView.disableView();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -371,14 +330,20 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             @Override
             public void run() {
 
-                Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(mZoomWindow.clone(), le);
-                Utils.matToBitmap(mZoomWindow2.clone(), re);
-                //((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-                //((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+                try {
+                    Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(mZoomWindow.clone(), le);
+                    Utils.matToBitmap(mZoomWindow2.clone(), re);
+                    //((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
+                    //((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+                    onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+                }
+                catch (IllegalArgumentException e) {
+                    Log.i(TAG, "EXCEPTION");
+                }
 
-                onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+
             }
         };
 

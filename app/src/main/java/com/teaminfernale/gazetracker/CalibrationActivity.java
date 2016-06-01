@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import org.opencv.core.Point;
@@ -96,6 +95,8 @@ public class CalibrationActivity extends MainActivity{
 
     // Launches recognition activity
     private void launchRecognitionActivity() {
+        super.closeCamera();
+        Log.i(TAG, "Creating new activity");
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer.getPoints());
         startActivity(launchMainIntent);
@@ -129,7 +130,6 @@ public class CalibrationActivity extends MainActivity{
 
 
     private void startCalibrationListener() {
-
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -162,30 +162,4 @@ public class CalibrationActivity extends MainActivity{
             Log.i(TAG, "Calibration saved");
         }
     }
-
-
-   /* //DA SPOSTARE IN CALIBRATION!!!! ONCREATE
-
-
-    if (!calibrated) {
-        startCalibrationListener();
-    }
-    else {
-        redefineButtonListener();
-    }
-
-    findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Log.i(TAG, "reset pressed");
-            startCalibrationListener();
-        }
-    });
-
-    findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            startCalibrationListener();
-        }
-    }); //FINE DA SPOSTARE IN CALIBRATION */
 }

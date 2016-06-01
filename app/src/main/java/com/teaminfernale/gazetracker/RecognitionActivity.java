@@ -1,17 +1,13 @@
 package com.teaminfernale.gazetracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import org.opencv.core.Point;
-
-import java.util.StringTokenizer;
 
 /**
  * Created by Leonardo on 31/05/2016.
@@ -24,13 +20,13 @@ public class RecognitionActivity extends MainActivity {
 
     @Override
     protected void setLayout() {
-        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
+      /*  ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-        setContentView(R.layout.recognition_activity_layout);
+        setContentView(R.layout.recognition_activity_layout);*/
     }
 
     @Override
@@ -89,6 +85,8 @@ public class RecognitionActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.recognition_activity_layout);
+
         Intent i = getIntent();
         Point[] points = (Point[]) i.getSerializableExtra("trainedEyesContainer");
         mTrainedEyesContainer = new TrainedEyesContainer(points);
