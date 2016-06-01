@@ -99,7 +99,7 @@ public class CalibrationActivity extends MainActivity{
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer.getPoints());
         startActivity(launchMainIntent);
-        finish();
+        //finish();
     }
 
     @Override

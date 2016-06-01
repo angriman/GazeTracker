@@ -10,7 +10,7 @@
         android:alpha="0"/>
 
     <ImageView
-        android:id="@+id/top_right_image"
+        android:id="@+id/top_right_image_rec"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignTop="@id/fd_activity_surface_view"
@@ -18,7 +18,7 @@
         android:scaleType="fitXY" />
 
     <ImageView
-        android:id="@+id/top_left_image"
+        android:id="@+id/top_left_image_rec"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignTop="@id/fd_activity_surface_view"
@@ -26,7 +26,7 @@
         android:scaleType="fitXY" />
 
     <ImageView
-        android:id="@+id/down_right_image"
+        android:id="@+id/down_right_image_rec"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignBottom="@id/fd_activity_surface_view"
@@ -34,7 +34,7 @@
         android:scaleType="fitXY" />
 
     <ImageView
-        android:id="@+id/down_left_image"
+        android:id="@+id/down_left_image_rec"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignBottom="@id/fd_activity_surface_view"
@@ -42,7 +42,7 @@
         android:scaleType="fitXY" />
 
     <Button
-        android:id="@+id/calibrate_button"
+        android:id="@+id/calibrate_button_rec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/fd_activity_surface_view"
@@ -51,7 +51,7 @@
         android:text="@string/start_calibration_button" />
 
     <ImageView
-        android:id="@+id/left_eye"
+        android:id="@+id/left_eye_rec"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_centerVertical="true"
@@ -59,7 +59,7 @@
         android:scaleType="fitXY" />
 
     <ImageView
-        android:id="@+id/right_eye"
+        android:id="@+id/right_eye_rec"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_centerVertical="true"

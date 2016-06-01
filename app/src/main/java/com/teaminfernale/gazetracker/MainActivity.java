@@ -172,7 +172,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }

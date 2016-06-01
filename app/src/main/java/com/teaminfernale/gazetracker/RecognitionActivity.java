@@ -22,21 +22,20 @@ public class RecognitionActivity extends MainActivity {
     protected void setLayout() {
         super.setModeRecognition();
         setContentView(R.layout.recognition_activity_layout);
-      /*  ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-        */
+        ((ImageView) findViewById(R.id.left_eye_rec)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.right_eye_rec)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_left_image_rec)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.top_right_image_rec)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_left_image_rec)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.down_right_image_rec)).setImageResource(R.drawable.lena1);
     }
 
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
         //to show the eyes for debug
-        ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-        ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+        ((ImageView) findViewById(R.id.left_eye_rec)).setImageBitmap(le);
+        ((ImageView) findViewById(R.id.right_eye_rec)).setImageBitmap(re);
 
         final Point finalLMatchedEye = leftEye;
         final Point finalRMatchedEye = rightEye;
@@ -52,19 +51,19 @@ public class RecognitionActivity extends MainActivity {
                     switch (mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
                         case UP_LEFT:
                             Log.i(TAG, result + "up left");
-                            imageView = (ImageView) findViewById(R.id.top_left_image);
+                            imageView = (ImageView) findViewById(R.id.top_left_image_rec);
                             break;
                         case UP_RIGHT:
                             Log.i(TAG, result + "up right");
-                            imageView = (ImageView) findViewById(R.id.top_right_image);
+                            imageView = (ImageView) findViewById(R.id.top_right_image_rec);
                             break;
                         case DOWN_LEFT:
                             Log.i(TAG, result + "down left");
-                            imageView = (ImageView) findViewById(R.id.down_left_image);
+                            imageView = (ImageView) findViewById(R.id.down_left_image_rec);
                             break;
                         case DOWN_RIGHT:
                             Log.i(TAG, result + "down right");
-                            imageView = (ImageView) findViewById(R.id.down_right_image);
+                            imageView = (ImageView) findViewById(R.id.down_right_image_rec);
                             break;
                         default:
                             Log.i(TAG, "somewhere I don't know");
@@ -94,7 +93,6 @@ public class RecognitionActivity extends MainActivity {
         Log.i(TAG, "Trained container created");
         //SETTARE LAYOUT
 
-        //INIZIALIZZARE mGazeCalculator!!!!
     }
 
     /*PER RICARICARE I PUNTI DELLA CALIBRATION (onCreate)
