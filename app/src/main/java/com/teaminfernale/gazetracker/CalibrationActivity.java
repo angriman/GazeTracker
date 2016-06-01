@@ -1,5 +1,6 @@
 package com.teaminfernale.gazetracker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -79,6 +80,12 @@ public class CalibrationActivity extends MainActivity{
                     doneSamplePerEye = 0;
                     currentRegion = SRegion.NONE;
                     findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
+
+                    // Launch Calibration or Recognition activity
+                    Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
+                    launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer);
+                    CalibrationActivity.this.startActivity(launchMainIntent);
+                    finish();
                 }
                 break;
             default:

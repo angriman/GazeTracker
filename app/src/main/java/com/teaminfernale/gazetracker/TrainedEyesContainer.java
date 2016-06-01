@@ -2,6 +2,7 @@ package com.teaminfernale.gazetracker;
 
 import org.opencv.core.Point;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +10,7 @@ import java.util.ArrayList;
  * Class used to store the first 8 points (4 for left eye and 4 for right eye) acquired during the
  * initial 4-points acquisition.
  */
-public class TrainedEyesContainer {
+public class TrainedEyesContainer implements Serializable {
 
     public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
 
