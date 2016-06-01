@@ -20,13 +20,15 @@ public class RecognitionActivity extends MainActivity {
 
     @Override
     protected void setLayout() {
+        super.setModeRecognition();
+        setContentView(R.layout.recognition_activity_layout);
       /*  ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-        setContentView(R.layout.recognition_activity_layout);*/
+        */
     }
 
     @Override
@@ -85,7 +87,6 @@ public class RecognitionActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recognition_activity_layout);
 
         Intent i = getIntent();
         Point[] points = (Point[]) i.getSerializableExtra("trainedEyesContainer");

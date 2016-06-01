@@ -31,6 +31,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.ml.LogisticRegression;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 
@@ -97,9 +98,15 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private boolean wantToSave = false;
 
+    private int mode = 0;
+
     Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
 
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
+
+    public void setModeRecognition() {
+        mode = 1;
+    }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -203,6 +210,16 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+        switch (mode) {
+            case 0:
+                mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+                break;
+            default:
+                mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.recognition_front_camera_view);
+        }
+
+        if (mOpenCvCameraView == null)
+            Log.i(TAG, "Capito er bug");
         mOpenCvCameraView.setCvCameraViewListener(this);
         Log.i(TAG, "camera view cameraview initializated");
 

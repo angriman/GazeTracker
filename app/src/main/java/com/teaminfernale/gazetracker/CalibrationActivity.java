@@ -33,7 +33,6 @@ public class CalibrationActivity extends MainActivity{
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
         if (calibrating) {
-            Log.i(TAG, "Sample added");
             switch (currentRegion) {
                 case UP_LEFT:
                     mTrainedEyesContainer.addSample(0, 0, leftEye);
