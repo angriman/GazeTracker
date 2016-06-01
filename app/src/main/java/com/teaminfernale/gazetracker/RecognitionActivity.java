@@ -90,7 +90,9 @@ public class RecognitionActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent i = getIntent();
-        mTrainedEyesContainer = (TrainedEyesContainer)i.getSerializableExtra("trainedEyesContainer");
+        Point[] points = (Point[]) i.getSerializableExtra("trainedEyesContainer");
+        mTrainedEyesContainer = new TrainedEyesContainer(points);
+        Log.i(TAG, "Trained container created");
         //SETTARE LAYOUT
 
         //INIZIALIZZARE mGazeCalculator!!!!
