@@ -76,11 +76,11 @@
 
 
     <Button
-        android:id="@+id/reset_calibration"
+        android:id="@+id/go_to_simulation_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onRecreateClick"
-        android:text="@string/reset_calibration_button"
+        android:text="@string/go_to_simulation_button"
         android:layout_alignTop="@+id/down_right_image"
         android:layout_alignStart="@+id/save_calibration"/>
 
