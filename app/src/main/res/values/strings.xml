@@ -6,4 +6,5 @@
     <string name="start_simulation_button">Start simulation</string>
     <string name="save_calibration_button">Save calibration</string>
     <string name="stop_simulation_button">Stop simulation</string>
+    <string name="go_to_simulation_button">Go to simulation</string>
 </resources>

@@ -55,6 +55,7 @@ public class AskPermissionActivity extends Activity {
             }
             else {
                 Log.i(TAG, "CAMERA permission has been GRANTED.");
+
                 Intent launchMainIntent = new Intent(AskPermissionActivity.this, MainActivity.class);
                 AskPermissionActivity.this.startActivity(launchMainIntent);
                 finish();
