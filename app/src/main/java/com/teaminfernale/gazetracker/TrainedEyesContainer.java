@@ -73,6 +73,22 @@ public class TrainedEyesContainer {
         }
     }
 
+    public TrainedEyesContainer(double[] coordinates){
+        if (coordinates.length == 16) {
+            this.R_upRight = new Point(coordinates[0], coordinates[1]);
+            this.L_upRight = new Point(coordinates[2], coordinates[3]);
+
+            this.R_upLeft = new Point(coordinates[4], coordinates[5]);
+            this.L_upLeft = new Point(coordinates[6], coordinates[7]);
+
+            this.R_downRight = new Point(coordinates[8], coordinates[9]);
+            this.L_downRight = new Point(coordinates[10], coordinates[11]);
+
+            this.R_downLeft = new Point(coordinates[12], coordinates[13]);
+            this.L_downLeft = new Point(coordinates[14], coordinates[15]);
+        }
+    }
+
     //Set methods
 
     public void setR_upRight(Point r_upRight) {
@@ -159,6 +175,17 @@ public class TrainedEyesContainer {
 
     public Point[] getPoints() {
         return new Point[]{R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
+    }
+
+    public double[] getPointsCoordinates() {
+        return new double[]{R_upRight.x, R_upRight.y,
+                L_upRight.x, L_upRight.y,
+                R_upLeft.x, R_upLeft.y,
+                L_upLeft.x, L_upLeft.y,
+                R_downRight.x, R_downRight.y,
+                L_downRight.x, L_downRight.y,
+                R_downLeft.x, R_downLeft.y,
+                L_downLeft.x, L_downLeft.y};
     }
 
     private Point meanPointArrayList(ArrayList<Point> arr){

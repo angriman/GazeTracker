@@ -46,10 +46,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
-    private  GazeCalculator mGazeCalculator;
-    private boolean calibrating = false;
-    private int calibration_phase = 0;
+//    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+//    private  GazeCalculator mGazeCalculator;
+//    private boolean calibrating = false;
+//    private int calibration_phase = 0;
     private int learn_frames = 0;
     private Mat teplateR;
     private Mat teplateL;
@@ -192,7 +192,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
-        calibrating = true;
+//        calibrating = true;
 
         Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
@@ -338,7 +338,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(mZoomWindow.clone(), le);
                     Utils.matToBitmap(mZoomWindow2.clone(), re);
-                    onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+                    if (finalLMatchedEye != null && finalRMatchedEye != null)
+                        onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
                 }
                 catch (IllegalArgumentException e) {
                     Log.i(TAG, "EXCEPTION");
@@ -412,9 +413,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
             //DA SPOSTARE IN CALIBRATION!!!!
-            if (calibrating) {
-                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
-            }
+//            if (calibrating) {
+//                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
+//            }
 
             return mmG.minLoc;
             // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto

@@ -100,8 +100,9 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
 
         Intent i = getIntent();
-        Point[] points = (Point[]) i.getSerializableExtra("trainedEyesContainer");
-        mTrainedEyesContainer = new TrainedEyesContainer(points);
+        double[] pointsCoordinates = (double[])i.getDoubleArrayExtra("trainedEyesContainer");
+                //(Point[]) i.getSerializableExtra("trainedEyesContainer");
+        mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates);
 
         findViewById(R.id.simulation_button).setOnClickListener(new View.OnClickListener() {
             @Override

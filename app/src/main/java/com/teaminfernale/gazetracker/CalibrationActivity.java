@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
  */
 public class CalibrationActivity extends MainActivity{
 
-    private static final int mSamplePerEye = 1;
+    private static final int mSamplePerEye = 20;
     private static int currentEyeSamples = 0;
     private boolean calibrating = false;
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
@@ -34,7 +34,7 @@ public class CalibrationActivity extends MainActivity{
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
-        if (calibrating) {
+        if (calibrating && leftEye != null && rightEye != null) {
             switch (currentRegion) {
                 case UP_LEFT:
                     mTrainedEyesContainer.addSample(0, 0, leftEye);
@@ -81,7 +81,7 @@ public class CalibrationActivity extends MainActivity{
                     currentEyeSamples++;
 
                     if (currentEyeSamples >= mSamplePerEye) { // Calibration completed
-                        //mTrainedEyesContainer.meanSamples();
+                        mTrainedEyesContainer.meanSamples();
                         currentEyeSamples = 0;
                         currentRegion = SRegion.NONE;
                         findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
@@ -128,9 +128,13 @@ public class CalibrationActivity extends MainActivity{
         }
 
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
-        launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer.getPoints());
+        Point[] points = mTrainedEyesContainer.getPoints();
+        Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
+        double[] pointsCoordinates = mTrainedEyesContainer.getPointsCoordinates();
+        launchMainIntent.putExtra("trainedEyesContainer", pointsCoordinates);
+
         startActivity(launchMainIntent);
-        //finish();
+        finish();
     }
 
     @Override
