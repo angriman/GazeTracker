@@ -38,7 +38,7 @@ public class AskPermissionActivity extends Activity {
 
     private void requestCameraPermission(){
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
-            //SPIEGA A COSA TI SERVONO I PERMESSI (MOSTRALO ALL'UTENTE)
+            //TODO: SPIEGA A COSA TI SERVONO I PERMESSI (MOSTRALO ALL'UTENTE)
         }
         ActivityCompat.requestPermissions(AskPermissionActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }

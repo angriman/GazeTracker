@@ -3,6 +3,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" >
 
+    <RelativeLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="fitStart"
+            android:src="@drawable/lena1" />
+
+    </RelativeLayout>
+
     <org.opencv.android.JavaCameraView
         android:id="@+id/fd_activity_surface_view"
         android:layout_width="fill_parent"

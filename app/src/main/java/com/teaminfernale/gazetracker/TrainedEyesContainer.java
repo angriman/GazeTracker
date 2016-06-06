@@ -2,7 +2,6 @@ package com.teaminfernale.gazetracker;
 
 import org.opencv.core.Point;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**

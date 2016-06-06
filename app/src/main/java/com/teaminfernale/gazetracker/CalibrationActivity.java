@@ -3,19 +3,26 @@ package com.teaminfernale.gazetracker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.StringTokenizer;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
  */
-public class CalibrationActivity extends MainActivity{
+public class CalibrationActivity extends MainActivity {
 
     private static final int mSamplePerEye = 20;
     private static int currentEyeSamples = 0;
@@ -27,8 +34,38 @@ public class CalibrationActivity extends MainActivity{
     private boolean wantToSave = false;
     private static final String TAG = "CalibrationActivity";
 
+    protected void onMatchedEyes(final Point leftEye, Point rightEye, final Mat source, Rect eyeAreaLeft, Rect eyeAreaRight) {
+        Log.i(TAG, "Received points (" + leftEye.x + "," + leftEye.y + ")" + " (" + rightEye.x + "," + rightEye.y + ")");
+        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    Bitmap background = Bitmap.createBitmap(source.cols(), source.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(source.clone(), background);
+                    ImageView b = ((ImageView) findViewById(R.id.back));
+                    b.setImageBitmap(background);
+                    Imgproc.circle(source, leftEye, 2, new Scalar(255, 255, 255, 255), 1);
+                }
+                catch (IllegalArgumentException e) {
+                    Log.i(TAG, "EXCEPTION");
+                }
+
+
+            }
+        };
+
+        mainHandler.post(myRunnable);
+    }
+
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
+/*        if ( leftEye != null && rightEye != null) {
+            Log.i(TAG, "Received points (" + leftEye.x + "," + leftEye.y + ")" + " (" + rightEye.x + "," + rightEye.y + ")");
+        }*/
 
         //to show the eyes for debug
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);

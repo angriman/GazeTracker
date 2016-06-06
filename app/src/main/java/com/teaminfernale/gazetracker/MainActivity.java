@@ -158,7 +158,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -288,38 +288,64 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         MatOfRect faces = new MatOfRect();
 
         if (mJavaDetector != null) {
+            // Detects the face
             mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
         }
 
         Point lMatchedEye = new Point();
         Point rMatchedEye = new Point();
+        Point trueLeftEye = new Point();
+        Point trueRightEye = new Point();
+
 
         Rect[] facesArray = faces.toArray();
-        //Log.i(TAG, "FacesArray length = " + facesArray.length);
+        Rect eyearea_right = new Rect();
+        Rect eyearea_left = new Rect();
+        Rect r = new Rect();
+
         if (facesArray.length > 0) {
 
-            Rect r = facesArray[0];
+            // This the rectangle corresponding to the face
+            r = facesArray[0];
+            //Log.i(TAG, "r.x = " + r.x + " r.y = " + r.y);
+
             // Compute both eyes area
             // Rect eyearea = new Rect(r.x + r.width / 8, (int) (r.y + (r.height / 4.5)), r.width - 2 * r.width / 8, (int) (r.height / 3.0));
             // split it
 
             // TODO: capire perché vengono usati questi numeri e salvarli in variabili (per capire meglio il codice)
-            Rect eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
-            Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+            eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+            eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
 
             if (learn_frames < 5) {
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
                 teplateL = get_template(mJavaDetectorEye, eyearea_left, 24);
                 learn_frames++;
-            } else {
+            }
+            else {
                 // Learning finished, use the new templates for template matching
                 lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
                 rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
+                if (lMatchedEye != null && rMatchedEye != null) {
+                    if (lMatchedEye.x > 0.0 && lMatchedEye.y > 0.0 && rMatchedEye.x > 0.0 && rMatchedEye.y > 0.0) {
+                        trueLeftEye.x = lMatchedEye.x + eyearea_left.x + r.x;
+                        trueLeftEye.y = lMatchedEye.y + eyearea_left.y + r.y;
+                        trueRightEye.x = rMatchedEye.x + eyearea_right.x + r.x;
+                        trueRightEye.y =  rMatchedEye.y + eyearea_right.y + r.y;
+
+                        onMatchedEyes(trueLeftEye, trueRightEye, mRgba, eyearea_left, eyearea_right);
+
+                    }
+                    //Log.i(TAG, "X = " + lMatchedEye.x + eyearea_left.x + r.x + " Y = " + lMatchedEye.y + eyearea_left.y + r.y);
+                }
             }
+            /*Log.i(TAG, "eye area right = " + eyearea_right.width + " " + eyearea_right.height);
+            Log.i(TAG, "zoom window = " + mZoomWindow.rows() + " " + mZoomWindow.cols());*/
 
             // Cut eye areas and put them to zoom windows
             Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
             Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+
         }
 
 
@@ -329,6 +355,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
+
+        final Rect finalEyearea_right = eyearea_right;
+        final Rect finalEyearea_left = eyearea_left;
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
@@ -338,8 +367,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(mZoomWindow.clone(), le);
                     Utils.matToBitmap(mZoomWindow2.clone(), re);
-                    if (finalLMatchedEye != null && finalRMatchedEye != null)
+                    if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+                        // Bisogna cambiarlo coi valori "reali"
+                        onMatchedEyes(finalLMatchedEye, finalRMatchedEye, mRgba, finalEyearea_right, finalEyearea_left);
+                    }
+
                 }
                 catch (IllegalArgumentException e) {
                     Log.i(TAG, "EXCEPTION");
@@ -353,6 +386,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         return mRgba;
     }
+
+    protected abstract void onMatchedEyes(Point leftEye, Point rightEye, Mat source, Rect eyeAreaLeft, Rect eyeAreaRight);
 
     // Called after model training is completed
     private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {

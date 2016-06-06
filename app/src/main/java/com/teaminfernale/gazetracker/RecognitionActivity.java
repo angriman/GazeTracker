@@ -11,7 +11,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.StringTokenizer;
 
@@ -36,6 +38,11 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_right_image)).setImageResource(R.drawable.lena1);
+
+    }
+
+    @Override
+    protected void onMatchedEyes(Point leftEye, Point rightEye, Mat source, Rect eyeAreaLeft, Rect eyeAreaRight) {
 
     }
 
