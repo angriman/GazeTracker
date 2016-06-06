@@ -69,16 +69,16 @@
 
     <ImageView
         android:id="@+id/left_eye"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:layout_centerVertical="true"
         android:layout_alignLeft="@id/fd_activity_surface_view"
         android:scaleType="fitXY" />
 
     <ImageView
         android:id="@+id/right_eye"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/fd_activity_surface_view"
         android:scaleType="fitXY" />

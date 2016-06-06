@@ -24,8 +24,9 @@ public class AskPermissionActivity extends Activity {
         setContentView(R.layout.ask_permission_activity);
 
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
+        }
         else {
 
             // Launch Calibration or Recognition activity

@@ -46,7 +46,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-//    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+    //    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
 //    private  GazeCalculator mGazeCalculator;
 //    private boolean calibrating = false;
 //    private int calibration_phase = 0;
@@ -86,7 +86,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private int mode = 0;
 
-    Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+    Point R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
 
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
 
@@ -158,7 +158,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -183,7 +183,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     //comando setContentView(R.layout.XXX_activity_layout);
     protected abstract void setLayout();
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -223,50 +225,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
-    }
 
-    public void closeCamera() {
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-        Log.i(TAG, "Camera closed");
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-        Log.i(TAG, "On pause called");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
-
-    public void onCameraViewStarted(int width, int height) {
-        mGray = new Mat();
-        mRgba = new Mat();
-    }
-
-    public void onCameraViewStopped() {
-        mGray.release();
-        mRgba.release();
-        mZoomWindow.release();
-        mZoomWindow2.release();
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -326,14 +286,16 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 // Learning finished, use the new templates for template matching
                 lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
                 rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
+
+                onMatchedEyes(lMatchedEye, rMatchedEye, mRgba);
+
                 if (lMatchedEye != null && rMatchedEye != null) {
                     if (lMatchedEye.x > 0.0 && lMatchedEye.y > 0.0 && rMatchedEye.x > 0.0 && rMatchedEye.y > 0.0) {
                         trueLeftEye.x = lMatchedEye.x + eyearea_left.x + r.x;
                         trueLeftEye.y = lMatchedEye.y + eyearea_left.y + r.y;
                         trueRightEye.x = rMatchedEye.x + eyearea_right.x + r.x;
-                        trueRightEye.y =  rMatchedEye.y + eyearea_right.y + r.y;
+                        trueRightEye.y = rMatchedEye.y + eyearea_right.y + r.y;
 
-                        onMatchedEyes(trueLeftEye, trueRightEye, mRgba, eyearea_left, eyearea_right);
 
                     }
                     //Log.i(TAG, "X = " + lMatchedEye.x + eyearea_left.x + r.x + " Y = " + lMatchedEye.y + eyearea_left.y + r.y);
@@ -343,8 +305,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Log.i(TAG, "zoom window = " + mZoomWindow.rows() + " " + mZoomWindow.cols());*/
 
             // Cut eye areas and put them to zoom windows
-            Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
-            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+           /* Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
+            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());*/
 
         }
 
@@ -355,9 +317,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
-
-        final Rect finalEyearea_right = eyearea_right;
-        final Rect finalEyearea_left = eyearea_left;
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
@@ -370,15 +329,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
                         // Bisogna cambiarlo coi valori "reali"
-                        onMatchedEyes(finalLMatchedEye, finalRMatchedEye, mRgba, finalEyearea_right, finalEyearea_left);
+                        //onMatchedEyes(finalLMatchedEye, finalRMatchedEye, mRgba, finalEyearea_right, finalEyearea_left);
                     }
 
-                }
-                catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     Log.i(TAG, "EXCEPTION");
                 }
-
-
             }
         };
 
@@ -387,7 +343,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return mRgba;
     }
 
-    protected abstract void onMatchedEyes(Point leftEye, Point rightEye, Mat source, Rect eyeAreaLeft, Rect eyeAreaRight);
+    protected abstract void onMatchedEyes(Point leftEye, Point rightEye, Mat source);
 
     // Called after model training is completed
     private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
@@ -444,13 +400,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI2);
             iris.x = mmG.minLoc.x + eye_only_rectangle.x;
             iris.y = mmG.minLoc.y + eye_only_rectangle.y;
-            Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
+            Imgproc.circle(yyrez, mmG.minLoc, 5, new Scalar(0, 255, 255, 255), 1);
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
-            //DA SPOSTARE IN CALIBRATION!!!!
-//            if (calibrating) {
-//                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
-//            }
 
             return mmG.minLoc;
             // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
@@ -487,7 +439,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
 
             // Draws a red rectangle around the center of the eye
-           // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
+            // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
             template = (mGray.submat(eye_template)).clone();
 
             return template;
@@ -545,8 +497,51 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return true;
     }
 
-    public void onRecreateClick(View v)
-    {
+    public void closeCamera() {
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+        Log.i(TAG, "Camera closed");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+        Log.i(TAG, "On pause called");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    public void onCameraViewStarted(int width, int height) {
+        mGray = new Mat();
+        mRgba = new Mat();
+    }
+
+    public void onCameraViewStopped() {
+        mGray.release();
+        mRgba.release();
+        mZoomWindow.release();
+        mZoomWindow2.release();
+    }
+
+    public void onRecreateClick(View v) {
         learn_frames = 0;
     }
 

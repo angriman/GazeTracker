@@ -42,7 +42,7 @@ public class RecognitionActivity extends MainActivity {
     }
 
     @Override
-    protected void onMatchedEyes(Point leftEye, Point rightEye, Mat source, Rect eyeAreaLeft, Rect eyeAreaRight) {
+    protected void onMatchedEyes(Point leftEye, Point rightEye, Mat source) {
 
     }
 

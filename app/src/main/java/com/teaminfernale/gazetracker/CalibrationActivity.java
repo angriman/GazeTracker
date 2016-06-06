@@ -34,31 +34,100 @@ public class CalibrationActivity extends MainActivity {
     private boolean wantToSave = false;
     private static final String TAG = "CalibrationActivity";
 
-    protected void onMatchedEyes(final Point leftEye, Point rightEye, final Mat source, Rect eyeAreaLeft, Rect eyeAreaRight) {
-        Log.i(TAG, "Received points (" + leftEye.x + "," + leftEye.y + ")" + " (" + rightEye.x + "," + rightEye.y + ")");
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+    @Override
+    protected void onMatchedEyes(final Point leftEye, final Point rightEye, final Mat source) {
 
+        if (leftEye != null && rightEye != null) {
+            Log.i(TAG, "Matched left: (" + leftEye.x + "," + leftEye.y);
+            Log.i(TAG, "Matched right: (" + rightEye.x + "," + rightEye.y);
 
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
+            if (calibrating) {
 
-                try {
-                    Bitmap background = Bitmap.createBitmap(source.cols(), source.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(source.clone(), background);
-                    ImageView b = ((ImageView) findViewById(R.id.back));
-                    b.setImageBitmap(background);
-                    Imgproc.circle(source, leftEye, 2, new Scalar(255, 255, 255, 255), 1);
+                switch (currentRegion) {
+                    case UP_LEFT:
+                        mTrainedEyesContainer.addSample(0, 0, leftEye);
+                        mTrainedEyesContainer.addSample(1, 0, rightEye);
+                        currentEyeSamples++;
+
+                        if (currentEyeSamples >= mSamplePerEye) {
+                            currentEyeSamples = 0;
+                            currentRegion = SRegion.UP_RIGHT;
+                            findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
+                            ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
+                        }
+                        break;
+
+                    case UP_RIGHT:
+                        mTrainedEyesContainer.addSample(0, 1, leftEye);
+                        mTrainedEyesContainer.addSample(1, 1, rightEye);
+                        currentEyeSamples++;
+
+                        if (currentEyeSamples >= mSamplePerEye) {
+                            currentEyeSamples = 0;
+                            currentRegion = SRegion.DOWN_RIGHT;
+                            findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
+                            ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
+                        }
+                        break;
+
+                    case DOWN_RIGHT:
+                        mTrainedEyesContainer.addSample(0, 2, leftEye);
+                        mTrainedEyesContainer.addSample(1, 2, rightEye);
+                        currentEyeSamples++;
+
+                        if (currentEyeSamples >= mSamplePerEye) {
+                            currentEyeSamples = 0;
+                            currentRegion = SRegion.DOWN_LEFT;
+                            findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
+                            ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
+                        }
+                        break;
+
+                    case DOWN_LEFT:
+                        mTrainedEyesContainer.addSample(0, 3, leftEye);
+                        mTrainedEyesContainer.addSample(1, 3, rightEye);
+                        currentEyeSamples++;
+
+                        if (currentEyeSamples >= mSamplePerEye) { // Calibration completed
+                            mTrainedEyesContainer.meanSamples();
+                            currentEyeSamples = 0;
+                            currentRegion = SRegion.NONE;
+                            findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
+                            launchRecognitionActivity();
+                        }
+                        break;
+
+                    default:
+                        break;
                 }
-                catch (IllegalArgumentException e) {
-                    Log.i(TAG, "EXCEPTION");
-                }
-
-
             }
-        };
 
-        mainHandler.post(myRunnable);
+
+            Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+
+            Runnable myRunnable = new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        Bitmap background = Bitmap.createBitmap(source.cols(), source.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(source.clone(), background);
+                        ImageView b = ((ImageView) findViewById(R.id.back));
+                        b.setImageBitmap(background);
+                        // Imgproc.circle(source, rightEye, 2, new Scalar(0, 255, 255, 255), 1);
+                    } catch (IllegalArgumentException e) {
+                        Log.i(TAG, "EXCEPTION");
+                    }
+
+
+                }
+            };
+
+            mainHandler.post(myRunnable);
+
+
+        }
     }
 
     @Override
@@ -68,10 +137,10 @@ public class CalibrationActivity extends MainActivity {
         }*/
 
         //to show the eyes for debug
-        ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-        ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+//        ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
+//        ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
-        if (calibrating && leftEye != null && rightEye != null) {
+        /*if (calibrating && leftEye != null && rightEye != null) {
             switch (currentRegion) {
                 case UP_LEFT:
                     mTrainedEyesContainer.addSample(0, 0, leftEye);
@@ -129,7 +198,7 @@ public class CalibrationActivity extends MainActivity {
                 default:
                     break;
             }
-        }
+        }*/
     }
 
     // Launches recognition activity
@@ -177,8 +246,8 @@ public class CalibrationActivity extends MainActivity {
     @Override
     protected void setLayout() {
         setContentView(R.layout.calibration_activity_layout);
-        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+/*        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);*/
     }
 
 
