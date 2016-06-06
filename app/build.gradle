@@ -146,4 +146,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile project(':opencv')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/flandmark-1.07-0.11.jar')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacpp-0.11.jar')
 }
