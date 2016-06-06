@@ -3,6 +3,7 @@ package com.teaminfernale.gazetracker;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -11,6 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.flandmark;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -27,11 +34,22 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
+import org.bytedeco.javacpp.flandmark.*;
+import static org.bytedeco.javacpp.flandmark.*;
+import org.bytedeco.javacpp.*;
+import static org.bytedeco.javacpp.properties.*;
+import static org.bytedeco.javacpp.presets.*;
+import static org.bytedeco.javacpp.tools.*;
+import static org.bytedeco.javacpp.indexer.*;
+import static org.bytedeco.javacpp.annotation.*;
+import static org.bytedeco.javacv.*;
+import org.bytedeco.javacpp.opencv_core;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 
 public abstract class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
@@ -46,7 +64,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-//    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+    //    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
 //    private  GazeCalculator mGazeCalculator;
 //    private boolean calibrating = false;
 //    private int calibration_phase = 0;
@@ -69,7 +87,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private CascadeClassifier mJavaDetector;
     private CascadeClassifier mJavaDetectorEye;
-
+    private CascadeClassifier mJavaDetectorFace;
+    private static FLANDMARK_Model model;
 
     private int mDetectorType = JAVA_DETECTOR;
     private String[] mDetectorName;
@@ -86,13 +105,40 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private int mode = 0;
 
-    Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+    Point R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient mClient;
 
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
 
     public void setModeRecognition() {
         mode = 1;
     }
+
+    enum landmark_pos {
+        FACE_CENTER(0),
+        LEFT_EYE_INNER(1) ,
+        RIGHT_EYE_INNER(2),
+        MOUTH_LEFT(3),
+        MOUTH_RIGHT(4),
+        LEFT_EYE_OUTER(5),
+        RIGHT_EYE_OUTER(6),
+        NOSE_CENTER(7),
+        LEFT_EYE_ALIGN(8),
+        RIGHT_EYE_ALIGN(9);
+
+        int value;
+
+        private landmark_pos(int value) {
+            this.value = value;
+        }
+
+
+
+    };
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -134,6 +180,43 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         iser.close();
                         oser.close();
 
+
+                        // Load face cascade classificator
+                        InputStream isfc = getResources().openRawResource(
+                                R.raw.haarcascade_frontalface_alt);
+                        File cascadeDirFC = getDir("cascadeFC",
+                                Context.MODE_PRIVATE);
+                        File cascadeFileFC = new File(cascadeDirFC,
+                                "haarcascade_frontalface_alt.xml");
+                        FileOutputStream osfc = new FileOutputStream(cascadeFileFC);
+
+                        byte[] bufferFC = new byte[4096];
+                        int bytesReadFC;
+                        while ((bytesReadFC = isfc.read(bufferFC)) != -1) {
+                            osfc.write(bufferFC, 0, bytesReadFC);
+                        }
+                        isfc.close();
+                        osfc.close();
+
+
+                        // Load flandmark model
+                        InputStream isflm = getResources().openRawResource(
+                                R.raw.flandmark_model);
+                        File cascadeDirFLM = getDir("cascadeFLM",
+                                Context.MODE_PRIVATE);
+                        File cascadeFileFLM = new File(cascadeDirFLM,
+                                "flandmark_model.dat");
+                        FileOutputStream osflm = new FileOutputStream(cascadeFileFLM);
+
+                        byte[] bufferFLM = new byte[4096];
+                        int bytesReadFLM;
+                        while ((bytesReadFLM = isflm.read(bufferFLM)) != -1) {
+                            osflm.write(bufferFLM, 0, bytesReadFLM);
+                        }
+                        isflm.close();
+                        osflm.close();
+
+
                         mJavaDetector = new CascadeClassifier(
                                 cascadeFile.getAbsolutePath());
                         if (mJavaDetector.empty()) {
@@ -146,12 +229,28 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         mJavaDetectorEye = new CascadeClassifier(
                                 cascadeFileER.getAbsolutePath());
                         if (mJavaDetectorEye.empty()) {
-                            Log.e(TAG, "Failed to load cascade classifier");
+                            Log.e(TAG, "Failed to load cascade classifier - eye");
                             mJavaDetectorEye = null;
                         } else
-                            Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
+                            Log.i(TAG, "Loaded cascade classifier (eye) from " + cascadeFileER.getAbsolutePath());
 
-                        cascadeDir.delete();
+                        cascadeDirER.delete();
+
+                        mJavaDetectorFace = new CascadeClassifier(
+                                cascadeFileFC.getAbsolutePath());
+                        if (mJavaDetectorFace.empty()) {
+                            Log.e(TAG, "Failed to load cascade classifier - face");
+                            mJavaDetectorFace = null;
+                        } else
+                            Log.i(TAG, "Loaded cascade classifier (face) from " + cascadeFileFC.getAbsolutePath());
+
+                        cascadeDirFC.delete();
+
+
+                        model = flandmark_init(cascadeFileFLM.getAbsolutePath());
+                        Log.i(TAG, "Loaded flandmark model from " + cascadeFileFC.getAbsolutePath());
+                        cascadeDirFLM.delete();
+
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -183,7 +282,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     //comando setContentView(R.layout.XXX_activity_layout);
     protected abstract void setLayout();
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -223,6 +324,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     public void closeCamera() {
@@ -322,6 +426,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
         }
 
+        final int[] bbox = new int[4];
+        final double[] landmarks = new double[2 * model.data().options().M()];
+
+        //detectLandmarks(model, mRgba, , r);
 
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
@@ -340,8 +448,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     Utils.matToBitmap(mZoomWindow2.clone(), re);
                     if (finalLMatchedEye != null && finalRMatchedEye != null)
                         onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
-                }
-                catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     Log.i(TAG, "EXCEPTION");
                 }
 
@@ -452,7 +559,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
 
             // Draws a red rectangle around the center of the eye
-           // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
+            // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
             template = (mGray.submat(eye_template)).clone();
 
             return template;
@@ -510,10 +617,93 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return true;
     }
 
-    public void onRecreateClick(View v)
-    {
+    public void onRecreateClick(View v) {
         learn_frames = 0;
     }
 
+    /** detects landmarks using flandmakrs and add two more landmakrs to be used to alignt the face*/
+    private static ArrayList<Point> detectLandmarks(FLANDMARK_Model model, final Mat  image,final opencv_core.IplImage gray_image_iipl, final Rect  face){
 
+        ArrayList<Point> landmarks = new ArrayList<Point>();
+
+        // 1. get landmarks (using flandmarks)
+        int bbox [] = { face.x, face.y, face.x + face.width, face.y + face.height };
+        double [] points = new double [2 * model.data().options().M()];
+
+        if( flandmark_detect(gray_image_iipl, bbox, model,points) > 0){
+            return landmarks;
+        }
+
+        for (int i = 0; i < model.data().options().M(); i++) {
+            landmarks.add(new Point(points[2 * i], points[2 * i + 1]));
+        }
+
+        // 2. get a linar regresion using the four points of the eyes
+        LinearRegression lr = new LinearRegression();
+        lr.addPoint(landmarks.get(landmark_pos.LEFT_EYE_OUTER.value).x,landmarks.get(landmark_pos.LEFT_EYE_OUTER.value).y);
+        lr.addPoint(landmarks.get(landmark_pos.LEFT_EYE_INNER.value).x,landmarks.get(landmark_pos.LEFT_EYE_INNER.value).y);
+        lr.addPoint(landmarks.get(landmark_pos.RIGHT_EYE_INNER.value).x,landmarks.get(landmark_pos.RIGHT_EYE_INNER.value).y);
+        lr.addPoint(landmarks.get(landmark_pos.RIGHT_EYE_OUTER.value).x,landmarks.get(landmark_pos.RIGHT_EYE_OUTER.value).y);
+
+        double coef_determination = lr.getCoefDeterm();
+        double coef_correlation = lr.getCoefCorrel();
+        double standar_error_estimate = lr.getStdErrorEst();
+
+        double a = lr.getA();
+        double b = lr.getB();
+
+        // 3. get two more landmarks based on this linear regresion to be used to align the face
+        Point pp1 = new Point(landmarks.get(landmark_pos.LEFT_EYE_OUTER.value).x,
+                landmarks.get(landmark_pos.LEFT_EYE_OUTER.value).x*b+a);
+        Point pp2 = new Point(landmarks.get(landmark_pos.RIGHT_EYE_OUTER.value).x,
+                landmarks.get(landmark_pos.RIGHT_EYE_OUTER.value).x*b+a);
+
+        landmarks.add(pp1);
+        landmarks.add(pp2);
+
+	       /* delete[] points;
+	        points = 0;*/
+        return landmarks;
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mClient.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.teaminfernale.gazetracker/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(mClient, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.teaminfernale.gazetracker/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(mClient, viewAction);
+        mClient.disconnect();
+    }
 }
