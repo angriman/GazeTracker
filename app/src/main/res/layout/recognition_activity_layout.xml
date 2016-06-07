@@ -49,7 +49,7 @@
         android:layout_centerHorizontal="true"
         android:onClick="onRecreateClick"
         android:text="@string/start_simulation_button" />
-
+<!--
     <ImageView
         android:id="@+id/rec_left_eye"
         android:layout_width="150dp"
@@ -64,7 +64,7 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/recognition_front_camera_view"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY" />-->
 
     <Button
         android:layout_width="wrap_content"

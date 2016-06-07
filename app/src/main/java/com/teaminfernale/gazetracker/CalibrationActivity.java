@@ -119,8 +119,6 @@ public class CalibrationActivity extends MainActivity {
                     } catch (IllegalArgumentException e) {
                         Log.i(TAG, "EXCEPTION");
                     }
-
-
                 }
             };
 

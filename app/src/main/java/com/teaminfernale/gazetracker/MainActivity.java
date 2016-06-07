@@ -158,7 +158,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -287,8 +287,23 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
                 rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
 
-                onMatchedEyes(lMatchedEye, rMatchedEye, mRgba);
+                Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
 
+                final Point finalLMatchedEye1 = lMatchedEye;
+                final Point finalRMatchedEye1 = rMatchedEye;
+
+                Runnable myRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (finalLMatchedEye1 != null && finalRMatchedEye1 != null) {
+                            // Bisogna cambiarlo coi valori "reali"
+                            onMatchedEyes(finalLMatchedEye1, finalRMatchedEye1, mRgba);
+                        }
+                    }
+                };
+
+                mainHandler.post(myRunnable);
                 if (lMatchedEye != null && rMatchedEye != null) {
                     if (lMatchedEye.x > 0.0 && lMatchedEye.y > 0.0 && rMatchedEye.x > 0.0 && rMatchedEye.y > 0.0) {
                         trueLeftEye.x = lMatchedEye.x + eyearea_left.x + r.x;
