@@ -39,6 +39,8 @@ public class TrainedEyesContainer {
     private ArrayList<Point> R_downLeft_a = new ArrayList<>();
     private ArrayList<Point> L_downLeft_a = new ArrayList<>();
 
+    private Sorter sorter = new Sorter();
+
     //Constructors
     public TrainedEyesContainer() {}
 
@@ -204,7 +206,7 @@ public class TrainedEyesContainer {
         }
 
 
-        Point[] sortedlist = sortPoints(list);
+        Point[] sortedlist = sorter.sort(list);
 
 
         xTot = xTot / arr.size();
@@ -213,104 +215,6 @@ public class TrainedEyesContainer {
         return new Point(xTot, yTot);
     }
 
-    private Point[] sortPoints(Point[] list) {
-        if (list.length == 1) {
-            return list;
-        }
-
-       /* if (list.length == 2) {
-            if (list[0].x > list[1].x) {
-                switchPoints(list);
-            }
-            else if (list[0].x == list[1].x) {
-                if (list[0].y > list[1].y) {
-                    switchPoints(list);
-                }
-            }
-            return list;
-        }
-*/
-
-        Point[] firstList = new Point[list.length/2];
-        Point[] secondList = new Point[list.length - firstList.length];
-
-        System.arraycopy(list, 0, firstList, 0, firstList.length);
-        System.arraycopy(list, firstList.length, secondList, 0, secondList.length);
-
-        firstList = sortPoints(firstList);
-        secondList = sortPoints(secondList);
-
-        return merge(firstList, secondList);
-    }
-
-    private Point[] merge(Point[] list1, Point[] list2) {
-        int i = 0;
-        int j = 0;
-        int count = 0;
-
-        Point[] result = new Point[list1.length + list2.length];
-
-        while (count < result.length) {
-
-            if (i == list1.length) {
-                result[count] = list2[j];
-                j++;
-                count++;
-            }
-            else if (j == list2.length) {
-                result[count] = list1[i];
-                i++;
-                count++;
-            }
-            else {
-                switch (comparePoints(list1[i], list2[j])) {
-                    case -1:
-                        result[count] = list1[i];
-                        i++;
-                        count++;
-                        break;
-                    case 0:
-                        result[count] = list1[i];
-                        i++;
-                        count++;
-                        break;
-                    case 1:
-                        result[count] = list2[j];
-                        j++;
-                        count++;
-                        break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private int comparePoints(Point p1, Point p2) {
-        if (p1.x > p2.x) {
-            return 1;
-        }
-        else if (p1.x == p2.x) {
-            if (p1.y > p2.y) {
-                return 1;
-            }
-            else if (p1.y == p2.y) {
-                return 0;
-            }
-            else {
-                return -1;
-            }
-        }
-        else {
-            return -1;
-        }
-    }
-
-    private void switchPoints(Point[] list) {
-        Point x = list[0];
-        list[0] = list[1];
-        list[1] = x;
-    }
 
     // 0 for left, 1 for right
     public void addSample(int eye, int position, Point center) {
