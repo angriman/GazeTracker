@@ -1,5 +1,7 @@
 package com.teaminfernale.gazetracker;
 
+import android.util.Log;
+
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -199,16 +201,18 @@ public class TrainedEyesContainer {
 
         int xTot = 0;
         int yTot = 0;
-        for (int i = 0; i < arr.size(); i++){
+        for (int i = 0; i < arr.size(); ++i) {
             xTot += arr.get(i).x;
             yTot += arr.get(i).y;
             list[i] = arr.get(i);
         }
 
-
+        // TODO Usare questo array ordinato per eliminare gli outliers
+        // TODO: spostare la computazione su un secondo thread e notificare alla RecognitionActivity quando si è pronti alla simulazione
         Point[] sortedlist = sorter.sort(list);
+        Point median = sorter.getMedian(sortedlist);
 
-
+        Log.i(TAG, "Median = (" + median.x + "," + median.y + ")");
         xTot = xTot / arr.size();
         yTot = yTot / arr.size();
 

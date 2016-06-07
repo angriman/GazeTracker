@@ -7,6 +7,24 @@ import org.opencv.core.Point;
  */
 public class Sorter {
 
+    public Point getMedian(Point[] list) {
+        if (list.length > 0) {
+            if (isOdd(list.length)) {
+                return list[(list.length + 1) / 2];
+            }
+            Point result = new Point();
+            result.x = (list[(list.length) / 2].x + list[(list.length) / 2 + 1].x) / 2;
+            result.y = (list[(list.length) / 2].y + list[(list.length) / 2 + 1].y) / 2;
+            return result;
+        }
+        return new Point();
+    }
+
+    private boolean isOdd(int i) {
+        return i % 2 == 0;
+    }
+
+
     public Point[] sort(Point[] list) {
         if (list.length == 1) {
             return list;
