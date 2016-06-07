@@ -18,6 +18,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.flandmark;
+import org.bytedeco.javacv.CanvasFrame;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -36,13 +37,6 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.bytedeco.javacpp.flandmark.*;
 import static org.bytedeco.javacpp.flandmark.*;
-import org.bytedeco.javacpp.*;
-import static org.bytedeco.javacpp.properties.*;
-import static org.bytedeco.javacpp.presets.*;
-import static org.bytedeco.javacpp.tools.*;
-import static org.bytedeco.javacpp.indexer.*;
-import static org.bytedeco.javacpp.annotation.*;
-import static org.bytedeco.javacv.*;
 import org.bytedeco.javacpp.opencv_core;
 
 import java.io.File;
@@ -88,7 +82,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private CascadeClassifier mJavaDetector;
     private CascadeClassifier mJavaDetectorEye;
     private CascadeClassifier mJavaDetectorFace;
-    private static FLANDMARK_Model model;
+    private FLANDMARK_Model model;
 
     private int mDetectorType = JAVA_DETECTOR;
     private String[] mDetectorName;
@@ -247,9 +241,15 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         cascadeDirFC.delete();
 
 
+                        Log.i(TAG, "Trying to load flandmark model from " + cascadeFileFLM.getAbsolutePath());
                         model = flandmark_init(cascadeFileFLM.getAbsolutePath());
-                        Log.i(TAG, "Loaded flandmark model from " + cascadeFileFC.getAbsolutePath());
+                        Log.i(TAG, "Loaded flandmark model from " + cascadeFileFLM.getAbsolutePath());
                         cascadeDirFLM.delete();
+                        try{
+                            //model = flandmark_init(getfileFromResources(R.raw.flandmark_model, "flandmark_model.dat").getAbsolutePath());
+                        } catch (Exception e) {
+                            Log.i(TAG, "Failed to load flandmark model from " + cascadeFileFLM.getAbsolutePath());
+                        }
 
 
                     } catch (IOException e) {
@@ -622,7 +622,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
     /** detects landmarks using flandmakrs and add two more landmakrs to be used to alignt the face*/
-    private static ArrayList<Point> detectLandmarks(FLANDMARK_Model model, final Mat  image,final opencv_core.IplImage gray_image_iipl, final Rect  face){
+   /* private static ArrayList<Point> detectLandmarks(FLANDMARK_Model model, final Mat  image,final opencv_core.IplImage gray_image_iipl, final Rect  face){
 
         ArrayList<Point> landmarks = new ArrayList<Point>();
 
@@ -661,10 +661,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         landmarks.add(pp1);
         landmarks.add(pp2);
 
-	       /* delete[] points;
-	        points = 0;*/
+	       //delete[] points;
+	       //points = 0;
         return landmarks;
-    }
+    }*/
 
 
     @Override
@@ -705,5 +705,23 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         );
         AppIndex.AppIndexApi.end(mClient, viewAction);
         mClient.disconnect();
+    }
+
+    public File getfileFromResources(int resID,String filename) throws Exception
+    {
+        InputStream is = getResources().openRawResource(resID);
+        File fileDir = getDir("cascade", Context.MODE_PRIVATE);
+        File filetoreturn = new File(fileDir,filename);
+        FileOutputStream os = new FileOutputStream(filetoreturn);
+
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+        is.close();
+        os.close();
+
+        return filetoreturn;
     }
 }
