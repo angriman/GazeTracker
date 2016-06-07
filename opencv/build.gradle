@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-
 buildscript {
     repositories {
         mavenCentral()
@@ -8,7 +7,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.1.0'
     }
 }
-
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -30,4 +28,8 @@ android {
             jniLibs.srcDir 'src/main/jniLibs'
         }
     }
+}
+
+dependencies {
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacpp.jar')
 }

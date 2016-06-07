@@ -150,4 +150,8 @@ dependencies {
     compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacpp-0.11.jar')
     compile 'com.google.android.gms:play-services-appindexing:8.1.0'
     compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacv-0.11.jar')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacpp-1.2.1.jar')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/javacpp.jar')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/android-support-v4.jar')
+    compile files('C:/Users/Leonardo/AndroidStudioProjects/GazeTracker/libs/opencv-2.4.11-0.11.jar')
 }
