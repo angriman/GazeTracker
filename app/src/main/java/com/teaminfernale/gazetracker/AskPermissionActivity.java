@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.TextView;
-
-import org.opencv.android.CameraBridgeViewBase;
+import android.view.View;
 
 /**
  * Created by Leonardo on 23/05/2016.
@@ -37,10 +35,12 @@ public class AskPermissionActivity extends Activity {
     }
 
 
-    private void requestCameraPermission(){
+    private void requestCameraPermission() {
+
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
-            //TODO: SPIEGA A COSA TI SERVONO I PERMESSI (MOSTRALO ALL'UTENTE)
+
         }
+
         ActivityCompat.requestPermissions(AskPermissionActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }
 
@@ -50,9 +50,12 @@ public class AskPermissionActivity extends Activity {
             if (grantResults.length != 1 ||
                     grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Log.i(TAG, "CAMERA permission has been DENIED.");
-                // Handle lack of permission here
-                //Snackbar.make(mLayout, R.string.permission_not_granted,
-                 //       Snackbar.LENGTH_SHORT).show();
+                findViewById(R.id.askPermissionsButton).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        requestCameraPermission();
+                    }
+                });
             }
             else {
                 Log.i(TAG, "CAMERA permission has been GRANTED.");
