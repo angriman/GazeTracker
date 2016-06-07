@@ -32,8 +32,8 @@ public class RecognitionActivity extends MainActivity {
     protected void setLayout() {
         super.setModeRecognition();
         setContentView(R.layout.recognition_activity_layout);
-        ((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);
+        /*((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
+        ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);*/
         ((ImageView) findViewById(R.id.rec_top_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_left_image)).setImageResource(R.drawable.lena1);
@@ -50,8 +50,8 @@ public class RecognitionActivity extends MainActivity {
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
         // To show the eyes for debug
-        ((ImageView) findViewById(R.id.rec_left_eye)).setImageBitmap(le);
-        ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);
+/*        ((ImageView) findViewById(R.id.rec_left_eye)).setImageBitmap(le);
+        ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);*/
 
         if (simulationStarted) {
 
