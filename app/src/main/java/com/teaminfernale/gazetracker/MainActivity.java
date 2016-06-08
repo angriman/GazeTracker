@@ -193,12 +193,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
-        String t = "PointTag";
-        Point p = new Point();
-        Log.i(t, "Prova");
-        findEyeCenter(new Mat(), new Rect(), p);
-        Log.i(t, "P = (" + p.x + "," + p.y + ")");
-
+        //Log.i(t, "P = (" + p.x + "," + p.y + ")");
+       // Log.i(t, String.valueOf(x));
         Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         switch (mode) {
@@ -310,7 +306,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
             // TODO: capire perché vengono usati questi numeri e salvarli in variabili (per capire meglio il codice)
             Rect eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
-            Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+            final Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
 
             if (learn_frames < 5) {
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
@@ -318,9 +314,39 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 learn_frames++;
             } else {
                 // Learning finished, use the new templates for template matching
-                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
-                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
+/*                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);*/
+
+                Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+                Runnable myRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            String t = "PointTag";
+                            int[] result = findEyeCenter(mGray.getNativeObjAddr(), eyearea_left.x, eyearea_left.y, eyearea_left.width, eyearea_left.height);
+                            Log.i(t, "Center = ("+result[0]+","+result[1]+")");
+                            Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                            Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                            Utils.matToBitmap(mZoomWindow.clone(), le);
+                            Utils.matToBitmap(mZoomWindow2.clone(), re);
+                            Point leftEye = new Point(result[0]+eyearea_left.x, result[1]+eyearea_left.y);
+                            Imgproc.circle(mGray, leftEye, 5, new Scalar(0, 255, 255, 255));
+                            onEyeFound(leftEye, leftEye, le, re);
+                        }
+                        catch (IllegalArgumentException e) {
+                            Log.i(TAG, "EXCEPTION");
+                        }
+
+
+                    }
+                };
+
+                mainHandler.post(myRunnable);
+
             }
+
 
             // Cut eye areas and put them to zoom windows
             Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
@@ -329,32 +355,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
 
         // On a separate thread it converts the eye mat into a bitmap
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-
-        final Point finalLMatchedEye = lMatchedEye;
-        final Point finalRMatchedEye = rMatchedEye;
-
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                    Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(mZoomWindow.clone(), le);
-                    Utils.matToBitmap(mZoomWindow2.clone(), re);
-                    if (finalLMatchedEye != null && finalRMatchedEye != null)
-                        onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
-                }
-                catch (IllegalArgumentException e) {
-                    Log.i(TAG, "EXCEPTION");
-                }
-
-
-            }
-        };
-
-        mainHandler.post(myRunnable);
 
         return mRgba;
     }
@@ -520,6 +520,11 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         learn_frames = 0;
     }
 
-    private native void findEyeCenter(Mat jface, Rect jeye, Point center);
+    static {
+        System.loadLibrary("main-jni");
+    }
+
+    private native int[] findEyeCenter(long matAddr, int x, int y, int width, int height);
+
 
 }
