@@ -158,7 +158,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    //TODO Sistemare questi casini con la fotocamera
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -192,7 +193,11 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
-//        calibrating = true;
+        String t = "PointTag";
+        Point p = new Point();
+        Log.i(t, "Prova");
+        findEyeCenter(new Mat(), new Rect(), p);
+        Log.i(t, "P = (" + p.x + "," + p.y + ")");
 
         Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
@@ -515,5 +520,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         learn_frames = 0;
     }
 
+    private native void findEyeCenter(Mat jface, Rect jeye, Point center);
 
 }

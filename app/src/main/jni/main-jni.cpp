@@ -2,6 +2,17 @@
 #include <jni.h>
 #include <opencv2/opencv.hpp>
 
+JNIEXPORT void JNICALL
+Java_com_teaminfernale_gazetracker_MainActivity_findEyeCenter(JNIEnv *env, jobject instance,
+                                                              jobject jface, jobject jeye, jobject center) {
+
+    cv::Mat* face = (cv::Mat*)jface;
+    cv::Rect* eye = (cv::Rect*)jeye;
+    cv::Point p = *((cv::Point*)center);
+    p.x = 3;
+    p.y = 4;
+}
+
 extern "C" {
 
 JNIEXPORT void JNICALL
