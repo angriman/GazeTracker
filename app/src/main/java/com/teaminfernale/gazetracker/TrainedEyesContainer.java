@@ -309,8 +309,10 @@ public class TrainedEyesContainer {
 
     public ScreenRegion computeCorner2(Point p_left, Point p_right) {
 
-        Point p = p_left;
-        /*Solo con un occhio per ora*/
+        Point p = new Point();
+        p.x = (p_left.x + p_right.x) / 2;
+        p.y = (p_left.y + p_right.y) / 2;
+
         boolean isUp = p.y < upperLeftTreshold;
         boolean isLeft = p.x < leftLeftTreshold;
 
