@@ -316,10 +316,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 String t = "PointTag";
                 Log.i(t, "Punti trovati: ");
                 // Learning finished, use the new templates for template matching
-                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                /*lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
                 rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
                 if (lMatchedEye != null)
-                    Log.i(t, "Center usual= ("+lMatchedEye.x+","+lMatchedEye.y+")");
+                    Log.i(t, "Center usual= ("+lMatchedEye.x+","+lMatchedEye.y+")");*/
 
                 lMatchedEye = cpp_match_eye(eyearea_left);
                 rMatchedEye = cpp_match_eye(eyearea_right);
