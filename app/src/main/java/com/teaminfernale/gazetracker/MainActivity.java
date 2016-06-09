@@ -159,7 +159,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     }
 
                     //TODO Sistemare questi casini con la fotocamera
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -313,9 +313,62 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 teplateL = get_template(mJavaDetectorEye, eyearea_left, 24);
                 learn_frames++;
             } else {
+                String t = "PointTag";
+                Log.i(t, "Punti trovati: ");
                 // Learning finished, use the new templates for template matching
-/*                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
-                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);*/
+                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
+                if (lMatchedEye != null)
+                    Log.i(t, "Center usual= ("+lMatchedEye.x+","+lMatchedEye.y+")");
+
+                lMatchedEye = cpp_match_eye(eyearea_left);
+                rMatchedEye = cpp_match_eye(eyearea_right);
+                if (lMatchedEye != null)
+                    Log.i(t, "Center CPP = ("+lMatchedEye.x+","+lMatchedEye.y+")");
+
+
+            }
+
+            // Cut eye areas and put them to zoom windows
+            Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
+            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+        }
+
+
+        // On a separate thread it converts the eye mat into a bitmap
+        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(mZoomWindow.clone(), le);
+                    Utils.matToBitmap(mZoomWindow2.clone(), re);
+                    if (finalLMatchedEye != null && finalRMatchedEye != null)
+                        onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+                }
+                catch (IllegalArgumentException e) {
+                    Log.i(TAG, "EXCEPTION");
+                }
+
+
+            }
+        };
+
+        mainHandler.post(myRunnable);
+
+        return mRgba;
+    }
+/*            } else {
+                // Learning finished, use the new templates for template matching
+                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
+                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
 
                 Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
 
@@ -327,6 +380,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                             String t = "PointTag";
                             int[] result = findEyeCenter(mGray.getNativeObjAddr(), eyearea_left.x, eyearea_left.y, eyearea_left.width, eyearea_left.height);
                             Log.i(t, "Center = ("+result[0]+","+result[1]+")");
+                            //Log.i(t, "mZoomWindow dimensions -> cols =" + mZoomWindow.cols())
                             Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                             Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                             Utils.matToBitmap(mZoomWindow.clone(), le);
@@ -357,7 +411,26 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         // On a separate thread it converts the eye mat into a bitmap
 
         return mRgba;
+    }*/
+
+
+    private Point cpp_match_eye(Rect area){
+
+
+        String t = "PointTag";
+        int[] result = findEyeCenter(mGray.getNativeObjAddr(), area.x, area.y, area.width, area.height);
+        //Log.i(t, "mZoomWindow dimensions -> cols =" + mZoomWindow.cols())
+        //Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+        //Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+        //Utils.matToBitmap(mZoomWindow.clone(), le);
+        //Utils.matToBitmap(mZoomWindow2.clone(), re);
+        //Point leftEye = new Point(result[0]+area.x, result[1]+area.y);
+        //Imgproc.circle(mGray, leftEye, 5, new Scalar(0, 255, 255, 255));
+        //onEyeFound(leftEye, leftEye, le, re);
+
+        return new Point(result[0], result[1]);
     }
+
 
     // Called after model training is completed
     private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
@@ -417,10 +490,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
-            //DA SPOSTARE IN CALIBRATION!!!!
-//            if (calibrating) {
-//                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
-//            }
 
             return mmG.minLoc;
             // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
