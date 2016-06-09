@@ -1,8 +1,9 @@
 package com.teaminfernale.gazetracker;
 
+import android.util.Log;
+
 import org.opencv.core.Point;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +27,7 @@ public class TrainedEyesContainer {
     private Point R_downLeft;
     private Point L_downLeft;
 
-
+    private static final String TAG = "TrainedEyesContainer";
 
     private ArrayList<Point> R_upRight_a = new ArrayList<>();
     private ArrayList<Point> L_upRight_a = new ArrayList<>();
@@ -39,6 +40,8 @@ public class TrainedEyesContainer {
 
     private ArrayList<Point> R_downLeft_a = new ArrayList<>();
     private ArrayList<Point> L_downLeft_a = new ArrayList<>();
+
+    private Sorter sorter = new Sorter();
 
     //Constructors
     public TrainedEyesContainer() {}
@@ -159,7 +162,7 @@ public class TrainedEyesContainer {
         return L_downLeft;
     }
 
-    public void meanSamples(){//simple mean
+    public void meanSamples(){ //simple mean
         R_upRight = meanPointArrayList(R_upRight_a);
         L_upRight = meanPointArrayList(L_upRight_a);
 
@@ -190,22 +193,36 @@ public class TrainedEyesContainer {
 
     private Point meanPointArrayList(ArrayList<Point> arr){
         //If I have no points returns a default point (0,0)
-        if (arr.size()== 0) return new Point(0, 0);
+        if (arr.size() == 0) {
+            return new Point(0, 0);
+        }
+
+        Point[] list = new Point[arr.size()];
 
         int xTot = 0;
         int yTot = 0;
-        for (int i = 0; i<arr.size(); i++){
+        for (int i = 0; i < arr.size(); ++i) {
             xTot += arr.get(i).x;
             yTot += arr.get(i).y;
         }
-        xTot = xTot/arr.size();
-        yTot = yTot/arr.size();
+
+        // TODO Usare questo array ordinato per eliminare gli outliers
+        // TODO: spostare la computazione su un secondo thread e notificare alla RecognitionActivity quando si è pronti alla simulazione
+        Point[] sortedlist = sorter.sort(list);
+        Point median = sorter.getMedian(sortedlist);
+
+        Log.i(TAG, "Median = (" + median.x + "," + median.y + ")");
+        xTot = xTot / arr.size();
+        yTot = yTot / arr.size();
 
         return new Point(xTot, yTot);
     }
 
+
     // 0 for left, 1 for right
     public void addSample(int eye, int position, Point center) {
+
+        //Log.i(TAG, "Added sample: eye" + eye + " position " + position + " Center = (" + center.x + "," + center.y + ")");
         if (eye == 0) { // left eye
             switch (position) {
                 case 0://up left
