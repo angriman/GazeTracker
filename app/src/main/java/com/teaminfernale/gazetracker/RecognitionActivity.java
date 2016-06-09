@@ -1,7 +1,6 @@
 package com.teaminfernale.gazetracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,11 +8,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import org.opencv.core.Point;
-
-import java.util.StringTokenizer;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
@@ -59,7 +55,7 @@ public class RecognitionActivity extends MainActivity {
                     if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         String result = "You are watching ";
                         ImageView imageView = null;
-                        switch (mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
+                        switch (mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye)) {
                             case UP_LEFT:
                                 Log.i(TAG, result + "up left");
                                 imageView = (ImageView) findViewById(R.id.rec_top_left_image);
@@ -100,8 +96,7 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
 
         Intent i = getIntent();
-        double[] pointsCoordinates = (double[])i.getDoubleArrayExtra("trainedEyesContainer");
-                //(Point[]) i.getSerializableExtra("trainedEyesContainer");
+        double[] pointsCoordinates = i.getDoubleArrayExtra("trainedEyesContainer");
         mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates);
 
         findViewById(R.id.simulation_button).setOnClickListener(new View.OnClickListener() {

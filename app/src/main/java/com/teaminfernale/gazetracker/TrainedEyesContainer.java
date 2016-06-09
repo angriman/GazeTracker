@@ -1,5 +1,7 @@
 package com.teaminfernale.gazetracker;
 
+import android.util.Log;
+
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -41,6 +43,11 @@ public class TrainedEyesContainer {
     private ArrayList<Point> L_downLeft_a = new ArrayList<>();
 
     private Sorter sorter = new Sorter();
+
+    private int upperLeftTreshold = 0;
+    private int upperRightTreshold = 0;
+    private int leftLeftTreshold = 0;
+    private int leftRightTreshold = 0;
 
     //Constructors
     public TrainedEyesContainer() {}
@@ -173,6 +180,28 @@ public class TrainedEyesContainer {
 
         R_downLeft = meanPointArrayList(R_downLeft_a);
         L_downLeft = meanPointArrayList(L_downLeft_a);
+
+        computeTresholds();
+    }
+
+    private void computeTresholds() {
+        Log.i(TAG, "Results: R_upRight = " + R_upRight.x + "," + R_upRight.y + ")");
+        Log.i(TAG, "Results: L_upRight = " + L_upRight.x + "," + L_upRight.y + ")");
+        Log.i(TAG, "Results: R_upLeft = " + R_upLeft.x + "," + R_upLeft.y + ")");
+        Log.i(TAG, "Results: L_upLeft = " + L_upLeft.x + "," + L_upLeft.y + ")");
+        Log.i(TAG, "Results: R_downRight = " + R_downRight.x + "," + R_downRight.y + ")");
+        Log.i(TAG, "Results: L_downRight = " + L_downRight.x + "," + L_downRight.y + ")");
+        Log.i(TAG, "Results: R_downLeft = " + R_downLeft.x + "," + R_downLeft.y + ")");
+        Log.i(TAG, "Results: L_downLeft = " + L_downLeft.x + "," + L_downLeft.y + ")");
+        upperLeftTreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
+        upperRightTreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
+
+        leftLeftTreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.y + L_downRight.y) / 2) / 2;
+        leftRightTreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.y + R_downRight.y) / 2) / 2;
+
+        Log.i(TAG, "Tresholds = upperLeftTreshold: " + upperLeftTreshold + "\n leftLefTresholdt: " + leftLeftTreshold);
+        Log.i(TAG, "Tresholds = upperRightTreshold: " + upperRightTreshold + "\n upperRightTreshold: " + leftRightTreshold);
+
     }
 
     public Point[] getPoints() {
@@ -206,9 +235,12 @@ public class TrainedEyesContainer {
 
         Arrays.sort(listX);
         Arrays.sort(listY);
+        Log.i(TAG, "X array: "+Arrays.toString(listX));
+        Log.i(TAG, "Y array: "+Arrays.toString(listY));
         int medianX = sorter.getMedian(listX);
         int medianY = sorter.getMedian(listY);
-        //Log.i(TAG, "Median = (" + median.x + "," + median.y + ")");
+        Log.i(TAG, "Median x = " + medianX);
+        Log.i(TAG, "Median y = " + medianY);
 
         return new Point(medianX, medianY);
     }
@@ -273,6 +305,27 @@ public class TrainedEyesContainer {
             default:
                 return ScreenRegion.DOWN_LEFT;
         }
+    }
+
+    public ScreenRegion computeCorner2(Point p_left, Point p_right) {
+
+        Point p = p_left;
+        /*Solo con un occhio per ora*/
+        boolean isUp = p.y < upperLeftTreshold;
+        boolean isLeft = p.x < leftLeftTreshold;
+
+        if (isUp) {
+            if (isLeft) {
+                return ScreenRegion.UP_LEFT;
+            }
+            return ScreenRegion.UP_RIGHT;
+
+        }
+        if (isLeft) {
+            return ScreenRegion.DOWN_LEFT;
+        }
+        return ScreenRegion.DOWN_RIGHT;
+
     }
 
     private int minIndex(double a, double b, double c, double d){
