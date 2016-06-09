@@ -520,6 +520,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         learn_frames = 0;
     }
 
+    // Load jni library
     static {
         System.loadLibrary("main-jni");
     }
