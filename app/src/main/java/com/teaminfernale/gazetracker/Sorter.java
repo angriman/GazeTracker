@@ -46,7 +46,6 @@ public class Sorter {
         int i = 0;
         int j = 0;
         int count = 0;
-
         Point[] result = new Point[list1.length + list2.length];
 
         while (count < result.length) {

@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
  */
 public class CalibrationActivity extends MainActivity{
 
-    private static final int mSamplePerEye = 20;
+    private static final int mSamplePerEye = 50;
     private static int currentEyeSamples = 0;
     private boolean calibrating = false;
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}

@@ -204,6 +204,7 @@ public class TrainedEyesContainer {
         for (int i = 0; i < arr.size(); ++i) {
             xTot += arr.get(i).x;
             yTot += arr.get(i).y;
+            list[i] = arr.get(i);
         }
 
         // TODO Usare questo array ordinato per eliminare gli outliers
@@ -211,7 +212,10 @@ public class TrainedEyesContainer {
         Point[] sortedlist = sorter.sort(list);
         Point median = sorter.getMedian(sortedlist);
 
-        Log.i(TAG, "Median = (" + median.x + "," + median.y + ")");
+        for (Point p : sortedlist) {
+            Log.i(TAG, "(" + p.x + "," + p.y + ")");
+        }
+        //Log.i(TAG, "Median = (" + median.x + "," + median.y + ")");
         xTot = xTot / arr.size();
         yTot = yTot / arr.size();
 
@@ -277,7 +281,7 @@ public class TrainedEyesContainer {
         double[] minimum = {a, b, c, d};
         double min = a;
         int minIn = 0;
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < 4; ++i) {
             if (minimum[i] < min) {
                 min = minimum[i];
                 minIn = i;

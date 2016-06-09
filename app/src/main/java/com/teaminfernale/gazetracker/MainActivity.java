@@ -326,7 +326,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         try {
                             String t = "PointTag";
                             int[] result = findEyeCenter(mGray.getNativeObjAddr(), eyearea_left.x, eyearea_left.y, eyearea_left.width, eyearea_left.height);
-                            Log.i(t, "Center = ("+result[0]+","+result[1]+")");
+                            //Log.i(t, "Center = ("+result[0]+","+result[1]+")");
                             Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                             Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                             Utils.matToBitmap(mZoomWindow.clone(), le);
