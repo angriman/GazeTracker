@@ -204,9 +204,6 @@ public class TrainedEyesContainer {
             listY[i] = (int)arr.get(i).y;
         }
 
-        // TODO Usare questo array ordinato per eliminare gli outliers
-        // TODO: spostare la computazione su un secondo thread e notificare alla RecognitionActivity quando si è pronti alla simulazione
-
         Arrays.sort(listX);
         Arrays.sort(listY);
         int medianX = sorter.getMedian(listX);
@@ -265,10 +262,17 @@ public class TrainedEyesContainer {
                 distance(L_downLeft, p_left) + distance(R_downLeft, p_right));
 
 
-        if (min_LR == 0) return ScreenRegion.UP_LEFT;
-        if (min_LR == 1) return ScreenRegion.UP_RIGHT;
-        if (min_LR == 2) return ScreenRegion.DOWN_RIGHT;
-        return ScreenRegion.DOWN_LEFT;
+
+        switch (min_LR) {
+            case 0:
+                return ScreenRegion.UP_LEFT;
+            case 1:
+                return ScreenRegion.UP_RIGHT;
+            case 2:
+                return ScreenRegion.DOWN_RIGHT;
+            default:
+                return ScreenRegion.DOWN_LEFT;
+        }
     }
 
     private int minIndex(double a, double b, double c, double d){

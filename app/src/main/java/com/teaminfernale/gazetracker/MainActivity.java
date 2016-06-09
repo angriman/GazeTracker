@@ -159,11 +159,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     }
 
                     //TODO Sistemare questi casini con la fotocamera
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
                 }
                 break;
+
                 default: {
                     super.onManagerConnected(status);
                 }
@@ -299,14 +300,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         //Log.i(TAG, "FacesArray length = " + facesArray.length);
         if (facesArray.length > 0) {
 
-            Rect r = facesArray[0];
-            // Compute both eyes area
-            // Rect eyearea = new Rect(r.x + r.width / 8, (int) (r.y + (r.height / 4.5)), r.width - 2 * r.width / 8, (int) (r.height / 3.0));
-            // split it
-
+            // Rectangle of the face
+            Rect faceRect = facesArray[0];
+            int eyeAreaMargin = 16;
             // TODO: capire perché vengono usati questi numeri e salvarli in variabili (per capire meglio il codice)
-            Rect eyearea_right = new Rect(r.x + r.width / 16, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
-            final Rect eyearea_left = new Rect(r.x + r.width / 16 + (r.width - 2 * r.width / 16) / 2, (int) (r.y + (r.height / 4.5)), (r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+            Rect eyearea_right = new Rect(faceRect.x + faceRect.width / eyeAreaMargin, (int) (faceRect.y + (faceRect.height / 4.5)), (faceRect.width - 2 * faceRect.width / eyeAreaMargin) / 2, (int) (faceRect.height / 3.0));
+            Rect eyearea_left = new Rect(faceRect.x + faceRect.width / eyeAreaMargin + (faceRect.width - 2 * faceRect.width / eyeAreaMargin) / 2, (int) (faceRect.y + (faceRect.height / 4.5)), (faceRect.width - 2 * faceRect.width / 16) / 2, (int) (faceRect.height / 3.0));
 
             if (learn_frames < 5) {
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
@@ -314,7 +313,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 learn_frames++;
             } else {
                 String t = "PointTag";
-                Log.i(t, "Punti trovati: ");
                 // Learning finished, use the new templates for template matching
                 /*lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
                 rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
@@ -325,9 +323,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 rMatchedEye = cpp_match_eye(eyearea_right);
                 if (lMatchedEye != null)
                     Log.i(t, "Center CPP = ("+lMatchedEye.x+","+lMatchedEye.y+")");
-
-
-            }
+                }
 
             // Cut eye areas and put them to zoom windows
             Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
@@ -365,53 +361,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         return mRgba;
     }
-/*            } else {
-                // Learning finished, use the new templates for template matching
-                lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye, 0);
-                rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye, 1);
-
-                Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-
-                Runnable myRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            String t = "PointTag";
-                            int[] result = findEyeCenter(mGray.getNativeObjAddr(), eyearea_left.x, eyearea_left.y, eyearea_left.width, eyearea_left.height);
-                            Log.i(t, "Center = ("+result[0]+","+result[1]+")");
-                            //Log.i(t, "mZoomWindow dimensions -> cols =" + mZoomWindow.cols())
-                            Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                            Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                            Utils.matToBitmap(mZoomWindow.clone(), le);
-                            Utils.matToBitmap(mZoomWindow2.clone(), re);
-                            Point leftEye = new Point(result[0]+eyearea_left.x, result[1]+eyearea_left.y);
-                            Imgproc.circle(mGray, leftEye, 5, new Scalar(0, 255, 255, 255));
-                            onEyeFound(leftEye, leftEye, le, re);
-                        }
-                        catch (IllegalArgumentException e) {
-                            Log.i(TAG, "EXCEPTION");
-                        }
-
-
-                    }
-                };
-
-                mainHandler.post(myRunnable);
-
-            }
-
-
-            // Cut eye areas and put them to zoom windows
-            Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
-            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
-        }
-
-
-        // On a separate thread it converts the eye mat into a bitmap
-
-        return mRgba;
-    }*/
 
 
     private Point cpp_match_eye(Rect area){
