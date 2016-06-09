@@ -44,9 +44,13 @@ public class TrainedEyesContainer {
 
     private Sorter sorter = new Sorter();
 
+    // If left pupil y coordinate is greater than this the user is probably watching down
     private int upperLeftTreshold = 0;
+    // If right pupil y coordinate is greater than this the user is probably watching down
     private int upperRightTreshold = 0;
+    // If left pupil x coordinate is greater than this the user is probably watching right
     private int leftLeftTreshold = 0;
+    // If right pupil x coordinate is greater than this the user is probably watching right
     private int leftRightTreshold = 0;
 
 
@@ -116,14 +120,14 @@ public class TrainedEyesContainer {
     }
 
     private void computeTresholds() {
-        Log.i(TAG, "Results: R_upRight = " + R_upRight.x + "," + R_upRight.y + ")");
-        Log.i(TAG, "Results: L_upRight = " + L_upRight.x + "," + L_upRight.y + ")");
-        Log.i(TAG, "Results: R_upLeft = " + R_upLeft.x + "," + R_upLeft.y + ")");
-        Log.i(TAG, "Results: L_upLeft = " + L_upLeft.x + "," + L_upLeft.y + ")");
-        Log.i(TAG, "Results: R_downRight = " + R_downRight.x + "," + R_downRight.y + ")");
-        Log.i(TAG, "Results: L_downRight = " + L_downRight.x + "," + L_downRight.y + ")");
-        Log.i(TAG, "Results: R_downLeft = " + R_downLeft.x + "," + R_downLeft.y + ")");
-        Log.i(TAG, "Results: L_downLeft = " + L_downLeft.x + "," + L_downLeft.y + ")");
+        Log.i(TAG, "Results: R_upRight = (" + R_upRight.x + "," + R_upRight.y + ")");
+        Log.i(TAG, "Results: L_upRight = (" + L_upRight.x + "," + L_upRight.y + ")");
+        Log.i(TAG, "Results: R_upLeft = (" + R_upLeft.x + "," + R_upLeft.y + ")");
+        Log.i(TAG, "Results: L_upLeft = (" + L_upLeft.x + "," + L_upLeft.y + ")");
+        Log.i(TAG, "Results: R_downRight = (" + R_downRight.x + "," + R_downRight.y + ")");
+        Log.i(TAG, "Results: L_downRight = (" + L_downRight.x + "," + L_downRight.y + ")");
+        Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
+        Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
         upperLeftTreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
         upperRightTreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
 
@@ -252,18 +256,20 @@ public class TrainedEyesContainer {
         return ScreenRegion.DOWN_RIGHT;
     }
 
+    // If the user is watching on the upper part of the screen
     private boolean isUp(int leftEyeY, int rightEyeY) {
         int leftUpperDistance = leftEyeY - upperLeftTreshold;
         int rightUpperDistance = rightEyeY - upperRightTreshold;
 
-        return leftUpperDistance + rightUpperDistance > 0;
+        return leftUpperDistance + rightUpperDistance < 0;
     }
 
+    // If the user is watching on the left part of the screen
     private boolean isLeft(int leftEyeX, int rightEyeX) {
         int leftLeftDistance = leftEyeX - leftLeftTreshold;
         int leftRightDistance = rightEyeX - leftRightTreshold;
 
-        return leftLeftDistance + leftRightDistance > 0;
+        return leftLeftDistance + leftRightDistance < 0;
     }
 
     private int minIndex(double a, double b, double c, double d){
