@@ -49,6 +49,7 @@ public class TrainedEyesContainer {
     private int leftLeftTreshold = 0;
     private int leftRightTreshold = 0;
 
+
     //Constructors
     public TrainedEyesContainer() {}
 
@@ -96,76 +97,6 @@ public class TrainedEyesContainer {
             this.R_downLeft = new Point(coordinates[12], coordinates[13]);
             this.L_downLeft = new Point(coordinates[14], coordinates[15]);
         }
-    }
-
-    //Set methods
-
-    public void setR_upRight(Point r_upRight) {
-        R_upRight = r_upRight;
-    }
-
-    public void setL_upRight(Point l_upRight) {
-        L_upRight = l_upRight;
-    }
-
-    public void setR_upLeft(Point r_upLeft) {
-        R_upLeft = r_upLeft;
-    }
-
-    public void setL_upLeft(Point l_upLeft) {
-        L_upLeft = l_upLeft;
-    }
-
-    public void setR_downRight(Point r_downRight) {
-        R_downRight = r_downRight;
-    }
-
-    public void setL_downRight(Point l_downRight) {
-        L_downRight = l_downRight;
-    }
-
-    public void setR_downLeft(Point r_downLeft) {
-        R_downLeft = r_downLeft;
-    }
-
-    public void setL_downLeft(Point l_downLeft) {
-        L_downLeft = l_downLeft;
-    }
-
-
-
-    //Get methods
-
-    public Point getR_upRight() {
-        return R_upRight;
-    }
-
-    public Point getL_upRight() {
-        return L_upRight;
-    }
-
-    public Point getR_upLeft() {
-        return R_upLeft;
-    }
-
-    public Point getL_upLeft() {
-        return L_upLeft;
-    }
-
-    public Point getR_downRight() {
-        return R_downRight;
-    }
-
-    public Point getL_downRight() {
-        return L_downRight;
-    }
-
-    public Point getR_downLeft() {
-        return R_downLeft;
-    }
-
-    public Point getL_downLeft() {
-        return L_downLeft;
     }
 
     public void meanSamples(){ //simple mean
@@ -309,25 +240,30 @@ public class TrainedEyesContainer {
 
     public ScreenRegion computeCorner2(Point p_left, Point p_right) {
 
-        Point p = new Point();
-        p.x = (p_left.x + p_right.x) / 2;
-        p.y = (p_left.y + p_right.y) / 2;
-
-        boolean isUp = p.y < upperLeftTreshold;
-        boolean isLeft = p.x < leftLeftTreshold;
-
-        if (isUp) {
-            if (isLeft) {
+        if (isUp((int)p_left.y, (int)p_right.y)) {
+            if (isLeft((int)p_left.x, (int)p_right.x)) {
                 return ScreenRegion.UP_LEFT;
             }
             return ScreenRegion.UP_RIGHT;
-
         }
-        if (isLeft) {
+        if (isLeft((int)p_left.x, (int)p_right.x)) {
             return ScreenRegion.DOWN_LEFT;
         }
         return ScreenRegion.DOWN_RIGHT;
+    }
 
+    private boolean isUp(int leftEyeY, int rightEyeY) {
+        int leftUpperDistance = leftEyeY - upperLeftTreshold;
+        int rightUpperDistance = rightEyeY - upperRightTreshold;
+
+        return leftUpperDistance + rightUpperDistance > 0;
+    }
+
+    private boolean isLeft(int leftEyeX, int rightEyeX) {
+        int leftLeftDistance = leftEyeX - leftLeftTreshold;
+        int leftRightDistance = rightEyeX - leftRightTreshold;
+
+        return leftLeftDistance + leftRightDistance > 0;
     }
 
     private int minIndex(double a, double b, double c, double d){
