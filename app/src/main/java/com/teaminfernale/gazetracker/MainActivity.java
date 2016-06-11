@@ -38,6 +38,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private static final String TAG = "MainActivity";
     private static final String TAG1 = "MainActivity_calibr";
+    private static final String TAG2 = "MainActivity_lifeCycle";
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -158,7 +159,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0); // 0 pc, 1 cel leo
                     mOpenCvCameraView.enableView();
 
                 }
@@ -188,7 +189,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "On create called");
+        Log.i(TAG2, "MainActivity onCreate() called");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
@@ -203,6 +204,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             default:
                 mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.recognition_front_camera_view);
         }
+        mOpenCvCameraView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         if (mOpenCvCameraView == null)
             Log.i(TAG, "Capito er bug");
@@ -232,11 +234,29 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
     @Override
+    public void onStart() { //Called when the activity is becoming visible to the user
+        super.onStart();
+        Log.i(TAG2, "Main Activity onStart() called");
+    }
+
+    @Override
+    public void onStop() { //Called when the activity is no longer visible to the user
+        super.onStop();
+        Log.i(TAG2, "Main Activity onStop() called");
+    }
+
+    @Override
+    public void onRestart() { //Called after the activity has been stopped, prior to it being started again
+        super.onRestart();
+        Log.i(TAG2, "Main Activity onRestart() called");
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
-        Log.i(TAG, "On pause called");
+        Log.i(TAG2, "Main Activity onPause() called");
     }
 
     @Override
@@ -249,12 +269,14 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+        Log.i(TAG2, "Main Activity onResume() called");
     }
 
     public void onDestroy() {
         super.onDestroy();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        Log.i(TAG2, "Main Activity onDestroy() called");
     }
 
     public void onCameraViewStarted(int width, int height) {

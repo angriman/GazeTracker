@@ -7,4 +7,6 @@
     <string name="save_calibration_button">Save calibration</string>
     <string name="stop_simulation_button">Stop simulation</string>
     <string name="go_to_simulation_button">Go to simulation</string>
+    <string name="ask_permissions_button">Ask camera permissions</string>
+    <string name="ask_permission_textView">Camera permissions are necessary for this app</string>
 </resources>

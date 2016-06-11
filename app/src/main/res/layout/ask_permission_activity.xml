@@ -1,7 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<RelativeLayout android:id="@+id/RelativeLayout01"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+               >
 
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/askPermissionsButton"
+        android:textAlignment="center"
+        android:text="@string/ask_permission_textView"
+        android:gravity="bottom"
+        android:textColor="#020415"/>
+
+    <Button
+        android:id="@+id/askPermissionsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/ask_permissions_button"
+        android:background="@drawable/mybutton"
+        android:textColor="#1c8ad9"
+        android:elevation="5dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        />
+
+
+</RelativeLayout>
