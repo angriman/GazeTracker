@@ -49,11 +49,12 @@
         android:layout_centerHorizontal="true"
         android:onClick="onRecreateClick"
         android:text="@string/start_simulation_button"
-        android:drawableLeft="@drawable/start"
+
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
         android:elevation="5dp"
         />
+    <!--android:drawableLeft="@drawable/start"-->
 
     <ImageView
         android:id="@+id/rec_left_eye"
@@ -76,11 +77,12 @@
         android:layout_height="wrap_content"
         android:onClick="onRecreateClick"
         android:text="@string/recreate_button"
-        android:drawableLeft="@drawable/refresh"
+
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
         android:layout_alignTop="@+id/rec_left_eye"
         android:layout_centerHorizontal="true"
         android:elevation="5dp"/>
+    <!--android:drawableLeft="@drawable/refresh"-->
 
 </RelativeLayout>
