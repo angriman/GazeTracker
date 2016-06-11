@@ -1,9 +1,11 @@
 package com.teaminfernale.gazetracker;
 
+import android.util.Log;
+
 import org.opencv.core.Point;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Leonardo on 24/05/2016.
@@ -26,7 +28,7 @@ public class TrainedEyesContainer {
     private Point R_downLeft;
     private Point L_downLeft;
 
-
+    private static final String TAG = "TrainedEyesContainer";
 
     private ArrayList<Point> R_upRight_a = new ArrayList<>();
     private ArrayList<Point> L_upRight_a = new ArrayList<>();
@@ -39,6 +41,18 @@ public class TrainedEyesContainer {
 
     private ArrayList<Point> R_downLeft_a = new ArrayList<>();
     private ArrayList<Point> L_downLeft_a = new ArrayList<>();
+
+    private Sorter sorter = new Sorter();
+
+    // If left pupil y coordinate is greater than this the user is probably watching down
+    private int upperLeftTreshold = 0;
+    // If right pupil y coordinate is greater than this the user is probably watching down
+    private int upperRightTreshold = 0;
+    // If left pupil x coordinate is greater than this the user is probably watching right
+    private int leftLeftTreshold = 0;
+    // If right pupil x coordinate is greater than this the user is probably watching right
+    private int leftRightTreshold = 0;
+
 
     //Constructors
     public TrainedEyesContainer() {}
@@ -89,77 +103,7 @@ public class TrainedEyesContainer {
         }
     }
 
-    //Set methods
-
-    public void setR_upRight(Point r_upRight) {
-        R_upRight = r_upRight;
-    }
-
-    public void setL_upRight(Point l_upRight) {
-        L_upRight = l_upRight;
-    }
-
-    public void setR_upLeft(Point r_upLeft) {
-        R_upLeft = r_upLeft;
-    }
-
-    public void setL_upLeft(Point l_upLeft) {
-        L_upLeft = l_upLeft;
-    }
-
-    public void setR_downRight(Point r_downRight) {
-        R_downRight = r_downRight;
-    }
-
-    public void setL_downRight(Point l_downRight) {
-        L_downRight = l_downRight;
-    }
-
-    public void setR_downLeft(Point r_downLeft) {
-        R_downLeft = r_downLeft;
-    }
-
-    public void setL_downLeft(Point l_downLeft) {
-        L_downLeft = l_downLeft;
-    }
-
-
-
-    //Get methods
-
-    public Point getR_upRight() {
-        return R_upRight;
-    }
-
-    public Point getL_upRight() {
-        return L_upRight;
-    }
-
-    public Point getR_upLeft() {
-        return R_upLeft;
-    }
-
-    public Point getL_upLeft() {
-        return L_upLeft;
-    }
-
-    public Point getR_downRight() {
-        return R_downRight;
-    }
-
-    public Point getL_downRight() {
-        return L_downRight;
-    }
-
-    public Point getR_downLeft() {
-        return R_downLeft;
-    }
-
-    public Point getL_downLeft() {
-        return L_downLeft;
-    }
-
-    public void meanSamples(){//simple mean
+    public void meanSamples(){ //simple mean
         R_upRight = meanPointArrayList(R_upRight_a);
         L_upRight = meanPointArrayList(L_upRight_a);
 
@@ -171,6 +115,28 @@ public class TrainedEyesContainer {
 
         R_downLeft = meanPointArrayList(R_downLeft_a);
         L_downLeft = meanPointArrayList(L_downLeft_a);
+
+        computeTresholds();
+    }
+
+    private void computeTresholds() {
+        Log.i(TAG, "Results: R_upRight = (" + R_upRight.x + "," + R_upRight.y + ")");
+        Log.i(TAG, "Results: L_upRight = (" + L_upRight.x + "," + L_upRight.y + ")");
+        Log.i(TAG, "Results: R_upLeft = (" + R_upLeft.x + "," + R_upLeft.y + ")");
+        Log.i(TAG, "Results: L_upLeft = (" + L_upLeft.x + "," + L_upLeft.y + ")");
+        Log.i(TAG, "Results: R_downRight = (" + R_downRight.x + "," + R_downRight.y + ")");
+        Log.i(TAG, "Results: L_downRight = (" + L_downRight.x + "," + L_downRight.y + ")");
+        Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
+        Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
+        upperLeftTreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
+        upperRightTreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
+
+        leftLeftTreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.y + L_downRight.y) / 2) / 2;
+        leftRightTreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.y + R_downRight.y) / 2) / 2;
+
+        Log.i(TAG, "Tresholds = upperLeftTreshold: " + upperLeftTreshold + "\n leftLefTresholdt: " + leftLeftTreshold);
+        Log.i(TAG, "Tresholds = upperRightTreshold: " + upperRightTreshold + "\n upperRightTreshold: " + leftRightTreshold);
+
     }
 
     public Point[] getPoints() {
@@ -190,22 +156,35 @@ public class TrainedEyesContainer {
 
     private Point meanPointArrayList(ArrayList<Point> arr){
         //If I have no points returns a default point (0,0)
-        if (arr.size()== 0) return new Point(0, 0);
-
-        int xTot = 0;
-        int yTot = 0;
-        for (int i = 0; i<arr.size(); i++){
-            xTot += arr.get(i).x;
-            yTot += arr.get(i).y;
+        if (arr.size() == 0) {
+            return new Point(0, 0);
         }
-        xTot = xTot/arr.size();
-        yTot = yTot/arr.size();
 
-        return new Point(xTot, yTot);
+        int[] listX = new int[arr.size()];
+        int[] listY = new int[arr.size()];
+
+        for (int i = 0; i < arr.size(); ++i) {
+            listX[i] = (int)arr.get(i).x;
+            listY[i] = (int)arr.get(i).y;
+        }
+
+        Arrays.sort(listX);
+        Arrays.sort(listY);
+        Log.i(TAG, "X array: "+Arrays.toString(listX));
+        Log.i(TAG, "Y array: "+Arrays.toString(listY));
+        int medianX = sorter.getMedian(listX);
+        int medianY = sorter.getMedian(listY);
+        Log.i(TAG, "Median x = " + medianX);
+        Log.i(TAG, "Median y = " + medianY);
+
+        return new Point(medianX, medianY);
     }
+
 
     // 0 for left, 1 for right
     public void addSample(int eye, int position, Point center) {
+
+        //Log.i(TAG, "Added sample: eye" + eye + " position " + position + " Center = (" + center.x + "," + center.y + ")");
         if (eye == 0) { // left eye
             switch (position) {
                 case 0://up left
@@ -250,17 +229,54 @@ public class TrainedEyesContainer {
                 distance(L_downLeft, p_left) + distance(R_downLeft, p_right));
 
 
-        if (min_LR == 0) return ScreenRegion.UP_LEFT;
-        if (min_LR == 1) return ScreenRegion.UP_RIGHT;
-        if (min_LR == 2) return ScreenRegion.DOWN_RIGHT;
-        return ScreenRegion.DOWN_LEFT;
+
+        switch (min_LR) {
+            case 0:
+                return ScreenRegion.UP_LEFT;
+            case 1:
+                return ScreenRegion.UP_RIGHT;
+            case 2:
+                return ScreenRegion.DOWN_RIGHT;
+            default:
+                return ScreenRegion.DOWN_LEFT;
+        }
+    }
+
+    public ScreenRegion computeCorner2(Point p_left, Point p_right) {
+
+        if (isUp((int)p_left.y, (int)p_right.y)) {
+            if (isLeft((int)p_left.x, (int)p_right.x)) {
+                return ScreenRegion.UP_LEFT;
+            }
+            return ScreenRegion.UP_RIGHT;
+        }
+        if (isLeft((int)p_left.x, (int)p_right.x)) {
+            return ScreenRegion.DOWN_LEFT;
+        }
+        return ScreenRegion.DOWN_RIGHT;
+    }
+
+    // If the user is watching on the upper part of the screen
+    private boolean isUp(int leftEyeY, int rightEyeY) {
+        int leftUpperDistance = leftEyeY - upperLeftTreshold;
+        int rightUpperDistance = rightEyeY - upperRightTreshold;
+
+        return leftUpperDistance + rightUpperDistance < 0;
+    }
+
+    // If the user is watching on the left part of the screen
+    private boolean isLeft(int leftEyeX, int rightEyeX) {
+        int leftLeftDistance = leftEyeX - leftLeftTreshold;
+        int leftRightDistance = rightEyeX - leftRightTreshold;
+
+        return leftLeftDistance + leftRightDistance < 0;
     }
 
     private int minIndex(double a, double b, double c, double d){
         double[] minimum = {a, b, c, d};
         double min = a;
         int minIn = 0;
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < 4; ++i) {
             if (minimum[i] < min) {
                 min = minimum[i];
                 minIn = i;

@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  */
 public class CalibrationActivity extends MainActivity{
 
-    private static final int mSamplePerEye = 20;
+    private static final int mSamplePerEye = 15;
     private static int currentEyeSamples = 0;
     private boolean calibrating = false;
     private static final String TAG3 = "CalibActivity_lifeCycle";
