@@ -2,7 +2,6 @@ package com.teaminfernale.gazetracker;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,10 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -37,16 +32,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.StringTokenizer;
 
 
-public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public abstract class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MainActivity";
     private static final String TAG1 = "MainActivity_calibr";
-
-    private static final int mSamplesPerEye = 20;
-
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -55,10 +46,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-    private TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
-    private  GazeCalculator mGazeCalculator;
-    private boolean calibrating = false;
-    private int calibration_phase = 0;
+//    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
+//    private  GazeCalculator mGazeCalculator;
+//    private boolean calibrating = false;
+//    private int calibration_phase = 0;
     private int learn_frames = 0;
     private Mat teplateR;
     private Mat teplateL;
@@ -92,11 +83,16 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private boolean monitoring = false;
 
     private boolean wantToSave = false;
-    private int currentSamples = 0;
 
-    private int imageID = 0;
+    private int mode = 0;
 
     Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
+
+    protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
+
+    public void setModeRecognition() {
+        mode = 1;
+    }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -138,7 +134,8 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         iser.close();
                         oser.close();
 
-                        mJavaDetector = new CascadeClassifier(cascadeFile.getAbsolutePath());
+                        mJavaDetector = new CascadeClassifier(
+                                cascadeFile.getAbsolutePath());
                         if (mJavaDetector.empty()) {
                             Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetector = null;
@@ -161,12 +158,11 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }
                 break;
-
                 default: {
                     super.onManagerConnected(status);
                 }
@@ -183,86 +179,39 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     }
 
 
+    //Serve affinchè venga settato il layout con la fd_activity_surface_view per poter lanciare la fotocamera
+    //comando setContentView(R.layout.XXX_activity_layout);
+    protected abstract void setLayout();
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "On create called");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_main);
+        setLayout();
 
+//        calibrating = true;
 
-        // Setting images preview
-        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
-
-        findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
-        findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
-
-        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        String savedStringX = prefs.getString("stringX", "");
-        String savedStringY = prefs.getString("stringY", "");
-
-        if (savedStringX.length() > 0 && savedStringY.length() > 0) {
-
-            StringTokenizer stX = new StringTokenizer(savedStringX, ",");
-            StringTokenizer stY = new StringTokenizer(savedStringY, ",");
-
-            int[] savedListX = new int[8];
-            int[] savedListY = new int[8];
-            Toast.makeText(MainActivity.this, "Calibration loaded", Toast.LENGTH_SHORT).show();
-
-            for (int i = 0; i < 8; i++) {
-                savedListX[i] = Integer.parseInt(stX.nextToken());
-                savedListY[i] = Integer.parseInt(stY.nextToken());
-            }
-
-            R_upRight = new Point(savedListX[0],savedListY[0]);
-            L_upRight = new Point(savedListX[1],savedListY[1]);
-            R_upLeft = new Point(savedListX[2],savedListY[2]);
-            L_upLeft = new Point(savedListX[3],savedListY[3]);
-            R_downRight = new Point(savedListX[4],savedListY[4]);
-            L_downRight = new Point(savedListX[5],savedListY[5]);
-            R_downLeft= new Point(savedListX[6],savedListY[6]);
-            L_downLeft = new Point(savedListX[7],savedListY[7]);
-
-            calibrated = true;
-
-            mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-
-        }
-
-        findViewById(R.id.save_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                wantToSave = true;
-            }
-        });
-
-        if (!calibrated) {
-            startCalibrationListener();
-        }
-        else {
-            redefineButtonListener();
-        }
-
-        findViewById(R.id.reset_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startCalibrationListener();
-            }
-        });
-
+        Log.i(TAG, "initializating camera view");
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
-        mOpenCvCameraView.setCvCameraViewListener(this);
+        switch (mode) {
+            case 0:
+                mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+                break;
+            default:
+                mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.recognition_front_camera_view);
+        }
 
-        SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
+        if (mOpenCvCameraView == null)
+            Log.i(TAG, "Capito er bug");
+        mOpenCvCameraView.setCvCameraViewListener(this);
+        Log.i(TAG, "camera view cameraview initializated");
+
+
+        //setLayout();
+        /*SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
 
         methodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -273,44 +222,52 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
     }
 
-    private void startCalibrationListener() {
-
-        Log.i(TAG, "Start calibration listener");
-        calibrated = false;
-        calibrating = false;
-        calibration_phase = 0;
-
-
-        ((Button)findViewById(R.id.calibrate_button)).setText(getResources().getString(R.string.start_calibration_button));
-        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                calibrating = true;
-                calibration_phase = 0;
-                toggleImage();
-                Log.i(TAG, "Start calibrating");
-            }
-        });
+    public void closeCamera() {
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+        Log.i(TAG, "Camera closed");
     }
 
-    private void redefineButtonListener() {
-        Log.i(TAG, "Redefining button listener");
-        Button calibrateButton = (Button) findViewById(R.id.calibrate_button);
-        calibrateButton.setText(getResources().getString(R.string.start_simulation_button));
-
-        calibrateButton.setOnClickListener(null);
-        calibrateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                monitoring = true;
-            }
-        });
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+        Log.i(TAG, "On pause called");
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
 
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    public void onCameraViewStarted(int width, int height) {
+        mGray = new Mat();
+        mRgba = new Mat();
+    }
+
+    public void onCameraViewStopped() {
+        mGray.release();
+        mRgba.release();
+        mZoomWindow.release();
+        mZoomWindow2.release();
+    }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
@@ -369,71 +326,33 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         // On a separate thread it converts the eye mat into a bitmap
         Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
 
+        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;
+
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
 
-                Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(mZoomWindow.clone(), le);
-                Utils.matToBitmap(mZoomWindow2.clone(), re);
-                ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-                ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+                try {
+                    Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(mZoomWindow.clone(), le);
+                    Utils.matToBitmap(mZoomWindow2.clone(), re);
+                    if (finalLMatchedEye != null && finalRMatchedEye != null)
+                        onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
+                }
+                catch (IllegalArgumentException e) {
+                    Log.i(TAG, "EXCEPTION");
+                }
+
+
             }
         };
 
         mainHandler.post(myRunnable);
 
-        final Point finalLMatchedEye = lMatchedEye;
-        final Point finalRMatchedEye = rMatchedEye;
-
-        Runnable changePicture = new Runnable() {
-            @Override
-            public void run() {
-
-                if (monitoring) {
-
-                    if (finalLMatchedEye != null && finalRMatchedEye != null) {
-                        String result = "You are watching ";
-                        ImageView imageView = null;
-                        switch (mGazeCalculator.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
-                            case UP_LEFT:
-                                Log.i(TAG, result + "up left");
-                                imageView = (ImageView) findViewById(R.id.top_left_image);
-                                break;
-                            case UP_RIGHT:
-                                Log.i(TAG, result + "up right");
-                                imageView = (ImageView) findViewById(R.id.top_right_image);
-                                break;
-                            case DOWN_LEFT:
-                                Log.i(TAG, result + "down left");
-                                imageView = (ImageView) findViewById(R.id.down_left_image);
-                                break;
-                            case DOWN_RIGHT:
-                                Log.i(TAG, result + "down right");
-                                imageView = (ImageView) findViewById(R.id.down_right_image);
-                                break;
-                            default:
-                                Log.i(TAG, "somewhere I don't know");
-                                break;
-                        }
-
-                        if (imageID != 0) {
-                            ((ImageView)findViewById(imageID)).setImageResource(R.drawable.lena1);
-                        }
-                        imageID = imageView.getId();
-                        imageView.setImageResource(R.drawable.arianna);
-
-                    }
-                }
-            }
-        };
-        mainHandler.post(changePicture);
-
         return mRgba;
     }
-
-
 
     // Called after model training is completed
     private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator, int eye) {
@@ -493,96 +412,72 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
             //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
 
-            if (calibrating) {
-                if (mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc)) {
-                    Log.i(TAG, "Sample added");
-                    currentSamples++;
-                }
-
-                if (currentSamples == mSamplesPerEye) {
-                    Log.i(TAG, "Calibration phase " + calibration_phase + " completed");
-                    calibration_phase++;
-                    currentSamples = 0;
-                    toggleImage();
-
-                    if (calibration_phase == 4) {
-                        calibrated = true;
-                        calibrating = false;
-                        completeCalibration();
-                    }
-                }
-            }
+            //DA SPOSTARE IN CALIBRATION!!!!
+//            if (calibrating) {
+//                mTrainedEyesContainer.addSample(eye, calibration_phase, mmG.minLoc);
+//            }
 
             return mmG.minLoc;
+            // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
+            // Tracciare i vari punti sullo schermo
         }
 
         return null;
     }
 
-    private void completeCalibration() {
-        mTrainedEyesContainer.meanSamples();
+    // First 6 frames to train the model
+    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
+        Mat template = new Mat();
+        Mat mROI = mGray.submat(area);
+        MatOfRect eyes = new MatOfRect();
+        Point iris = new Point();
+        Rect eye_template;
+        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
 
-        R_upRight = mTrainedEyesContainer.getR_upRight();
-        Log.d(TAG1, "Point R_upRight " + R_upRight.toString());
+        Rect[] eyesArray = eyes.toArray();
+        if (eyesArray.length > 0) {
+            Rect e = eyesArray[0];
+            e.x = area.x + e.x;
+            e.y = area.y + e.y;
+            Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), (int) e.width, (int) (e.height * 0.6));
+            mROI = mGray.submat(eye_only_rectangle);
+            Mat vyrez = mRgba.submat(eye_only_rectangle);
 
-        L_upRight = mTrainedEyesContainer.getL_upRight();
-        Log.d(TAG1, "Point L_upRight " + L_upRight.toString());
+            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
 
-        R_upLeft = mTrainedEyesContainer.getR_upLeft();
-        Log.d(TAG1, "Point R_upLeft " + R_upLeft.toString());
+            // Draws a point in the center of the eye
+            //Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
+            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
+            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
+            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
 
-        L_upLeft = mTrainedEyesContainer.getL_upLeft();
-        Log.d(TAG1, "Point L_upLeft " + L_upLeft.toString());
+            // Draws a red rectangle around the center of the eye
+           // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
+            template = (mGray.submat(eye_template)).clone();
 
-        R_downRight = mTrainedEyesContainer.getR_downRight();
-        L_downRight = mTrainedEyesContainer.getL_downRight();
-        R_downLeft = mTrainedEyesContainer.getR_downLeft();
-        L_downLeft = mTrainedEyesContainer.getL_downLeft();
+            return template;
+        }
 
-        calibrated = true;
-        calibrating = false;
-        mGazeCalculator = new GazeCalculator(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-
-        //redefineButtonListener();
-
+        return template;
     }
 
-    private void toggleImage() {
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-        Runnable changePicture = new Runnable() {
-            @Override
-            public void run() {
+    private void setMinFaceSize(float faceSize) {
+        mRelativeFaceSize = faceSize;
+        mAbsoluteFaceSize = 0;
+    }
 
-                Log.i(TAG, "Toggling to " + calibration_phase);
-                switch (calibration_phase) {
-                    case 0:
-                        findViewById(R.id.top_left_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 1:
-                        findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.top_right_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 2:
-                        findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.down_right_image).setVisibility(View.VISIBLE);
-                        break;
-                    case 3:
-                        findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.down_left_image).setVisibility(View.VISIBLE);
-                        break;
+    private void CreateAuxiliaryMats() {
+        if (mGray.empty())
+            return;
 
-                    default:
-                        findViewById(R.id.down_left_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.down_right_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.top_left_image).setVisibility(View.VISIBLE);
-                        findViewById(R.id.top_right_image).setVisibility(View.VISIBLE);
-                        break;
-                }
+        int rows = mGray.rows();
+        int cols = mGray.cols();
 
-            }
-        };
+        if (mZoomWindow == null) {
+            mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
+            mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
+        }
 
-        mainHandler.post(changePicture);
     }
 
 
@@ -615,118 +510,10 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         return true;
     }
 
-    // First 6 frames to train the model
-    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
-        Mat template = new Mat();
-        Mat mROI = mGray.submat(area);
-        MatOfRect eyes = new MatOfRect();
-        Point iris = new Point();
-        Rect eye_template;
-        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
-
-        Rect[] eyesArray = eyes.toArray();
-        for (int i = 0; i < eyesArray.length;) {
-            Rect e = eyesArray[i];
-            e.x = area.x + e.x;
-            e.y = area.y + e.y;
-            Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), (int) e.width, (int) (e.height * 0.6));
-            mROI = mGray.submat(eye_only_rectangle);
-            Mat vyrez = mRgba.submat(eye_only_rectangle);
-
-            Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
-
-            // Draws a point in the center of the eye
-            //Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
-            iris.x = mmG.minLoc.x + eye_only_rectangle.x;
-            iris.y = mmG.minLoc.y + eye_only_rectangle.y;
-            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
-
-            // Draws a red rectangle around the center of the eye
-            // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
-            template = (mGray.submat(eye_template)).clone();
-
-            return template;
-        }
-
-        return template;
-    }
-
-    private void setMinFaceSize(float faceSize) {
-        mRelativeFaceSize = faceSize;
-        mAbsoluteFaceSize = 0;
-    }
-
-    private void CreateAuxiliaryMats() {
-        if (mGray.empty())
-            return;
-
-        int rows = mGray.rows();
-        int cols = mGray.cols();
-
-        if (mZoomWindow == null) {
-            mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
-            mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
-        }
-
-    }
-
     public void onRecreateClick(View v)
     {
         learn_frames = 0;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-
-        if (wantToSave) {
-            SharedPreferences sp = getPreferences(MODE_PRIVATE);
-
-            Point[] pointsArray = {R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
-
-            StringBuilder str_X = new StringBuilder();
-            StringBuilder str_Y = new StringBuilder();
-
-            for (Point aPointsArray : pointsArray) {
-                str_X.append((int)aPointsArray.x).append(",");
-                str_Y.append((int)aPointsArray.y).append(",");
-            }
-            sp.edit().putString("stringX", str_X.toString()).apply();
-            sp.edit().putString("stringY", str_Y.toString()).apply();
-
-            Log.i(TAG, "Calibration saved");
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        mOpenCvCameraView.disableView();
-    }
-
-    public void onCameraViewStarted(int width, int height) {
-        mGray = new Mat();
-        mRgba = new Mat();
-    }
-
-    public void onCameraViewStopped() {
-        mGray.release();
-        mRgba.release();
-        mZoomWindow.release();
-        mZoomWindow2.release();
-    }
 
 }

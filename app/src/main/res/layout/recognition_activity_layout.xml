@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/recognition_front_camera_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:alpha="0"/>
+
+    <ImageView
+        android:id="@+id/rec_top_right_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@id/recognition_front_camera_view"
+        android:layout_alignRight="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/rec_top_left_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@id/recognition_front_camera_view"
+        android:layout_alignLeft="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/rec_down_right_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@id/recognition_front_camera_view"
+        android:layout_alignRight="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/rec_down_left_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@id/recognition_front_camera_view"
+        android:layout_alignLeft="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <Button
+        android:id="@+id/simulation_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/recognition_front_camera_view"
+        android:layout_centerHorizontal="true"
+        android:onClick="onRecreateClick"
+        android:text="@string/start_simulation_button" />
+
+    <ImageView
+        android:id="@+id/rec_left_eye"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/rec_right_eye"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerVertical="true"
+        android:layout_alignRight="@id/recognition_front_camera_view"
+        android:scaleType="fitXY" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:onClick="onRecreateClick"
+        android:text="@string/recreate_button" />
+
+</RelativeLayout>
