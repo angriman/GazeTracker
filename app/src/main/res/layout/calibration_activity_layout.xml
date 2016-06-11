@@ -48,7 +48,14 @@
         android:layout_alignTop="@id/fd_activity_surface_view"
         android:layout_centerHorizontal="true"
         android:onClick="onRecreateClick"
-        android:text="@string/start_calibration_button" />
+        android:text="@string/start_calibration_button"
+        android:background="@drawable/mybutton"
+        android:textColor="#1c8ad9"
+        android:drawableLeft="@drawable/start"
+        android:elevation="5dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+
+        />
 
     <ImageView
         android:id="@+id/left_eye"
@@ -72,7 +79,13 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:onClick="onRecreateClick"
-        android:text="@string/recreate_button" />
+        android:text="@string/recreate_button"
+        android:background="@drawable/mybutton"
+        android:textColor="#1c8ad9"
+        android:drawableLeft="@drawable/refresh"
+        android:elevation="5dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        />
 
 
     <Button
@@ -82,7 +95,13 @@
         android:onClick="onRecreateClick"
         android:text="@string/go_to_simulation_button"
         android:layout_alignTop="@+id/down_right_image"
-        android:layout_alignStart="@+id/save_calibration"/>
+        android:layout_alignStart="@+id/save_calibration"
+        android:background="@drawable/mybutton"
+        android:textColor="#1c8ad9"
+        android:drawableRight="@drawable/go_simulation"
+        android:elevation="5dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        />
 
 
     <Button
@@ -92,6 +111,13 @@
         android:layout_alignTop="@+id/left_eye"
         android:layout_centerHorizontal="true"
         android:onClick="onRecreateClick"
-        android:text="@string/save_calibration_button" />
+        android:text="@string/save_calibration_button"
+        android:background="@drawable/mybutton"
+        android:textColor="#1c8ad9"
+        android:drawableLeft="@drawable/save_icon"
+        android:elevation="5dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        />
+
 
 </RelativeLayout>

@@ -3,6 +3,8 @@ package com.teaminfernale.gazetracker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +22,7 @@ public class CalibrationActivity extends MainActivity{
     private static final int mSamplePerEye = 20;
     private static int currentEyeSamples = 0;
     private boolean calibrating = false;
+    private static final String TAG3 = "CalibActivity_lifeCycle";
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
     SRegion currentRegion = SRegion.UP_LEFT;
     TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
@@ -148,6 +151,7 @@ public class CalibrationActivity extends MainActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG3, "CalibActivity onCreate() called");
 
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
 
@@ -164,6 +168,8 @@ public class CalibrationActivity extends MainActivity{
         final String savedStringX = prefs.getString("stringX", "");
         final String savedStringY = prefs.getString("stringY", "");
 
+
+        // BUTTON go_to_simulation_button da cancellare (se la calib è fatta va alla recog da solo, altrimenti non si può andare)
         if (savedStringX.length() > 0 && savedStringY.length() > 0) {
             findViewById(R.id.go_to_simulation_button).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -214,8 +220,12 @@ public class CalibrationActivity extends MainActivity{
     }
 
 
+    // si può provare a togliere, comunque chiama quello del main
     @Override
     public void onPause() {
         super.onPause();
+        Log.i(TAG3, "CalibActivity onPause() called");
     }
+
+
 }

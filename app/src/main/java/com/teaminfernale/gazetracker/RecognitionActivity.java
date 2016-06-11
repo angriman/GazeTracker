@@ -25,6 +25,7 @@ public class RecognitionActivity extends MainActivity {
     private static final String TAG = "RecognitionActivity";
     private int imageID = 0;
     private boolean simulationStarted = false;
+    private static final String TAG4 = "RecogActivity_lifeCycle";
 
     @Override
     protected void setLayout() {
@@ -98,6 +99,7 @@ public class RecognitionActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG4, "RecogActivity onCreate() called");
 
         Intent i = getIntent();
         double[] pointsCoordinates = (double[])i.getDoubleArrayExtra("trainedEyesContainer");
