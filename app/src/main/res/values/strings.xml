@@ -13,4 +13,5 @@
     <string name="java_algorithm_button">Java algorithm</string>
     <string name="goto_menu_button">Back to Menu</string>
     <string name="right_eye_description">Represents the recognized right eye</string>
+    <string name="method_text_view">Method</string>
 </resources>

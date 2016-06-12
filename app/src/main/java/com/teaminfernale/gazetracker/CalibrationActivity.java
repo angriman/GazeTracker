@@ -7,8 +7,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import org.opencv.core.Point;
+
+import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
@@ -23,7 +27,9 @@ public class CalibrationActivity extends MainActivity {
     SRegion currentRegion = SRegion.UP_LEFT;
     TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
     private static final String TAG = "CalibrationActivity";
-    private MenuActivity.Algorithm mAlgorithm;
+    private Algorithm mAlgorithm;
+    private TextView mValue;
+    private SeekBar mMethodSeekbar;
 
     /**
      * Called each time the parent activity matches the eyes of the user
@@ -156,9 +162,39 @@ public class CalibrationActivity extends MainActivity {
             }
         });
 
+        mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
+        mValue = (TextView) findViewById(R.id.method);
+
+        if (mAlgorithm == Algorithm.JAVA) {
+            mMethodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress,
+                                              boolean fromUser) {
+                    setMethod(progress);
+                    updateMethodLabelText(progress);
+                }
+            });
+        }
+        else {
+            mMethodSeekbar.setVisibility(View.INVISIBLE);
+            mValue.setVisibility(View.INVISIBLE);
+        }
+
+        int initialMethod = 5;
+        setMethod(initialMethod);
+        updateMethodLabelText(initialMethod);
+
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        final String savedStringX = prefs.getString("stringX", "");
-        final String savedStringY = prefs.getString("stringY", "");
+        String[] strings = getStrings();
+        final String savedStringX = prefs.getString(strings[0], "");
+        final String savedStringY = prefs.getString(strings[1], "");
 
 
         // BUTTON go_to_simulation_button da cancellare (se la calib è fatta va alla recog da solo, altrimenti non si può andare)
@@ -199,6 +235,29 @@ public class CalibrationActivity extends MainActivity {
         }*/
     }
 
+    private void updateMethodLabelText(int newMethod) {
+        switch (newMethod) {
+            case 0:
+                mValue.setText("TM_SQDIFF");
+                break;
+            case 1:
+                mValue.setText("TM_SQDIFF_NORMED");
+                break;
+            case 2:
+                mValue.setText("TM_CCOEFF");
+                break;
+            case 3:
+                mValue.setText("TM_CCOEFF_NORMED");
+                break;
+            case 4:
+                mValue.setText("TM_CCORR");
+                break;
+            case 5:
+                mValue.setText("TM_CCORR_NORMED");
+                break;
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -215,6 +274,19 @@ public class CalibrationActivity extends MainActivity {
             str_Y.append((int)aPointsArray.y).append(",");
         }
 
+        String[] strings = getStrings();
+
+        sp.edit().putString(strings[0], str_X.toString()).apply();
+        sp.edit().putString(strings[1], str_Y.toString()).apply();
+
+        Log.i(TAG, "Calibration saved");
+
+    }
+
+    /**
+     * Returns the pair of string which identify the saved calibration
+     */
+    private String[] getStrings() {
         String idX = "stringX";
         String idY = "stringY";
         String java = "JAVA";
@@ -233,13 +305,8 @@ public class CalibrationActivity extends MainActivity {
                 idX += java;
                 idY += java;
                 break;
-
         }
-        sp.edit().putString(idX, str_X.toString()).apply();
-        sp.edit().putString(idY, str_Y.toString()).apply();
-
-        Log.i(TAG, "Calibration saved");
-
+        return new String[] {idX, idY};
     }
 
 }

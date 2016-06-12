@@ -83,16 +83,6 @@
         android:orientation="horizontal"
         >
 
-        <SeekBar
-            android:id="@+id/methodSeekBar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:max="5"
-            android:paddingLeft="5dip"
-            android:paddingRight="10dip"
-            android:progress="500" >
-        </SeekBar>
-
     </LinearLayout>
 
     <LinearLayout

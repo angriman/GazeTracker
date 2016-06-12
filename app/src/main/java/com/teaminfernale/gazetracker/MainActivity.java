@@ -83,15 +83,18 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private CameraBridgeViewBase mOpenCvCameraView;
 
     private int mode = 0;
-
     private Algorithm mAlgorithm;
 
-    Point R_upRight,L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft = new Point();
 
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
 
     public void setModeRecognition() {
         mode = 1;
+    }
+
+    public void setMethod(int method) {
+
+        this.method = method;
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -217,20 +220,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         mOpenCvCameraView.setCvCameraViewListener(this);
         Log.i(TAG, "camera view cameraview initializated");
 
-
-        //setLayout();
-        /*SeekBar methodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
-
-        methodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}});*/
     }
 
     /**

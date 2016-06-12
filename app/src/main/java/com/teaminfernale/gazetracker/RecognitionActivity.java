@@ -23,6 +23,9 @@ public class RecognitionActivity extends MainActivity {
     private boolean simulationStarted = false;
     private static final String TAG4 = "RecogActivity_lifeCycle";
 
+    /**
+     * Sets the corresponding layout and initializes the images of the ImageViews
+     */
     @Override
     protected void setLayout() {
         super.setModeRecognition();
@@ -41,7 +44,6 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_right_image)).setImageResource(R.drawable.lena1);
     }
-
 
     /**
      * Called each time the parent activity matches the eyes of the user

@@ -85,22 +85,43 @@
         android:drawableLeft="@drawable/refresh"
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
-        />
+        android:id="@+id/button"/>
 
-<!--    <Button
-        android:id="@+id/go_to_simulation_button"
+    <SeekBar
+        android:id="@+id/methodSeekBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:max="5"
+        android:paddingLeft="5dip"
+        android:paddingRight="10dip"
+        android:progress="500"
+        android:layout_alignTop="@+id/down_right_image"
+        android:layout_toEndOf="@+id/down_left_image"
+        android:layout_toStartOf="@+id/down_right_image">
+    </SeekBar>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onRecreateClick"
-        android:text="@string/go_to_simulation_button"
-        android:layout_alignTop="@+id/down_right_image"
-        android:layout_alignStart="@+id/save_calibration"
-        android:background="@drawable/mybutton"
-        android:textColor="#1c8ad9"
+        android:text="@string/method_text_view"
+        android:id="@+id/method"
+        android:layout_above="@+id/methodSeekBar"
+        android:layout_centerHorizontal="true"/>
 
-        android:elevation="5dp"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        />-->
+    <!--    <Button
+            android:id="@+id/go_to_simulation_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onRecreateClick"
+            android:text="@string/go_to_simulation_button"
+            android:layout_alignTop="@+id/down_right_image"
+            android:layout_alignStart="@+id/save_calibration"
+            android:background="@drawable/mybutton"
+            android:textColor="#1c8ad9"
+
+            android:elevation="5dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            />-->
     <!--android:drawableRight="@drawable/go_simulation"-->
 
 <!--
