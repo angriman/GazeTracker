@@ -574,8 +574,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return true;
     }
 
-    public void onRecreateClick(View v)
-    {
+    public void onRecreateClick(View v) {
         learn_frames = 0;
     }
 

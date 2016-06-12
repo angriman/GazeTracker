@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import org.opencv.core.Point;
 
 import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
+import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.*;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
@@ -28,8 +30,8 @@ public class CalibrationActivity extends MainActivity {
     TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
     private static final String TAG = "CalibrationActivity";
     private Algorithm mAlgorithm;
+    private SeekBar methodSeekBar;
     private TextView mValue;
-    private SeekBar mMethodSeekbar;
 
     /**
      * Called each time the parent activity matches the eyes of the user
@@ -152,21 +154,26 @@ public class CalibrationActivity extends MainActivity {
         Log.i(TAG3, "CalibActivity onCreate() called");
 
         mAlgorithm = super.getAlgorithm();
+        methodSeekBar = (SeekBar) findViewById(R.id.methodSeekBar);
+        mValue = (TextView) findViewById(R.id.method);
 
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
 
-        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
+        final Button calibrationButton = (Button) findViewById(R.id.calibrate_button);
+        calibrationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 calibrating = true;
+                calibrationButton.setVisibility(View.INVISIBLE);
+                if (mAlgorithm == JAVA) {
+                    methodSeekBar.setVisibility(View.INVISIBLE);
+                }
             }
         });
 
-        mMethodSeekbar = (SeekBar) findViewById(R.id.methodSeekBar);
-        mValue = (TextView) findViewById(R.id.method);
 
-        if (mAlgorithm == Algorithm.JAVA) {
-            mMethodSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        if (mAlgorithm == JAVA) {
+            methodSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -183,7 +190,7 @@ public class CalibrationActivity extends MainActivity {
             });
         }
         else {
-            mMethodSeekbar.setVisibility(View.INVISIBLE);
+            methodSeekBar.setVisibility(View.INVISIBLE);
             mValue.setVisibility(View.INVISIBLE);
         }
 
@@ -235,6 +242,9 @@ public class CalibrationActivity extends MainActivity {
         }*/
     }
 
+    /**
+     * Updates the text of the text view above the seek bar
+     */
     private void updateMethodLabelText(int newMethod) {
         switch (newMethod) {
             case 0:
