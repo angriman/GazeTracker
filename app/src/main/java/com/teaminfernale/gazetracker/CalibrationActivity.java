@@ -133,7 +133,7 @@ public class CalibrationActivity extends MainActivity {
         Point[] points = mTrainedEyesContainer.getPoints();
         Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
         double[] pointsCoordinates = mTrainedEyesContainer.getPointsCoordinates();
-        int[] thresholds = mTrainedEyesContainer.getTresholds();
+        int[] thresholds = mTrainedEyesContainer.getThresholds();
         launchMainIntent.putExtra("trainedEyesContainer", pointsCoordinates);
         launchMainIntent.putExtra("tresholdsEyesContainer", thresholds);
         startActivity(launchMainIntent);

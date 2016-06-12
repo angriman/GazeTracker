@@ -14,22 +14,18 @@ import java.util.Arrays;
  */
 public class TrainedEyesContainer {
 
-    public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
-
-    private Point R_upRight;
-    private Point L_upRight;
-
-    private Point R_upLeft;
-    private Point L_upLeft;
-
-    private Point R_downRight;
-    private Point L_downRight;
-
-    private Point R_downLeft;
-    private Point L_downLeft;
-
     private static final String TAG = "TrainedEyesContainer";
 
+    /**
+     * Clear way to indicate one of the four region of the screen
+     */
+    public enum ScreenRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT}
+
+    /**
+     * For both left and right eye here we store every
+     * sample that is a point that represents the center
+     * of the pupil
+     */
     private ArrayList<Point> R_upRight_a = new ArrayList<>();
     private ArrayList<Point> L_upRight_a = new ArrayList<>();
 
@@ -42,52 +38,53 @@ public class TrainedEyesContainer {
     private ArrayList<Point> R_downLeft_a = new ArrayList<>();
     private ArrayList<Point> L_downLeft_a = new ArrayList<>();
 
+    /**
+     * For both left and right eye here we store the
+     * center of each of the four screen regions calculated
+     * at the end of the calibration using the samples
+     */
+    private Point R_upRight;
+    private Point L_upRight;
+
+    private Point R_upLeft;
+    private Point L_upLeft;
+
+    private Point R_downRight;
+    private Point L_downRight;
+
+    private Point R_downLeft;
+    private Point L_downLeft;
+
+    /**
+     * Instance of the Sorter class used to make
+     * operations with arrays
+     */
     private Sorter sorter = new Sorter();
 
+    /**
+     * Thresholds values used for recognition
+     */
     // If left pupil y coordinate is greater than this the user is probably watching down
-    private int upperLeftTreshold = 0;
+    private int upperLeftThreshold = 0;
     // If right pupil y coordinate is greater than this the user is probably watching down
-    private int upperRightTreshold = 0;
+    private int upperRightThreshold = 0;
     // If left pupil x coordinate is greater than this the user is probably watching right
-    private int leftLeftTreshold = 0;
+    private int leftLeftThreshold = 0;
     // If right pupil x coordinate is greater than this the user is probably watching right
-    private int leftRightTreshold = 0;
+    private int leftRightThreshold = 0;
 
 
-    //Constructors
     public TrainedEyesContainer() {}
 
-    public TrainedEyesContainer(Point R_upRight, Point L_upRight, Point R_upLeft, Point L_upLeft, Point R_downRight, Point L_downRight, Point R_downLeft, Point L_downLeft) {
-        this.R_upRight = R_upRight;
-        this.L_upRight = L_upRight;
-
-        this.R_upLeft = R_upLeft;
-        this.L_upLeft = L_upLeft;
-
-        this.R_downRight = R_downRight;
-        this.L_downRight = L_downRight;
-
-        this.R_downLeft = R_downLeft;
-        this.L_downLeft = L_downLeft;
-    }
-
-    public TrainedEyesContainer(Point[] points) {
-        if (points.length == 8) {
-            this.R_upRight = points[0];
-            this.L_upRight = points[1];
-
-            this.R_upLeft = points[2];
-            this.L_upLeft = points[3];
-
-            this.R_downRight = points[4];
-            this.L_downRight = points[5];
-
-            this.R_downLeft = points[6];
-            this.L_downLeft = points[7];
-        }
-    }
-
-    public TrainedEyesContainer(double[] coordinates, int[] tresholds){
+    /**
+     * Constructor used after calibration, it instantiates a new instance
+     * using the data collected and computed by a previous instance of this class
+     * @param coordinates Used to pass the data of the eight points which
+     *                    represent the center of each part of the screen
+     *                    for both eyes
+     * @param thresholds vector that contains the four thresholds
+     */
+    public TrainedEyesContainer(double[] coordinates, int[] thresholds) {
         if (coordinates.length == 16) {
             this.R_upRight = new Point(coordinates[0], coordinates[1]);
             this.L_upRight = new Point(coordinates[2], coordinates[3]);
@@ -102,15 +99,21 @@ public class TrainedEyesContainer {
             this.L_downLeft = new Point(coordinates[14], coordinates[15]);
         }
 
-        if (tresholds.length == 4) {
-            upperLeftTreshold = tresholds[0];
-            upperRightTreshold = tresholds[1];
-            leftLeftTreshold = tresholds[2];
-            leftRightTreshold = tresholds[3];
+        if (thresholds.length == 4) {
+            upperLeftThreshold = thresholds[0];
+            upperRightThreshold = thresholds[1];
+            leftLeftThreshold = thresholds[2];
+            leftRightThreshold = thresholds[3];
         }
     }
 
-    public void meanSamples(){ //simple mean
+
+    /**
+     * Computes the simple mean of the points contained in the eight
+     * lists of points and stores the results in the eight points
+     * declared as class variables
+     */
+    public void meanSamples() {
         R_upRight = meanPointArrayList(R_upRight_a);
         L_upRight = meanPointArrayList(L_upRight_a);
 
@@ -123,10 +126,14 @@ public class TrainedEyesContainer {
         R_downLeft = meanPointArrayList(R_downLeft_a);
         L_downLeft = meanPointArrayList(L_downLeft_a);
 
-        computeTresholds();
+        computeThresholds();
     }
 
-    private void computeTresholds() {
+    /**
+     * Computes the four thresholds using
+     * the eight points declared as class variables
+     */
+    private void computeThresholds() {
         Log.i(TAG, "Results: R_upRight = (" + R_upRight.x + "," + R_upRight.y + ")");
         Log.i(TAG, "Results: L_upRight = (" + L_upRight.x + "," + L_upRight.y + ")");
         Log.i(TAG, "Results: R_upLeft = (" + R_upLeft.x + "," + R_upLeft.y + ")");
@@ -136,21 +143,30 @@ public class TrainedEyesContainer {
         Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
         Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
 
-        upperLeftTreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
-        upperRightTreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
+        upperLeftThreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
+        upperRightThreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
 
-        leftLeftTreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.x + L_downRight.x) / 2) / 2;
-        leftRightTreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.x + R_downRight.x) / 2) / 2;
+        leftLeftThreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.x + L_downRight.x) / 2) / 2;
+        leftRightThreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.x + R_downRight.x) / 2) / 2;
 
-        Log.i(TAG, "Tresholds = upperLeftTreshold: " + upperLeftTreshold + "\n leftLefTresholdt: " + leftLeftTreshold);
-        Log.i(TAG, "Tresholds = upperRightTreshold: " + upperRightTreshold + "\n upperRightTreshold: " + leftRightTreshold);
+        Log.i(TAG, "Thresholds = upperLeftThreshold: " + upperLeftThreshold + "\n leftLefThresholdt: " + leftLeftThreshold);
+        Log.i(TAG, "Thresholds = upperRightThreshold: " + upperRightThreshold + "\n upperRightThreshold: " + leftRightThreshold);
 
     }
 
+    /**
+     * Returns the eight points declared
+     * as class variables
+     */
     public Point[] getPoints() {
         return new Point[]{R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft};
     }
 
+    /**
+     * Returns the eight points coordinates as a unique double array.
+     * It is used to pass data to another instance of this class
+     * because the Point class is not serializable.
+     */
     public double[] getPointsCoordinates() {
         return new double[]{R_upRight.x, R_upRight.y,
                 L_upRight.x, L_upRight.y,
@@ -162,10 +178,18 @@ public class TrainedEyesContainer {
                 L_downLeft.x, L_downLeft.y};
     }
 
-    public int[] getTresholds() {
-        return new int[]{upperLeftTreshold, upperRightTreshold, leftLeftTreshold, leftLeftTreshold};
+    /**
+     * Returns in a single array the values of the four thresholds
+     */
+    public int[] getThresholds() {
+        return new int[]{upperLeftThreshold, upperRightThreshold, leftLeftThreshold, leftLeftThreshold};
     }
 
+    /**
+     * Calculates and returns a point obtained as the median of
+     * the list of points passed as input.
+     * @param arr list of points used to compute the median point
+     */
     private Point meanPointArrayList(ArrayList<Point> arr){
         //If I have no points returns a default point (0,0)
         if (arr.size() == 0) {
@@ -195,7 +219,13 @@ public class TrainedEyesContainer {
     }
 
 
-    // 0 for left, 1 for right
+    /**
+     * Stores a new sample inside the corresponding list
+     * @param eye represents the left (0) or the right (1) eye
+     * @param position represent which of the four position the sample is about
+     *                 (0 ~ Up-Left; 1 ~ Up-Right; 2 ~ Down-Right; 3 ~ Down-Left)
+     * @param center represents the center of the pupil
+     * */
     public void addSample(int eye, int position, Point center) {
 
         //Log.i(TAG, "Added sample: eye" + eye + " position " + position + " Center = (" + center.x + "," + center.y + ")");
@@ -233,7 +263,13 @@ public class TrainedEyesContainer {
         }
     }
 
-
+    /**
+     * Computes which area of the screen is being watched by the user.
+     * It computes the mean distance between the current center of the pupil
+     * and the centers computed after the calibration.
+     * @param p_left the current center of the left pupil
+     * @param p_right the current center of the right pupil
+     * */
     public ScreenRegion computeCorner(Point p_left, Point p_right) {
 
         int min_LR = minIndex(
@@ -254,6 +290,14 @@ public class TrainedEyesContainer {
         }
     }
 
+    /**
+     * Computes which area of the screen is being watched by the user.
+     * It uses a different approach based on the four thresholds: it
+     * discriminates between up and down and between left and right.
+     * Then it combines the results and returns the area.
+     * @param p_left the current center of the left pupil
+     * @param p_right the current center of the right pupil
+     */
     public ScreenRegion computeCorner2(Point p_left, Point p_right) {
 
         if (isUp((int)p_left.y, (int)p_right.y)) {
@@ -268,24 +312,36 @@ public class TrainedEyesContainer {
         return ScreenRegion.DOWN_RIGHT;
     }
 
-    // If the user is watching on the upper part of the screen
+    /**
+     * Discriminates if the user is watching the upper or the lower
+     * part of the screen.
+     * @param leftEyeY the Y coordinate of the center of the pupil of the left eye
+     * @param rightEyeY the Y coordinate of the center of the pupil of the right eye
+     */
     private boolean isUp(int leftEyeY, int rightEyeY) {
-        Log.i(TAG, "upperLeftTreshold = " + upperLeftTreshold);
-        int leftUpperDistance = leftEyeY - upperLeftTreshold;
-        int rightUpperDistance = rightEyeY - upperRightTreshold;
-        Log.i(TAG, "left upper distance = " + leftEyeY + " - " + upperLeftTreshold);
-        Log.i(TAG, "right upper distance = " + rightEyeY + " - " + upperRightTreshold);
+        Log.i(TAG, "upperLeftThreshold = " + upperLeftThreshold);
+        int leftUpperDistance = leftEyeY - upperLeftThreshold;
+        int rightUpperDistance = rightEyeY - upperRightThreshold;
+        Log.i(TAG, "left upper distance = " + leftEyeY + " - " + upperLeftThreshold);
+        Log.i(TAG, "right upper distance = " + rightEyeY + " - " + upperRightThreshold);
         return leftUpperDistance + rightUpperDistance < 0;
     }
 
-    // If the user is watching on the left part of the screen
-    private boolean isLeft(int leftEyeX, int rightEyeX) {
-        int leftLeftDistance = leftEyeX/4 - leftLeftTreshold;
-        int leftRightDistance = rightEyeX/4 - leftRightTreshold;
+    /**
+     * Discriminates if the user is watching the left or the right
+     * part of the screen.
+     * @param leftEyeX the X coordinate of the center of the pupil of the left eye
+     * @param rightEyeX the X coordinate of the center of the pupil of the right eye
+     */    private boolean isLeft(int leftEyeX, int rightEyeX) {
+        int leftLeftDistance = leftEyeX/4 - leftLeftThreshold;
+        int leftRightDistance = rightEyeX/4 - leftRightThreshold;
 
         return leftLeftDistance + leftRightDistance < 0;
     }
 
+    /**
+     * Helper method that returns the index of the minimum value
+     */
     private int minIndex(double a, double b, double c, double d){
         double[] minimum = {a, b, c, d};
         double min = a;
@@ -299,6 +355,11 @@ public class TrainedEyesContainer {
         return  minIn;
     }
 
+    /**
+     * Returns the distance between two points.
+     * @param pRegion first point
+     * @param p second point
+     */
     private double distance(Point pRegion, Point p) {
 
         if (pRegion != null && p != null) {
