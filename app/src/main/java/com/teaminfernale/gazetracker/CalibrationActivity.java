@@ -118,23 +118,6 @@ public class CalibrationActivity extends MainActivity {
         R_downLeft = pointsArray[6];
         L_downLeft = pointsArray[7];*/
 
-        if (wantToSave) {
-            SharedPreferences sp = getPreferences(MODE_PRIVATE);
-
-
-            StringBuilder str_X = new StringBuilder();
-            StringBuilder str_Y = new StringBuilder();
-
-            for (Point aPointsArray : mTrainedEyesContainer.getPoints()) {
-                str_X.append((int)aPointsArray.x).append(",");
-                str_Y.append((int)aPointsArray.y).append(",");
-            }
-            sp.edit().putString("stringX", str_X.toString()).apply();
-            sp.edit().putString("stringY", str_Y.toString()).apply();
-
-            Log.i(TAG, "Calibration saved");
-        }
-
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         Point[] points = mTrainedEyesContainer.getPoints();
         Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
@@ -171,6 +154,12 @@ public class CalibrationActivity extends MainActivity {
             }
         });
 
+        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                calibrating = true;
+            }
+        });
 
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
         final String savedStringX = prefs.getString("stringX", "");
@@ -188,7 +177,7 @@ public class CalibrationActivity extends MainActivity {
                     int[] savedListX = new int[8];
                     int[] savedListY = new int[8];
 
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 8; ++i) {
                         savedListX[i] = Integer.parseInt(stX.nextToken());
                         savedListY[i] = Integer.parseInt(stY.nextToken());
                     }
@@ -213,26 +202,28 @@ public class CalibrationActivity extends MainActivity {
         else {
             findViewById(R.id.go_to_simulation_button).setVisibility(View.INVISIBLE);
         }
-
-        startCalibrationListener();
     }
 
-
-    private void startCalibrationListener() {
-        findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                calibrating = true;
-            }
-        });
-    }
-
-
-    // si può provare a togliere, comunque chiama quello del main
     @Override
     public void onPause() {
         super.onPause();
         Log.i(TAG3, "CalibActivity onPause() called");
+
+        // Saves calibration
+        SharedPreferences sp = getPreferences(MODE_PRIVATE);
+
+        StringBuilder str_X = new StringBuilder();
+        StringBuilder str_Y = new StringBuilder();
+
+        for (Point aPointsArray : mTrainedEyesContainer.getPoints()) {
+            str_X.append((int)aPointsArray.x).append(",");
+            str_Y.append((int)aPointsArray.y).append(",");
+        }
+        sp.edit().putString("stringX", str_X.toString()).apply();
+        sp.edit().putString("stringY", str_Y.toString()).apply();
+
+        Log.i(TAG, "Calibration saved");
+
     }
 
 
