@@ -180,6 +180,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
+    public Algorithm getAlgorithm() {
+        return mAlgorithm;
+    }
 
     //Serve affinchè venga settato il layout con la fd_activity_surface_view per poter lanciare la fotocamera
     //comando setContentView(R.layout.XXX_activity_layout);

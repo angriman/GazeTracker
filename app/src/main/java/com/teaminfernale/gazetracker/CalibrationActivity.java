@@ -10,8 +10,6 @@ import android.widget.ImageView;
 
 import org.opencv.core.Point;
 
-import java.util.StringTokenizer;
-
 /**
  * Created by the awesome Leonardo on 31/05/2016.
  */
@@ -24,9 +22,8 @@ public class CalibrationActivity extends MainActivity {
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
     SRegion currentRegion = SRegion.UP_LEFT;
     TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
-
-    private boolean wantToSave = false;
     private static final String TAG = "CalibrationActivity";
+    private MenuActivity.Algorithm mAlgorithm;
 
     /**
      * Called each time the parent activity matches the eyes of the user
@@ -86,7 +83,7 @@ public class CalibrationActivity extends MainActivity {
                 case DOWN_LEFT:
                     mTrainedEyesContainer.addSample(0, 3, leftEye);
                     mTrainedEyesContainer.addSample(1, 3, rightEye);
-                    currentEyeSamples++;
+                        currentEyeSamples++;
 
                     if (currentEyeSamples >= mSamplePerEye) { // Calibration completed
                         mTrainedEyesContainer.meanSamples();
@@ -103,7 +100,11 @@ public class CalibrationActivity extends MainActivity {
         }
     }
 
-    // Launches recognition activity
+
+    /**
+     * Launches the recognition activity. Called when
+     * the calibration has beeen completed
+     */
     private void launchRecognitionActivity() {
         super.closeCamera();
         Log.i(TAG, "Creating new activity");
@@ -144,15 +145,9 @@ public class CalibrationActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG3, "CalibActivity onCreate() called");
 
-        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
+        mAlgorithm = super.getAlgorithm();
 
-        // Setting listener to save calibration button
-        findViewById(R.id.save_calibration).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                wantToSave = true;
-            }
-        });
+        ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
 
         findViewById(R.id.calibrate_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,7 +162,7 @@ public class CalibrationActivity extends MainActivity {
 
 
         // BUTTON go_to_simulation_button da cancellare (se la calib è fatta va alla recog da solo, altrimenti non si può andare)
-        if (savedStringX.length() > 0 && savedStringY.length() > 0) {
+       /* if (savedStringX.length() > 0 && savedStringY.length() > 0) {
             findViewById(R.id.go_to_simulation_button).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -201,7 +196,7 @@ public class CalibrationActivity extends MainActivity {
         }
         else {
             findViewById(R.id.go_to_simulation_button).setVisibility(View.INVISIBLE);
-        }
+        }*/
     }
 
     @Override
@@ -219,12 +214,32 @@ public class CalibrationActivity extends MainActivity {
             str_X.append((int)aPointsArray.x).append(",");
             str_Y.append((int)aPointsArray.y).append(",");
         }
-        sp.edit().putString("stringX", str_X.toString()).apply();
-        sp.edit().putString("stringY", str_Y.toString()).apply();
+
+        String idX = "stringX";
+        String idY = "stringY";
+        String java = "JAVA";
+
+        switch (mAlgorithm) {
+            case CPP:
+                String cpp = "CPP";
+                idX += cpp;
+                idY += cpp;
+                break;
+            case JAVA:
+                idX += java;
+                idY += java;
+                break;
+            default:
+                idX += java;
+                idY += java;
+                break;
+
+        }
+        sp.edit().putString(idX, str_X.toString()).apply();
+        sp.edit().putString(idY, str_Y.toString()).apply();
 
         Log.i(TAG, "Calibration saved");
 
     }
-
 
 }

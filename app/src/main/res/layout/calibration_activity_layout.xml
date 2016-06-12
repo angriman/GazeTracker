@@ -52,9 +52,10 @@
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
         android:elevation="5dp"
+        android:drawableLeft="@drawable/start"
         style="@style/Widget.AppCompat.Button.Borderless"
 
-        /><!--android:drawableLeft="@drawable/start"-->
+        />
 
     <ImageView
         android:id="@+id/left_eye"
@@ -81,14 +82,12 @@
         android:text="@string/recreate_button"
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
-
+        android:drawableLeft="@drawable/refresh"
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
         />
-    <!--android:drawableLeft="@drawable/refresh"-->
 
-
-    <Button
+<!--    <Button
         android:id="@+id/go_to_simulation_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -101,10 +100,10 @@
 
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
-        />
+        />-->
     <!--android:drawableRight="@drawable/go_simulation"-->
 
-
+<!--
     <Button
         android:id="@+id/save_calibration"
         android:layout_width="wrap_content"
@@ -119,7 +118,7 @@
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
         />
-    <!-- android:drawableLeft="@drawable/save_icon"-->
+    &lt;!&ndash; android:drawableLeft="@drawable/save_icon"&ndash;&gt;-->
 
 
 </RelativeLayout>
