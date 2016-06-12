@@ -75,7 +75,7 @@ public class RecognitionActivity extends MainActivity {
                     if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         String result = "You are watching ";
                         ImageView imageView = null;
-                        switch (mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
+                        switch (mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye)) {
                             case UP_LEFT:
                                 Log.i(TAG, result + "up left");
                                 imageView = (ImageView) findViewById(R.id.rec_top_left_image);
@@ -118,8 +118,9 @@ public class RecognitionActivity extends MainActivity {
 
         Intent intent = getIntent();
         double[] pointsCoordinates = intent.getDoubleArrayExtra("trainedEyesContainer");
+        int[] tresholds = intent.getIntArrayExtra("tresholdsEyesContainer");
         setAlgorithm((Algorithm) intent.getSerializableExtra("algorithm"));
-        mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates);
+        mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates, tresholds);
 
         findViewById(R.id.simulation_button).setOnClickListener(new View.OnClickListener() {
             @Override

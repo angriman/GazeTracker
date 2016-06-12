@@ -87,7 +87,7 @@ public class TrainedEyesContainer {
         }
     }
 
-    public TrainedEyesContainer(double[] coordinates){
+    public TrainedEyesContainer(double[] coordinates, int[] tresholds){
         if (coordinates.length == 16) {
             this.R_upRight = new Point(coordinates[0], coordinates[1]);
             this.L_upRight = new Point(coordinates[2], coordinates[3]);
@@ -100,6 +100,13 @@ public class TrainedEyesContainer {
 
             this.R_downLeft = new Point(coordinates[12], coordinates[13]);
             this.L_downLeft = new Point(coordinates[14], coordinates[15]);
+        }
+
+        if (tresholds.length == 4) {
+            upperLeftTreshold = tresholds[0];
+            upperRightTreshold = tresholds[1];
+            leftLeftTreshold = tresholds[2];
+            leftRightTreshold = tresholds[3];
         }
     }
 
@@ -153,6 +160,10 @@ public class TrainedEyesContainer {
                 L_downRight.x, L_downRight.y,
                 R_downLeft.x, R_downLeft.y,
                 L_downLeft.x, L_downLeft.y};
+    }
+
+    public int[] getTresholds() {
+        return new int[]{upperLeftTreshold, upperRightTreshold, leftLeftTreshold, leftLeftTreshold};
     }
 
     private Point meanPointArrayList(ArrayList<Point> arr){
@@ -231,8 +242,6 @@ public class TrainedEyesContainer {
                 distance(L_downRight, p_left) + distance(R_downRight, p_right),
                 distance(L_downLeft, p_left) + distance(R_downLeft, p_right));
 
-
-
         switch (min_LR) {
             case 0:
                 return ScreenRegion.UP_LEFT;
@@ -261,10 +270,11 @@ public class TrainedEyesContainer {
 
     // If the user is watching on the upper part of the screen
     private boolean isUp(int leftEyeY, int rightEyeY) {
-        int leftUpperDistance = leftEyeY/4 - upperLeftTreshold;
-        int rightUpperDistance = rightEyeY/4 - upperRightTreshold;
-        Log.i(TAG, "left upper distance = " + leftUpperDistance);
-        Log.i(TAG, "right upper distance = " + rightUpperDistance);
+        Log.i(TAG, "upperLeftTreshold = " + upperLeftTreshold);
+        int leftUpperDistance = leftEyeY - upperLeftTreshold;
+        int rightUpperDistance = rightEyeY - upperRightTreshold;
+        Log.i(TAG, "left upper distance = " + leftEyeY + " - " + upperLeftTreshold);
+        Log.i(TAG, "right upper distance = " + rightEyeY + " - " + upperRightTreshold);
         return leftUpperDistance + rightUpperDistance < 0;
     }
 
@@ -289,12 +299,12 @@ public class TrainedEyesContainer {
         return  minIn;
     }
 
-    private double distance(Point pRegion, Point p){
+    private double distance(Point pRegion, Point p) {
 
         if (pRegion != null && p != null) {
             return Math.sqrt(((pRegion.x - p.x) * (pRegion.x - p.x)) + ((pRegion.y - p.y) * (pRegion.y - p.y)));
         }
-        return 1000;
+        return Double.MAX_VALUE;
     }
 
 }
