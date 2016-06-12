@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.teaminfernale.gazetracker.MenuActivity.Algorithm;
+
 import org.opencv.core.Point;
 
 /**
@@ -60,6 +62,7 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);
 
         if (simulationStarted) {
+            Log.i("CalibrationActivity", "Left eye = (" + leftEye.x + "," + leftEye.y +")");
 
             final Point finalLMatchedEye = leftEye;
             final Point finalRMatchedEye = rightEye;
@@ -72,7 +75,7 @@ public class RecognitionActivity extends MainActivity {
                     if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         String result = "You are watching ";
                         ImageView imageView = null;
-                        switch (mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye)) {
+                        switch (mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye)) {
                             case UP_LEFT:
                                 Log.i(TAG, result + "up left");
                                 imageView = (ImageView) findViewById(R.id.rec_top_left_image);
@@ -113,8 +116,9 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
 
-        Intent i = getIntent();
-        double[] pointsCoordinates = i.getDoubleArrayExtra("trainedEyesContainer");
+        Intent intent = getIntent();
+        double[] pointsCoordinates = intent.getDoubleArrayExtra("trainedEyesContainer");
+        setAlgorithm((Algorithm) intent.getSerializableExtra("algorithm"));
         mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates);
 
         findViewById(R.id.simulation_button).setOnClickListener(new View.OnClickListener() {

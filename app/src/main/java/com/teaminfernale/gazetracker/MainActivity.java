@@ -395,6 +395,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return mRgba;
     }
 
+    public void setAlgorithm(Algorithm algorithm) {
+        mAlgorithm = algorithm;
+    }
 
     private Point cpp_match_eye(Rect area){
 

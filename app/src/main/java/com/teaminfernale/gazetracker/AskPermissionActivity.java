@@ -30,6 +30,9 @@ public class AskPermissionActivity extends Activity {
         }
     }
 
+    /**
+     * Shows the alert to request the camera permissions to the user
+     */
     private void requestCameraPermission(){
         ActivityCompat.requestPermissions(AskPermissionActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }
@@ -58,7 +61,9 @@ public class AskPermissionActivity extends Activity {
         }
     }
 
-    /** Launches the activity */
+    /**
+     * Launches the next activity
+     */
     private void launchActivity() {
         // Launch Calibration activity
            /* Intent launchMainIntent = new Intent(AskPermissionActivity.this, CalibrationActivity.class);*/

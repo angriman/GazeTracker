@@ -48,6 +48,7 @@ public class CalibrationActivity extends MainActivity {
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
         if (calibrating && leftEye != null && rightEye != null) {
+            Log.i(TAG, "Left eye = (" + leftEye.x + "," + leftEye.y +")");
             switch (currentRegion) {
                 case UP_LEFT:
                     mTrainedEyesContainer.addSample(0, 0, leftEye);
@@ -128,6 +129,7 @@ public class CalibrationActivity extends MainActivity {
         L_downLeft = pointsArray[7];*/
 
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
+        launchMainIntent.putExtra("algorithm", mAlgorithm);
         Point[] points = mTrainedEyesContainer.getPoints();
         Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
         double[] pointsCoordinates = mTrainedEyesContainer.getPointsCoordinates();

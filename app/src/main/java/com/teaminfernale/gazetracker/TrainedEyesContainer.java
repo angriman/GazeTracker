@@ -128,11 +128,12 @@ public class TrainedEyesContainer {
         Log.i(TAG, "Results: L_downRight = (" + L_downRight.x + "," + L_downRight.y + ")");
         Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
         Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
+
         upperLeftTreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
         upperRightTreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
 
-        leftLeftTreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.y + L_downRight.y) / 2) / 2;
-        leftRightTreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.y + R_downRight.y) / 2) / 2;
+        leftLeftTreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.x + L_downRight.x) / 2) / 2;
+        leftRightTreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.x + R_downRight.x) / 2) / 2;
 
         Log.i(TAG, "Tresholds = upperLeftTreshold: " + upperLeftTreshold + "\n leftLefTresholdt: " + leftLeftTreshold);
         Log.i(TAG, "Tresholds = upperRightTreshold: " + upperRightTreshold + "\n upperRightTreshold: " + leftRightTreshold);
@@ -170,8 +171,10 @@ public class TrainedEyesContainer {
 
         Arrays.sort(listX);
         Arrays.sort(listY);
-        Log.i(TAG, "X array: "+Arrays.toString(listX));
-        Log.i(TAG, "Y array: "+Arrays.toString(listY));
+
+        Log.i(TAG, "X array: " + Arrays.toString(listX));
+        Log.i(TAG, "Y array: " + Arrays.toString(listY));
+
         int medianX = sorter.getMedian(listX);
         int medianY = sorter.getMedian(listY);
         Log.i(TAG, "Median x = " + medianX);
@@ -258,16 +261,17 @@ public class TrainedEyesContainer {
 
     // If the user is watching on the upper part of the screen
     private boolean isUp(int leftEyeY, int rightEyeY) {
-        int leftUpperDistance = leftEyeY - upperLeftTreshold;
-        int rightUpperDistance = rightEyeY - upperRightTreshold;
-
+        int leftUpperDistance = leftEyeY/4 - upperLeftTreshold;
+        int rightUpperDistance = rightEyeY/4 - upperRightTreshold;
+        Log.i(TAG, "left upper distance = " + leftUpperDistance);
+        Log.i(TAG, "right upper distance = " + rightUpperDistance);
         return leftUpperDistance + rightUpperDistance < 0;
     }
 
     // If the user is watching on the left part of the screen
     private boolean isLeft(int leftEyeX, int rightEyeX) {
-        int leftLeftDistance = leftEyeX - leftLeftTreshold;
-        int leftRightDistance = rightEyeX - leftRightTreshold;
+        int leftLeftDistance = leftEyeX/4 - leftLeftTreshold;
+        int leftRightDistance = rightEyeX/4 - leftRightTreshold;
 
         return leftLeftDistance + leftRightDistance < 0;
     }
