@@ -29,13 +29,27 @@ public class RecognitionActivity extends MainActivity {
         setContentView(R.layout.recognition_activity_layout);
         ((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);
+        initializeCornerImages();
+    }
+
+    /**
+     * Sets the images at the corners of the screen their default image
+     */
+    private void initializeCornerImages() {
         ((ImageView) findViewById(R.id.rec_top_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_top_right_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_right_image)).setImageResource(R.drawable.lena1);
-
     }
 
+
+    /**
+     * Called each time the parent activity matches the eyes of the user
+     * @param rightEye Coordinates of the center of the right eye
+     * @param leftEye Coordinates of the center of the left eye
+     * @param re Image containing the right eye
+     * @param le Image containing the left eye
+     */
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
@@ -111,7 +125,17 @@ public class RecognitionActivity extends MainActivity {
                 }
                 else {
                     b.setText(getResources().getString(R.string.start_simulation_button));
+                    initializeCornerImages();
                 }
+            }
+        });
+
+        findViewById(R.id.goto_menu_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent backToMenuIntent = new Intent(RecognitionActivity.this, MenuActivity.class);
+                startActivity(backToMenuIntent);
+                finish();
             }
         });
     }

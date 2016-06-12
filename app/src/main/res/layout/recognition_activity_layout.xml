@@ -54,7 +54,6 @@
         android:textColor="#1c8ad9"
         android:elevation="5dp"
         />
-    <!--android:drawableLeft="@drawable/start"-->
 
     <ImageView
         android:id="@+id/rec_left_eye"
@@ -70,19 +69,20 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/recognition_front_camera_view"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:contentDescription="@string/right_eye_description"/>
+
 
     <Button
+        android:id="@+id/goto_menu_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onRecreateClick"
-        android:text="@string/recreate_button"
-
+        android:text="@string/goto_menu_button"
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
         android:layout_alignTop="@+id/rec_left_eye"
         android:layout_centerHorizontal="true"
         android:elevation="5dp"/>
-    <!--android:drawableLeft="@drawable/refresh"-->
 
 </RelativeLayout>

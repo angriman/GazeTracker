@@ -3,8 +3,6 @@ package com.teaminfernale.gazetracker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,7 +15,7 @@ import java.util.StringTokenizer;
 /**
  * Created by the awesome Leonardo on 31/05/2016.
  */
-public class CalibrationActivity extends MainActivity{
+public class CalibrationActivity extends MainActivity {
 
     private static final int mSamplePerEye = 15;
     private static int currentEyeSamples = 0;
@@ -30,6 +28,13 @@ public class CalibrationActivity extends MainActivity{
     private boolean wantToSave = false;
     private static final String TAG = "CalibrationActivity";
 
+    /**
+     * Called each time the parent activity matches the eyes of the user
+     * @param rightEye Coordinates of the center of the right eye
+     * @param leftEye Coordinates of the center of the left eye
+     * @param re Image containing the right eye
+     * @param le Image containing the left eye
+     */
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
@@ -140,6 +145,9 @@ public class CalibrationActivity extends MainActivity{
         finish();
     }
 
+    /**
+     * Sets the corresponding layout and initializes the images of the image views
+     */
     @Override
     protected void setLayout() {
         setContentView(R.layout.calibration_activity_layout);

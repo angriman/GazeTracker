@@ -28,6 +28,8 @@
                   android:screenOrientation="landscape"/>
         <activity android:label="@string/app_name" android:name=".RecognitionActivity"
                   android:screenOrientation="landscape"/>
+        <activity android:label="@string/app_name" android:name=".MenuActivity"
+                  android:screenOrientation="landscape"/>
     </application>
 
 </manifest>

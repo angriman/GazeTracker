@@ -8,14 +8,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-
-import org.opencv.android.CameraBridgeViewBase;
 
 /**
  * Created by Leonardo on 23/05/2016.
  */
 public class AskPermissionActivity extends Activity {
+
     private final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String TAG = "AskPermissionActivity";
 
@@ -24,23 +22,15 @@ public class AskPermissionActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ask_permission_activity);
 
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
+        }
         else {
-
-            // Launch Calibration or Recognition activity
-            Intent launchMainIntent = new Intent(AskPermissionActivity.this, CalibrationActivity.class);
-            AskPermissionActivity.this.startActivity(launchMainIntent);
-            finish();
+            launchActivity();
         }
     }
 
-
     private void requestCameraPermission(){
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
-            //SPIEGA A COSA TI SERVONO I PERMESSI (MOSTRALO ALL'UTENTE)
-        }
         ActivityCompat.requestPermissions(AskPermissionActivity.this, new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
     }
 
@@ -60,18 +50,21 @@ public class AskPermissionActivity extends Activity {
             else {
                 Log.i(TAG, "CAMERA permission has been GRANTED.");
 
-                Intent launchMainIntent = new Intent(AskPermissionActivity.this, CalibrationActivity.class);
-                AskPermissionActivity.this.startActivity(launchMainIntent);
-                finish();
-
-                // You can now access the camera
-                //Snackbar.make(mLayout, R.string.permission_available_camera,
-                 //       Snackbar.LENGTH_SHORT).show();
+                launchActivity();
             }
         }
         else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    /** Launches the activity */
+    private void launchActivity() {
+        // Launch Calibration activity
+           /* Intent launchMainIntent = new Intent(AskPermissionActivity.this, CalibrationActivity.class);*/
+        Intent launchMainIntent = new Intent(AskPermissionActivity.this, MenuActivity.class);
+        AskPermissionActivity.this.startActivity(launchMainIntent);
+        finish();
     }
 
 }
