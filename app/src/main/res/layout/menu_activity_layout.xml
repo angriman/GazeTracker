@@ -15,6 +15,7 @@
         android:text="@string/cpp_algorithm_button"
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
+        android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
         />
 
