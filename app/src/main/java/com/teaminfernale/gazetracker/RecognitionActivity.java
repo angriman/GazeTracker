@@ -147,5 +147,12 @@ public class RecognitionActivity extends MainActivity {
         });
     }
 
+    /*@Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.i(TAG4, "RecogActivity onDestroy() called");
+        finish();
+    }*/
+
 
 }

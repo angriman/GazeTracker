@@ -137,7 +137,7 @@ public class CalibrationActivity extends MainActivity {
         launchMainIntent.putExtra("trainedEyesContainer", pointsCoordinates);
         launchMainIntent.putExtra("tresholdsEyesContainer", thresholds);
         startActivity(launchMainIntent);
-        finish();
+        //finish();
     }
 
     /**
@@ -201,10 +201,10 @@ public class CalibrationActivity extends MainActivity {
         setMethod(initialMethod);
         updateMethodLabelText(initialMethod);
 
-        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        String[] strings = getStrings();
-        final String savedStringX = prefs.getString(strings[0], "");
-        final String savedStringY = prefs.getString(strings[1], "");
+        //SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        //String[] strings = getStrings();
+        //final String savedStringX = prefs.getString(strings[0], "");
+        //final String savedStringY = prefs.getString(strings[1], "");
 
 
         // BUTTON go_to_simulation_button da cancellare (se la calib è fatta va alla recog da solo, altrimenti non si può andare)
@@ -277,20 +277,20 @@ public class CalibrationActivity extends MainActivity {
         Log.i(TAG3, "CalibActivity onPause() called");
 
         // Saves calibration
-        SharedPreferences sp = getPreferences(MODE_PRIVATE);
+        //SharedPreferences sp = getPreferences(MODE_PRIVATE);
 
-        StringBuilder str_X = new StringBuilder();
-        StringBuilder str_Y = new StringBuilder();
+        //StringBuilder str_X = new StringBuilder();
+        //StringBuilder str_Y = new StringBuilder();
 
-        for (Point aPointsArray : mTrainedEyesContainer.getPoints()) {
-            str_X.append((int)aPointsArray.x).append(",");
-            str_Y.append((int)aPointsArray.y).append(",");
-        }
+        //for (Point aPointsArray : mTrainedEyesContainer.getPoints()) {
+        //    str_X.append((int)aPointsArray.x).append(",");
+        //    str_Y.append((int)aPointsArray.y).append(",");
+        //}
 
-        String[] strings = getStrings();
+        //String[] strings = getStrings();
 
-        sp.edit().putString(strings[0], str_X.toString()).apply();
-        sp.edit().putString(strings[1], str_Y.toString()).apply();
+        //sp.edit().putString(strings[0], str_X.toString()).apply();
+        //sp.edit().putString(strings[1], str_Y.toString()).apply();
 
         Log.i(TAG, "Calibration saved");
 

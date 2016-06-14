@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
@@ -40,6 +41,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
+    private static final String TAG3 = "ZoomedWindow";
+    private static final String DEBUG = "Debug";
+
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
@@ -48,10 +52,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
-//    protected TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
-//    private  GazeCalculator mGazeCalculator;
-//    private boolean calibrating = false;
-//    private int calibration_phase = 0;
     private int learn_frames = 0;
     private Mat teplateR;
     private Mat teplateL;
@@ -84,6 +84,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private int mode = 0;
     private Algorithm mAlgorithm;
+
+    // Thread handler to convert eye mats into a bitmap
+    Handler mainHandler;
+    ArrayList<Runnable> threadList = new ArrayList<>();
 
 
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
@@ -162,7 +166,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     }
 
                     //TODO Sistemare questi casini con la fotocamera
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -206,6 +210,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             mAlgorithm = Algorithm.JAVA;
         }
 
+        mainHandler= new Handler(getApplicationContext().getMainLooper());
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
         switch (mode) {
             case 0:
@@ -219,7 +224,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Log.i(TAG, "Capito er bug");
         mOpenCvCameraView.setCvCameraViewListener(this);
         Log.i(TAG, "camera view cameraview initializated");
-
     }
 
     /**
@@ -237,6 +241,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void onStart() { //Called when the activity is becoming visible to the user
         super.onStart();
         Log.i(TAG2, "Main Activity onStart() called");
+
+
     }
 
     @Override
@@ -254,8 +260,15 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     @Override
     public void onPause() {
         super.onPause();
-        closeCamera();
         Log.i(TAG2, "Main Activity onPause() called");
+        closeCamera();
+        //Close all the opened threads
+        for (int i=0; i<threadList.size(); i++){
+            Runnable currentR = threadList.get(i);
+            mainHandler.removeCallbacks(currentR);
+        }
+        Log.i(TAG2, "All threads closed!");
+
     }
 
     @Override
@@ -274,8 +287,8 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     @Override
     public void onDestroy() {
         super.onDestroy();
-        closeCamera();
         Log.i(TAG2, "Main Activity onDestroy() called");
+        closeCamera();
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -307,6 +320,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         }
 
         if (mZoomWindow == null || mZoomWindow2 == null) {
+            CreateAuxiliaryMats();
+        }
+        if (mZoomWindow.empty() || mZoomWindow2.empty()) {
             CreateAuxiliaryMats();
         }
 
@@ -361,14 +377,18 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 }
 
             // Cut eye areas and put them to zoom windows
-            Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
-            Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+            if (!mZoomWindow.empty() && !mZoomWindow2.empty()) {
+                Imgproc.resize(mRgba.submat(eyearea_right), mZoomWindow, mZoomWindow.size());
+                Imgproc.resize(mRgba.submat(eyearea_left), mZoomWindow2, mZoomWindow2.size());
+            }
         }
 
+        launchThread(lMatchedEye, rMatchedEye);
 
-        // On a separate thread it converts the eye mat into a bitmap
-        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+        return mRgba;
+    }
 
+    private void  launchThread(Point lMatchedEye, Point rMatchedEye){
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
@@ -377,6 +397,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             public void run() {
 
                 try {
+                    Log.i(TAG3, "mZoomWindow = (" + mZoomWindow.toString() + ")");
                     Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(mZoomWindow.clone(), le);
@@ -385,20 +406,23 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
                 }
                 catch (IllegalArgumentException e) {
-                    Log.i(TAG, "EXCEPTION");
+                    Log.i(TAG, "THREAD EXCEPTION");
                 }
             }
         };
-
         mainHandler.post(myRunnable);
-
-        return mRgba;
-    }
+        threadList.add(myRunnable);
+    };
 
     public void setAlgorithm(Algorithm algorithm) {
         mAlgorithm = algorithm;
     }
 
+    /**
+     * Called to recognize eyes after training is complete. It uses the CPP algorithm
+     * with calls to OpenCV.
+     * @param area Rectangle of the face
+     */
     private Point cpp_match_eye(Rect area){
 
         String t = "PointTag";
@@ -534,6 +558,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
     private void CreateAuxiliaryMats() {
+        Log.i(TAG3, "CreateAuxiliaryMats");
         if (mGray.empty())
             return;
 
@@ -544,6 +569,11 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
             mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
         }
+        if (mZoomWindow.empty()){
+            mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
+            mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
+        }
+
 
     }
 

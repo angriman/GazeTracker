@@ -44,6 +44,6 @@ public class MenuActivity extends Activity {
         Intent launchMainIntent = new Intent(MenuActivity.this, CalibrationActivity.class);
         launchMainIntent.putExtra("algorithm", algorithm);
         MenuActivity.this.startActivity(launchMainIntent);
-        finish();
+        //finish();
     }
 }
