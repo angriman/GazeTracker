@@ -116,11 +116,11 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
 
-        // Restore TextView state from the savedInstanceState
+        // Restore the simulation button state from the savedInstanceState
         if (savedInstanceState != null)
         {
-            String strValue = savedInstanceState.getString("strTV");
-            if (strValue != null) ((Button)findViewById(R.id.simulation_button)).setText(strValue);
+            String buttonValue = savedInstanceState.getString("button");
+            if (buttonValue != null) ((Button)findViewById(R.id.simulation_button)).setText(buttonValue);
         }
 
         Intent intent = getIntent();
@@ -154,10 +154,11 @@ public class RecognitionActivity extends MainActivity {
         });
     }
 
+    // Save the instance state
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        String strTV = ((Button)findViewById(R.id.simulation_button)).getText().toString();
-        savedInstanceState.putString("strTV", strTV);
+        String button = ((Button)findViewById(R.id.simulation_button)).getText().toString();
+        savedInstanceState.putString("button", button);
         super.onSaveInstanceState(savedInstanceState);
     }
 
