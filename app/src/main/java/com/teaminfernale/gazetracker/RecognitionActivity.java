@@ -116,6 +116,13 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
 
+        // Restore the simulation button state from the savedInstanceState
+        if (savedInstanceState != null)
+        {
+            String buttonValue = savedInstanceState.getString("button");
+            if (buttonValue != null) ((Button)findViewById(R.id.simulation_button)).setText(buttonValue);
+        }
+
         Intent intent = getIntent();
         double[] pointsCoordinates = intent.getDoubleArrayExtra("trainedEyesContainer");
         int[] tresholds = intent.getIntArrayExtra("tresholdsEyesContainer");
@@ -147,12 +154,12 @@ public class RecognitionActivity extends MainActivity {
         });
     }
 
-    /*@Override
-    public void onDestroy(){
-        super.onDestroy();
-        Log.i(TAG4, "RecogActivity onDestroy() called");
-        finish();
-    }*/
-
+    // Save the instance state
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        String button = ((Button)findViewById(R.id.simulation_button)).getText().toString();
+        savedInstanceState.putString("button", button);
+        super.onSaveInstanceState(savedInstanceState);
+    }
 
 }
