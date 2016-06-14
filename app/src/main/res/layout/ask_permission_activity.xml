@@ -23,6 +23,7 @@
         android:layout_centerInParent="true"
         android:text="@string/ask_permissions_button"
         android:background="@drawable/mybutton"
+        android:drawableRight="@drawable/go_simulation"
         android:textColor="#1c8ad9"
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"

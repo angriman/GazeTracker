@@ -49,7 +49,7 @@
         android:layout_centerHorizontal="true"
         android:onClick="onRecreateClick"
         android:text="@string/start_simulation_button"
-
+        android:drawableRight="@drawable/start"
         android:background="@drawable/mybutton"
         android:textColor="#1c8ad9"
         android:elevation="5dp"
@@ -80,6 +80,7 @@
         android:onClick="onRecreateClick"
         android:text="@string/goto_menu_button"
         android:background="@drawable/mybutton"
+        android:drawableLeft="@drawable/go_back"
         android:textColor="#1c8ad9"
         android:layout_alignTop="@+id/rec_left_eye"
         android:layout_centerHorizontal="true"

@@ -10,7 +10,7 @@
     <string name="ask_permissions_button">Ask camera permissions</string>
     <string name="ask_permission_textView">Camera permissions are necessary for this app</string>
     <string name="cpp_algorithm_button">C++ Algorithm</string>
-    <string name="java_algorithm_button">Java algorithm</string>
+    <string name="java_algorithm_button">Java Algorithm</string>
     <string name="goto_menu_button">Back to Menu</string>
     <string name="right_eye_description">Represents the recognized right eye</string>
     <string name="method_text_view">Method</string>
