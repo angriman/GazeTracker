@@ -116,6 +116,13 @@ public class RecognitionActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
 
+        // Restore TextView state from the savedInstanceState
+        if (savedInstanceState != null)
+        {
+            String strValue = savedInstanceState.getString("strTV");
+            if (strValue != null) ((Button)findViewById(R.id.simulation_button)).setText(strValue);
+        }
+
         Intent intent = getIntent();
         double[] pointsCoordinates = intent.getDoubleArrayExtra("trainedEyesContainer");
         int[] tresholds = intent.getIntArrayExtra("tresholdsEyesContainer");
@@ -147,5 +154,11 @@ public class RecognitionActivity extends MainActivity {
         });
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        String strTV = ((Button)findViewById(R.id.simulation_button)).getText().toString();
+        savedInstanceState.putString("strTV", strTV);
+        super.onSaveInstanceState(savedInstanceState);
+    }
 
 }
