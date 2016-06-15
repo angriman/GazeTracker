@@ -332,9 +332,10 @@ public class TrainedEyesContainer {
      * part of the screen.
      * @param leftEyeX the X coordinate of the center of the pupil of the left eye
      * @param rightEyeX the X coordinate of the center of the pupil of the right eye
-     */    private boolean isLeft(int leftEyeX, int rightEyeX) {
-        int leftLeftDistance = leftEyeX/4 - leftLeftThreshold;
-        int leftRightDistance = rightEyeX/4 - leftRightThreshold;
+     */
+    private boolean isLeft(int leftEyeX, int rightEyeX) {
+        int leftLeftDistance = leftEyeX - leftLeftThreshold;
+        int leftRightDistance = rightEyeX - leftRightThreshold;
 
         return leftLeftDistance + leftRightDistance < 0;
     }

@@ -6,6 +6,9 @@
 #include "helpers.h"
 
 extern "C" {
+/**
+ * Methods declarations
+ */
 
 void scaleToFastSize(const cv::Mat &src,cv::Mat &dst) ;
 
@@ -24,7 +27,6 @@ JNIEXPORT jobject JNICALL
 Java_com_teaminfernale_gazetracker_MainActivity_findEyeCenter(JNIEnv *env, jobject instance,
                                                               jlong matAddr, jint x, jint y, jint width, jint height) {
 
-    // TODO
     cv::Mat &face = *(cv::Mat*)matAddr;
     jintArray result;
     result = (env)->NewIntArray(2);
@@ -33,7 +35,6 @@ Java_com_teaminfernale_gazetracker_MainActivity_findEyeCenter(JNIEnv *env, jobje
     }
 
     cv::Rect eye(x, y, width, height);
-
 
     cv::Mat eyeROIUnscaled = face(eye);
     cv::Mat eyeROI;

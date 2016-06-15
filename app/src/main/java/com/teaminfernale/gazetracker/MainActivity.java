@@ -42,7 +42,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
-    private static final String DEBUG = "Debug";
 
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
@@ -166,7 +165,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     }
 
                     //TODO Sistemare questi casini con la fotocamera
-                    mOpenCvCameraView.setCameraIndex(1);
+                    mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
                 }

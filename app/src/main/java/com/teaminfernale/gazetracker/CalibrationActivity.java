@@ -42,7 +42,7 @@ public class CalibrationActivity extends MainActivity {
      */
     @Override
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
-
+R
         //to show the eyes for debug
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
