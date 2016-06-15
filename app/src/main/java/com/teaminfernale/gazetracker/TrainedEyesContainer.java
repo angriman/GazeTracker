@@ -155,7 +155,7 @@ public class TrainedEyesContainer {
     }
 
     /**
-     * Returns the eight points declared
+     * Returns eight points declared
      * as class variables
      */
     public Point[] getPoints() {
