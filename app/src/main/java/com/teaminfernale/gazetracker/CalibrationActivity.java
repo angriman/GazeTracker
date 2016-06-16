@@ -1,8 +1,8 @@
 package com.teaminfernale.gazetracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,7 +14,7 @@ import android.widget.TextView;
 import org.opencv.core.Point;
 
 import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
-import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.*;
+import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.JAVA;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
@@ -32,7 +32,7 @@ public class CalibrationActivity extends MainActivity {
     private Algorithm mAlgorithm;
     private SeekBar methodSeekBar;
     private TextView mValue;
-
+    private int locatingEyesTextViewStatus = 0;
     /**
      * Called each time the parent activity matches the eyes of the user
      * @param rightEye Coordinates of the center of the right eye
@@ -201,48 +201,64 @@ public class CalibrationActivity extends MainActivity {
         setMethod(initialMethod);
         updateMethodLabelText(initialMethod);
 
-        //SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        //String[] strings = getStrings();
-        //final String savedStringX = prefs.getString(strings[0], "");
-        //final String savedStringY = prefs.getString(strings[1], "");
+        startTexViewUpdate();
 
+    }
 
-        // BUTTON go_to_simulation_button da cancellare (se la calib è fatta va alla recog da solo, altrimenti non si può andare)
-       /* if (savedStringX.length() > 0 && savedStringY.length() > 0) {
-            findViewById(R.id.go_to_simulation_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    StringTokenizer stX = new StringTokenizer(savedStringX, ",");
-                    StringTokenizer stY = new StringTokenizer(savedStringY, ",");
+    private void startTexViewUpdate() {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!eyesFound()) {
+                    long millisecondsDelay = 250;
+                    mainHandler.postDelayed(this, millisecondsDelay);
 
-                    int[] savedListX = new int[8];
-                    int[] savedListY = new int[8];
-
-                    for (int i = 0; i < 8; ++i) {
-                        savedListX[i] = Integer.parseInt(stX.nextToken());
-                        savedListY[i] = Integer.parseInt(stY.nextToken());
+                    String tail = "";
+                    switch (locatingEyesTextViewStatus) {
+                        case 1:
+                            tail += ".";
+                            break;
+                        case 2:
+                            tail += "..";
+                            break;
+                        case 3:
+                            tail += "...";
+                            break;
+                        default:
+                            break;
                     }
 
-                    R_upRight = new Point(savedListX[0], savedListY[0]);
-                    L_upRight = new Point(savedListX[1], savedListY[1]);
-                    R_upLeft = new Point(savedListX[2], savedListY[2]);
-                    L_upLeft = new Point(savedListX[3], savedListY[3]);
-                    R_downRight = new Point(savedListX[4], savedListY[4]);
-                    L_downRight = new Point(savedListX[5], savedListY[5]);
-                    R_downLeft = new Point(savedListX[6], savedListY[6]);
-                    L_downLeft = new Point(savedListX[7], savedListY[7]);
+                    String newText = getResources().getString(R.string.locating_text_view) + tail;
+                    TextView textView = (TextView) findViewById(R.id.status_text_view);
+                    if (textView != null) {
+                        textView.setText(newText);
+                    }
 
-                    mTrainedEyesContainer = new TrainedEyesContainer(R_upRight, L_upRight, R_upLeft, L_upLeft, R_downRight, L_downRight, R_downLeft, L_downLeft);
-                    Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
-                    launchMainIntent.putExtra("trainedEyesContainer", mTrainedEyesContainer.getPoints());
-                    startActivity(launchMainIntent);
-                    finish();
+                    locatingEyesTextViewStatus = (locatingEyesTextViewStatus + 1) % 4;
                 }
-            });
-        }
-        else {
-            findViewById(R.id.go_to_simulation_button).setVisibility(View.INVISIBLE);
-        }*/
+            }
+        };
+
+        mainHandler.postDelayed(runnable, 0);
+        threadList.add(runnable);
+
+    }
+
+    @Override
+    protected void updateUI() {
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Button startCalibrationButton = (Button)findViewById(R.id.calibrate_button);
+                if (startCalibrationButton != null) {
+                    startCalibrationButton.setTextColor(Color.parseColor("#FF1C8AD9"));
+                    startCalibrationButton.setEnabled(true);
+                    ((TextView) findViewById(R.id.status_text_view)).setText(getResources().getString(R.string.ready_text_view));
+                }
+            }
+        };
+        mainHandler.post(myRunnable);
+        threadList.add(myRunnable);
     }
 
     /**

@@ -16,4 +16,5 @@
     <string name="method_text_view">Method</string>
     <string name="locating_text_view">Locating eyes</string>
         <string name="ready_text_view">Ready to calibrate</string>
+    <string name="calibrating_text_view">Calibrating</string>
 </resources>
