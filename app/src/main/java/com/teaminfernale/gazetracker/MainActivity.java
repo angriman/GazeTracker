@@ -3,7 +3,6 @@ package com.teaminfernale.gazetracker;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -11,8 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -90,11 +87,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private Algorithm mAlgorithm;
     private boolean eyesFound = false;
     private int missedFrames = 0;
-    private int locatingEyesTextViewStatus = 0;
+
     // Thread handler to convert eye mats into a bitmap
     Handler mainHandler;
     ArrayList<Runnable> threadList = new ArrayList<>();
 
+    protected abstract void updateUI();
 
     /**
      * Called when in a new frame both the eyes have been found. Decides what to do with the
@@ -198,6 +196,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         }
     };
 
+    public boolean eyesFound() {
+        return eyesFound;
+    }
+
     public MainActivity() {
         mDetectorName = new String[2];
         mDetectorName[JAVA_DETECTOR] = "Java";
@@ -244,44 +246,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         mOpenCvCameraView.setCvCameraViewListener(this);
         Log.i(TAG, "camera view cameraview initializated");
 
-        startTexViewUpdate();
     }
 
-    private void startTexViewUpdate() {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!eyesFound) {
-                    long millisecondsDelay = 250;
-                    mainHandler.postDelayed(this, millisecondsDelay);
 
-                    String tail = "";
-                    switch (locatingEyesTextViewStatus) {
-                        case 1:
-                            tail += ".";
-                            break;
-                        case 2:
-                            tail += "..";
-                            break;
-                        case 3:
-                            tail += "...";
-                            break;
-                        default:
-                            break;
-                    }
-
-                    String newText = getResources().getString(R.string.locating_text_view) + tail;
-                    ((TextView) findViewById(R.id.status_text_view)).setText(newText);
-
-                    locatingEyesTextViewStatus = (locatingEyesTextViewStatus + 1) % 4;
-                }
-            }
-        };
-
-        mainHandler.postDelayed(runnable, 0);
-        threadList.add(runnable);
-
-    }
 
     /**
      * Disables the camera to let a different activity the possibility
@@ -457,19 +424,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return mRgba;
     }
 
-    private void updateUI() {
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Button startCalibrationButton = (Button)findViewById(R.id.calibrate_button);
-                startCalibrationButton.setTextColor(Color.parseColor("#FF1C8AD9"));
-                startCalibrationButton.setEnabled(true);
-                ((TextView)findViewById(R.id.status_text_view)).setText(getResources().getString(R.string.ready_text_view));
-            }
-        };
-        mainHandler.post(myRunnable);
-        threadList.add(myRunnable);
-    }
 
     private void launchThread(Point lMatchedEye, Point rMatchedEye){
         final Point finalLMatchedEye = lMatchedEye;

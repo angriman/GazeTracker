@@ -53,6 +53,9 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_down_right_image)).setImageResource(R.drawable.lena1);
     }
 
+    @Override
+    protected void updateUI() {}
+
     /**
      * Called each time the parent activity matches the eyes of the user
      * @param rightEye Coordinates of the center of the right eye
