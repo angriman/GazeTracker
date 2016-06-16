@@ -50,9 +50,10 @@
         android:onClick="onRecreateClick"
         android:text="@string/start_calibration_button"
         android:background="@drawable/mybutton"
-        android:textColor="#1c8ad9"
+        android:textColor="#3e4b54"
         android:elevation="5dp"
         android:drawableRight="@drawable/start"
+        android:enabled="false"
         style="@style/Widget.AppCompat.Button.Borderless"
 
         />
@@ -73,7 +74,7 @@
         android:layout_alignRight="@id/fd_activity_surface_view"
         android:scaleType="fitXY" />
 
-    <Button
+<!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -85,7 +86,16 @@
         android:drawableRight="@drawable/refresh"
         android:elevation="5dp"
         style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/button"/>
+        android:id="@+id/button"/>-->
+
+    <TextView
+        android:id="@+id/status_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/locating_text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        />
 
     <SeekBar
         android:id="@+id/methodSeekBar"

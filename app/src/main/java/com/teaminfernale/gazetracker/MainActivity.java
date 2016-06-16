@@ -3,6 +3,7 @@ package com.teaminfernale.gazetracker;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -10,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -42,6 +45,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
+    private static final String TAG4 = "MainActivityDebug";
 
     public static final int JAVA_DETECTOR = 0;
     private static final int TM_SQDIFF = 0;
@@ -52,6 +56,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR_NORMED = 5;
 
     private int learn_frames = 0;
+    private static final int MISSED_FRAMES_LIMIT = 10;
     private Mat teplateR;
     private Mat teplateL;
 
@@ -83,7 +88,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     private int mode = 0;
     private Algorithm mAlgorithm;
-
+    private boolean eyesFound = false;
+    private int missedFrames = 0;
+    private int locatingEyesTextViewStatus = 0;
     // Thread handler to convert eye mats into a bitmap
     Handler mainHandler;
     ArrayList<Runnable> threadList = new ArrayList<>();
@@ -119,7 +126,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
-
 
                     try {
                         // load cascade file from application resources
@@ -237,6 +243,44 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Log.i(TAG, "Capito er bug");
         mOpenCvCameraView.setCvCameraViewListener(this);
         Log.i(TAG, "camera view cameraview initializated");
+
+        startTexViewUpdate();
+    }
+
+    private void startTexViewUpdate() {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!eyesFound) {
+                    long millisecondsDelay = 250;
+                    mainHandler.postDelayed(this, millisecondsDelay);
+
+                    String tail = "";
+                    switch (locatingEyesTextViewStatus) {
+                        case 1:
+                            tail += ".";
+                            break;
+                        case 2:
+                            tail += "..";
+                            break;
+                        case 3:
+                            tail += "...";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    String newText = getResources().getString(R.string.locating_text_view) + tail;
+                    ((TextView) findViewById(R.id.status_text_view)).setText(newText);
+
+                    locatingEyesTextViewStatus = (locatingEyesTextViewStatus + 1) % 4;
+                }
+            }
+        };
+
+        mainHandler.postDelayed(runnable, 0);
+        threadList.add(runnable);
+
     }
 
     /**
@@ -274,7 +318,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         Log.i(TAG2, "Main Activity onPause() called");
         closeCamera();
         //Close all the opened threads
-        for (int i=0; i<threadList.size(); i++){
+        for (int i = 0; i < threadList.size(); ++i){
             Runnable currentR = threadList.get(i);
             mainHandler.removeCallbacks(currentR);
         }
@@ -370,12 +414,27 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     case JAVA:
                         lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye);
                         rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye);
-                        Log.i(TAG, "Matched eye java");
+                        if (!eyesFound) {
+                            if (lMatchedEye != null && rMatchedEye != null) {
+                                eyesFound = true;
+                                updateUI();
+                            }
+                            else {
+                                missedFrames++;
+                                if (missedFrames == MISSED_FRAMES_LIMIT) {
+                                    learn_frames = 0; // Simulates recreate button
+                                    missedFrames = 0;
+                                }
+                            }
+                        }
                         break;
                     case CPP:
                         lMatchedEye = cpp_match_eye(eyearea_left);
                         rMatchedEye = cpp_match_eye(eyearea_right);
-                        Log.i(TAG, "Matched eye CPP");
+                        if (!eyesFound) {
+                            eyesFound = true;
+                            updateUI();
+                        }
                         break;
                     default:
                         break;
@@ -398,7 +457,21 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return mRgba;
     }
 
-    private void  launchThread(Point lMatchedEye, Point rMatchedEye){
+    private void updateUI() {
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Button startCalibrationButton = (Button)findViewById(R.id.calibrate_button);
+                startCalibrationButton.setTextColor(Color.parseColor("#FF1C8AD9"));
+                startCalibrationButton.setEnabled(true);
+                ((TextView)findViewById(R.id.status_text_view)).setText(getResources().getString(R.string.ready_text_view));
+            }
+        };
+        mainHandler.post(myRunnable);
+        threadList.add(myRunnable);
+    }
+
+    private void launchThread(Point lMatchedEye, Point rMatchedEye){
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
@@ -422,7 +495,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         };
         mainHandler.post(myRunnable);
         threadList.add(myRunnable);
-    };
+    }
 
     public void setAlgorithm(Algorithm algorithm) {
         mAlgorithm = algorithm;

@@ -14,4 +14,6 @@
     <string name="goto_menu_button">Back to Menu</string>
     <string name="right_eye_description">Represents the recognized right eye</string>
     <string name="method_text_view">Method</string>
+    <string name="locating_text_view">Locating eyes</string>
+        <string name="ready_text_view">Ready to calibrate</string>
 </resources>
