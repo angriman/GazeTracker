@@ -137,7 +137,7 @@ public class CalibrationActivity extends MainActivity {
         launchMainIntent.putExtra("trainedEyesContainer", pointsCoordinates);
         launchMainIntent.putExtra("tresholdsEyesContainer", thresholds);
         startActivity(launchMainIntent);
-        //finish();
+        finish();
     }
 
     /**

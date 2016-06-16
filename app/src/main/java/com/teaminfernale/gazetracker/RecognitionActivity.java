@@ -121,6 +121,8 @@ public class RecognitionActivity extends MainActivity {
         {
             String buttonValue = savedInstanceState.getString("button");
             if (buttonValue != null) ((Button)findViewById(R.id.simulation_button)).setText(buttonValue);
+            boolean previousState = savedInstanceState.getBoolean("buttonState");
+            simulationStarted = previousState;
         }
 
         Intent intent = getIntent();
@@ -159,6 +161,7 @@ public class RecognitionActivity extends MainActivity {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         String button = ((Button)findViewById(R.id.simulation_button)).getText().toString();
         savedInstanceState.putString("button", button);
+        savedInstanceState.putBoolean("buttonState", simulationStarted);
         super.onSaveInstanceState(savedInstanceState);
     }
 
