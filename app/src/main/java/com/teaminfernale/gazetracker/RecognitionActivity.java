@@ -138,6 +138,13 @@ public class RecognitionActivity extends MainActivity {
                 ((Button) findViewById(R.id.simulation_button)).setText(buttonValue);
             boolean previousState = savedInstanceState.getBoolean("buttonState");
             simulationStarted = previousState;
+            metric = (RecognitionMetric)savedInstanceState.getSerializable("metric");
+            Switch s = (Switch) findViewById(R.id.recognition_method_switch);
+            if (metric == RecognitionMetric.MEDIAN) {
+                s.setText(R.string.rec_method_switch_med);
+            } else {
+                s.setText(R.string.rec_method_switch_tresh);
+            }
         }
 
         Intent intent = getIntent();
@@ -193,6 +200,7 @@ public class RecognitionActivity extends MainActivity {
         String button = ((Button)findViewById(R.id.simulation_button)).getText().toString();
         savedInstanceState.putString("button", button);
         savedInstanceState.putBoolean("buttonState", simulationStarted);
+        savedInstanceState.putSerializable("metric", metric);
         super.onSaveInstanceState(savedInstanceState);
     }
 
