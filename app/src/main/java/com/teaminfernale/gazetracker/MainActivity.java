@@ -89,16 +89,29 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     ArrayList<Runnable> threadList = new ArrayList<>();
 
 
+    /**
+     * Called when in a new frame both the eyes have been found. Decides what to do with the
+     * eyes-position informations.
+     * @param leftEye left eye coordinates
+     * @param rightEye right eye coordinates
+     * @param le left eye image
+     * @param re right eye image
+     */
     protected abstract void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re);
 
+    /**
+     * Change the mode in 1 (meaning that the app is in not in calibration anymore and the
+     * recognition is started).
+     */
     public void setModeRecognition() {
         mode = 1;
     }
 
-    public void setMethod(int method) {
+    /**
+     * Set the method used for Java eye recognition
+     */
+    public void setMethod(int method) { this.method = method; }
 
-        this.method = method;
-    }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -182,7 +195,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public MainActivity() {
         mDetectorName = new String[2];
         mDetectorName[JAVA_DETECTOR] = "Java";
-
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
@@ -190,8 +202,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return mAlgorithm;
     }
 
-    //Serve affinchè venga settato il layout con la fd_activity_surface_view per poter lanciare la fotocamera
-    //comando setContentView(R.layout.XXX_activity_layout);
+
+    /**
+     * Called at the creation of the activity. Needs to set the content wiew inside.
+     */
     protected abstract void setLayout();
 
     /** Called when the activity is first created. */
@@ -240,8 +254,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void onStart() { //Called when the activity is becoming visible to the user
         super.onStart();
         Log.i(TAG2, "Main Activity onStart() called");
-
-
     }
 
     @Override
@@ -267,7 +279,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             mainHandler.removeCallbacks(currentR);
         }
         Log.i(TAG2, "All threads closed!");
-
     }
 
     @Override
