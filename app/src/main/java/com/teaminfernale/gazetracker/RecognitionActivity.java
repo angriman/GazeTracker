@@ -7,7 +7,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
@@ -24,6 +27,9 @@ public class RecognitionActivity extends MainActivity {
     private int imageID = 0;
     private boolean simulationStarted = false;
     private static final String TAG4 = "RecogActivity_lifeCycle";
+    private enum RecognitionMetric {MEDIAN, THRESHOLD};
+    private RecognitionMetric metric;
+
 
     /**
      * Sets the corresponding layout and initializes the images of the ImageViews
@@ -75,7 +81,12 @@ public class RecognitionActivity extends MainActivity {
                     if (finalLMatchedEye != null && finalRMatchedEye != null) {
                         String result = "You are watching ";
                         ImageView imageView = null;
-                        switch (mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye)) {
+                        TrainedEyesContainer.ScreenRegion choosenRegion = null;
+                        if (metric==RecognitionMetric.MEDIAN)
+                            choosenRegion = mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye);
+                        else
+                            choosenRegion = mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye);
+                        switch (choosenRegion) {
                             case UP_LEFT:
                                 Log.i(TAG, result + "up left");
                                 imageView = (ImageView) findViewById(R.id.rec_top_left_image);
@@ -115,12 +126,13 @@ public class RecognitionActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
+        metric = RecognitionMetric.THRESHOLD;
 
         // Restore the simulation button state from the savedInstanceState
-        if (savedInstanceState != null)
-        {
+        if (savedInstanceState != null) {
             String buttonValue = savedInstanceState.getString("button");
-            if (buttonValue != null) ((Button)findViewById(R.id.simulation_button)).setText(buttonValue);
+            if (buttonValue != null)
+                ((Button) findViewById(R.id.simulation_button)).setText(buttonValue);
             boolean previousState = savedInstanceState.getBoolean("buttonState");
             simulationStarted = previousState;
         }
@@ -135,11 +147,10 @@ public class RecognitionActivity extends MainActivity {
             @Override
             public void onClick(View view) {
                 simulationStarted = !simulationStarted;
-                Button b = (Button)findViewById(R.id.simulation_button);
+                Button b = (Button) findViewById(R.id.simulation_button);
                 if (simulationStarted) {
                     b.setText(getResources().getString(R.string.stop_simulation_button));
-                }
-                else {
+                } else {
                     b.setText(getResources().getString(R.string.start_simulation_button));
                     initializeCornerImages();
                 }
@@ -154,6 +165,23 @@ public class RecognitionActivity extends MainActivity {
                 finish();
             }
         });
+
+
+        findViewById(R.id.recognition_method_switch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Switch s = (Switch) findViewById(R.id.recognition_method_switch);
+                if (metric == RecognitionMetric.MEDIAN) {
+                    metric = RecognitionMetric.THRESHOLD;
+                    s.setText(R.string.rec_method_switch_tresh);
+                } else {
+                    metric = RecognitionMetric.MEDIAN;
+                    s.setText(R.string.rec_method_switch_med);
+                }
+            }
+        });
+
+
     }
 
     // Save the instance state

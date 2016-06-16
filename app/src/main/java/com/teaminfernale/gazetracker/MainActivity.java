@@ -184,7 +184,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     }
 
                     //TODO Sistemare questi casini con la fotocamera
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(1);
                     mOpenCvCameraView.enableView();
 
                 }

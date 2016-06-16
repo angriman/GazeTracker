@@ -86,4 +86,14 @@
         android:layout_centerHorizontal="true"
         android:elevation="5dp"/>
 
+
+    <Switch
+        android:id="@+id/recognition_method_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rec_method_switch_tresh"
+        android:checked="false"
+        android:layout_below="@+id/rec_top_left_image"
+        android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>

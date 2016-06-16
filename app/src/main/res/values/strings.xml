@@ -15,5 +15,7 @@
     <string name="right_eye_description">Represents the recognized right eye</string>
     <string name="method_text_view">Method</string>
     <string name="locating_text_view">Locating eyes</string>
-        <string name="ready_text_view">Ready to calibrate</string>
+    <string name="ready_text_view">Ready to calibrate</string>
+    <string name="rec_method_switch_tresh">Using thresold</string>
+    <string name="rec_method_switch_med">Using median</string>
 </resources>
