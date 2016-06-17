@@ -45,6 +45,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
+    private static final String TAG4 = "MainActivityDebug";
 
     public static final int JAVA_DETECTOR = 0;
 
@@ -278,13 +279,13 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
     /**
-     * Setter method for the variable mAlgorithm. Used to let other activities to 
+     * Setter method for the variable mAlgorithm. Used to let other activities to
      * switch the algorithm used to recognize eyes.
      */
     public void setAlgorithm(Algorithm algorithm) {
         mAlgorithm = algorithm;
     }
-    
+
     /**
      * Main constructor
      */
@@ -545,7 +546,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
      * @param rMatchedEye Point that represents the center of the pupil of the right eye
      */
     private void launchThread(Point lMatchedEye, Point rMatchedEye) {
-        
+
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
@@ -567,18 +568,18 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 }
             }
         };
-        
+
         mainHandler.post(myRunnable);
         threadList.add(myRunnable);
     }
-    
+
     /**
      * Called to recognize eyes after training is complete. It uses the CPP algorithm
      * with calls to OpenCV.
      * @param area Rectangle of the face
      */
     private Point cpp_match_eye(Rect area) {
-        
+
         // The C++ algorithm returns an int array that represents a point
         int[] result = findEyeCenter(mGray.getNativeObjAddr(), area.x, area.y, area.width, area.height);
         return new Point(result[0], result[1]);
