@@ -128,7 +128,7 @@ public class CalibrationActivity extends MainActivity {
 
                     if (currentEyeSamples >= mSamplePerEye) {
                         currentEyeSamples = 0;
-                        currentRegion = SRegion.UP_RIGHT;
+                        currentRegion = nextRegion(currentRegion);
                         findViewById(R.id.top_left_image).setVisibility(View.INVISIBLE);
                         ((ImageView) findViewById(R.id.top_right_image)).setImageResource(R.drawable.lena1);
                     }
@@ -141,7 +141,7 @@ public class CalibrationActivity extends MainActivity {
 
                     if (currentEyeSamples >= mSamplePerEye) {
                         currentEyeSamples = 0;
-                        currentRegion = SRegion.DOWN_RIGHT;
+                        currentRegion = nextRegion(currentRegion);
                         findViewById(R.id.top_right_image).setVisibility(View.INVISIBLE);
                         ((ImageView) findViewById(R.id.down_right_image)).setImageResource(R.drawable.lena1);
                     }
@@ -154,7 +154,7 @@ public class CalibrationActivity extends MainActivity {
 
                     if (currentEyeSamples >= mSamplePerEye) {
                         currentEyeSamples = 0;
-                        currentRegion = SRegion.DOWN_LEFT;
+                        currentRegion = nextRegion(currentRegion);
                         findViewById(R.id.down_right_image).setVisibility(View.INVISIBLE);
                         ((ImageView) findViewById(R.id.down_left_image)).setImageResource(R.drawable.lena1);
                     }
@@ -163,12 +163,12 @@ public class CalibrationActivity extends MainActivity {
                 case DOWN_LEFT:
                     mTrainedEyesContainer.addSample(0, 3, leftEye);
                     mTrainedEyesContainer.addSample(1, 3, rightEye);
-                        currentEyeSamples++;
+                    currentEyeSamples++;
 
                     if (currentEyeSamples >= mSamplePerEye) { // Calibration completed
                         mTrainedEyesContainer.meanSamples();
                         currentEyeSamples = 0;
-                        currentRegion = SRegion.NONE;
+                        currentRegion = nextRegion(currentRegion);
                         findViewById(R.id.down_left_image).setVisibility(View.INVISIBLE);
                         launchRecognitionActivity();
                     }
@@ -180,6 +180,22 @@ public class CalibrationActivity extends MainActivity {
         }
     }
 
+    /**
+     * Return the next region to calibrate once the current region has finished.
+     * @param currentRegion the region that has just finished to calibrate
+     */
+    private SRegion nextRegion(SRegion currentRegion) {
+        switch (currentRegion) {
+            case UP_LEFT:
+                return SRegion.UP_RIGHT;
+            case UP_RIGHT:
+                return SRegion.DOWN_RIGHT;
+            case DOWN_RIGHT:
+                return SRegion.DOWN_LEFT;
+            default:
+                return SRegion.NONE;
+        }
+    }
 
     /**
      * Launches the recognition activity. Called when
@@ -370,6 +386,8 @@ public class CalibrationActivity extends MainActivity {
     public void onPause() {
         super.onPause();
         Log.i(TAG3, "CalibActivity onPause() called");
+
+
     }
 
 }

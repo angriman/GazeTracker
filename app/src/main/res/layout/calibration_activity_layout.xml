@@ -64,6 +64,7 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignLeft="@id/fd_activity_surface_view"
+        android:alpha="0"
         android:scaleType="fitXY" />
 
     <ImageView
@@ -72,6 +73,7 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/fd_activity_surface_view"
+        android:alpha="0"
         android:scaleType="fitXY" />
 
 <!--    <Button
