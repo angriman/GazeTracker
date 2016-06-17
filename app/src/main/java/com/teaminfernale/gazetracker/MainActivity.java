@@ -39,12 +39,18 @@ import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
 public abstract class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
+    /**
+     * Debug tags
+     */
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
-    private static final String TAG4 = "MainActivityDebug";
 
     public static final int JAVA_DETECTOR = 0;
+
+    /**
+     * Java eye recognition method identifiers.
+     */
     private static final int TM_SQDIFF = 0;
     private static final int TM_SQDIFF_NORMED = 1;
     private static final int TM_CCOEFF = 2;
@@ -52,12 +58,32 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final int TM_CCORR = 4;
     private static final int TM_CCORR_NORMED = 5;
 
+    /**
+     * Default chosen method
+     */
+    private int method = TM_CCOEFF;
+
+    /**
+     * Number of frames to be used for the learning phase
+     */
+    private static final int mLearningFrames = 5;
+
+    /**
+     * Number of used frames during the learning phase.
+     */
     private int learn_frames = 0;
+
+    /**
+     * Number of frames that can be lost after eyes recognized
+     * before restarting the learning phase.
+     */
     private static final int MISSED_FRAMES_LIMIT = 10;
+
+    /**
+     * Templates used to recognize the right and the left eye.
+     */
     private Mat teplateR;
     private Mat teplateL;
-
-    private int method = TM_CCOEFF;
 
     private MenuItem mItemFace50;
     private MenuItem mItemFace40;
@@ -65,15 +91,27 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private MenuItem mItemFace20;
     private MenuItem mItemType;
 
+    /**
+     * Matrix representing the colored frame captured by the camera.
+     */
     private Mat mRgba;
+
+    /**
+     * Matrix representing the grey scale frame captured by the camera.
+     */
     private Mat mGray;
-    // matrix for zooming
+
+    /**
+     * Matrices used to zoom on the left and right eye.
+     */
     private Mat mZoomWindow;
     private Mat mZoomWindow2;
 
+    /**
+     * Classifiers used to recognize the face and the eyes.
+     */
     private CascadeClassifier mJavaDetector;
     private CascadeClassifier mJavaDetectorEye;
-
 
     private int mDetectorType = JAVA_DETECTOR;
     private String[] mDetectorName;
@@ -81,22 +119,48 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private float mRelativeFaceSize = 0.2f;
     private int mAbsoluteFaceSize = 0;
 
+    /**
+     * Instance of the OpenCV camera used to capture frames from the camera
+     * without using the standard Camera class.
+     */
     private CameraBridgeViewBase mOpenCvCameraView;
 
+    /**
+     * Camera mode.
+     */
     private int mode = 0;
+
+    /**
+     * Currently used algorithm to recognize eyes (Java or C++).
+     */
     private Algorithm mAlgorithm;
+
+    /**
+     * If both eyes have been detected after the training phase.
+     */
     private boolean eyesFound = false;
     private int missedFrames = 0;
 
-    // Thread handler to convert eye mats into a bitmap
+    /**
+     * Thread handler to manage threads.
+     */
     Handler mainHandler;
+
+    /**
+     * List of threads used to terminate unfinished threads
+     */
     ArrayList<Runnable> threadList = new ArrayList<>();
 
+
+
+    /**
+     * Called when calibration can take place
+     */
     protected abstract void updateUI();
 
     /**
      * Called when in a new frame both the eyes have been found. Decides what to do with the
-     * eyes-position informations.
+     * eyes-position information.
      * @param leftEye left eye coordinates
      * @param rightEye right eye coordinates
      * @param le left eye image
@@ -118,6 +182,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void setMethod(int method) { this.method = method; }
 
 
+    /**
+     * OpenCV static loader
+     */
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -126,7 +193,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                     Log.i(TAG, "OpenCV loaded successfully");
 
                     try {
-                        // load cascade file from application resources
+                        // Load cascade file from application resources
                         InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
                         File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
                         File cascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
@@ -140,7 +207,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         is.close();
                         os.close();
 
-                        // Load left eye classificator
+                        // Load left eye classifier
                         InputStream iser = getResources().openRawResource(
                                 R.raw.haarcascade_lefteye_2splits);
                         File cascadeDirER = getDir("cascadeER",
@@ -154,6 +221,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         while ((bytesReadER = iser.read(bufferER)) != -1) {
                             oser.write(bufferER, 0, bytesReadER);
                         }
+
                         iser.close();
                         oser.close();
 
@@ -181,7 +249,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    //TODO Sistemare questi casini con la fotocamera
                     mOpenCvCameraView.setCameraIndex(0);
                     mOpenCvCameraView.enableView();
 
@@ -196,27 +263,45 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         }
     };
 
+    /**
+     * Getter method for eyesFound variable
+     */
     public boolean eyesFound() {
         return eyesFound;
     }
 
+    /**
+     * Getter method for currently used algorithm mAlgorithm variable
+     */
+    public Algorithm getAlgorithm() {
+        return mAlgorithm;
+    }
+
+    /**
+     * Setter method for the variable mAlgorithm. Used to let other activities to 
+     * switch the algorithm used to recognize eyes.
+     */
+    public void setAlgorithm(Algorithm algorithm) {
+        mAlgorithm = algorithm;
+    }
+    
+    /**
+     * Main constructor
+     */
     public MainActivity() {
         mDetectorName = new String[2];
         mDetectorName[JAVA_DETECTOR] = "Java";
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
-    public Algorithm getAlgorithm() {
-        return mAlgorithm;
-    }
-
-
     /**
      * Called at the creation of the activity. Needs to set the content wiew inside.
      */
     protected abstract void setLayout();
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -249,7 +334,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
 
-
     /**
      * Disables the camera to let a different activity the possibility
      * to use it without errors
@@ -261,20 +345,29 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         Log.i(TAG, "Camera closed");
     }
 
+    /**
+     * Called when the activity is becoming visible to the user.
+     * */
     @Override
-    public void onStart() { //Called when the activity is becoming visible to the user
+    public void onStart() {
         super.onStart();
         Log.i(TAG2, "Main Activity onStart() called");
     }
 
+    /**
+     * Called when the activity is no longer visible to the user.
+     */
     @Override
-    public void onStop() { //Called when the activity is no longer visible to the user
+    public void onStop() {
         super.onStop();
         Log.i(TAG2, "Main Activity onStop() called");
     }
 
+    /**
+     * Called after the activity has been stopped, prior to it being started again.
+     * */
     @Override
-    public void onRestart() { //Called after the activity has been stopped, prior to it being started again
+    public void onRestart() {
         super.onRestart();
         Log.i(TAG2, "Main Activity onRestart() called");
     }
@@ -284,6 +377,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         super.onPause();
         Log.i(TAG2, "Main Activity onPause() called");
         closeCamera();
+
         //Close all the opened threads
         for (int i = 0; i < threadList.size(); ++i){
             Runnable currentR = threadList.get(i);
@@ -312,11 +406,21 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         closeCamera();
     }
 
+    /**
+     * Called when the OpenCV camera view has started. Initializes the two matrices
+     * which represent the input frame mGray and mRgba.
+     * @param width width in pixels if the input frame
+     * @param height height in pixels of the input frame
+     */
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
     }
 
+    /**
+     * Called when the OpenCV camera view has stopped. It releases the matrices
+     * used for the input frame and to zoom to the eyes.
+     */
     public void onCameraViewStopped() {
         mGray.release();
         mRgba.release();
@@ -330,6 +434,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
      */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+        // Updates the input frame matrices
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
 
@@ -340,6 +445,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             }
         }
 
+        // Initializes the matrices for the eyes if not created yet.
         if (mZoomWindow == null || mZoomWindow2 == null) {
             CreateAuxiliaryMats();
         }
@@ -349,10 +455,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         MatOfRect faces = new MatOfRect();
 
+        // Initializes the face detector
         if (mJavaDetector != null) {
             mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
         }
 
+        // Variables for pupils center coordinates
         Point lMatchedEye = new Point();
         Point rMatchedEye = new Point();
 
@@ -360,30 +468,35 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         // inside the frame
         Rect[] facesArray = faces.toArray();
 
+        // At least one face detected
         if (facesArray.length > 0) {
 
-            // Rectangle of the first face
+            // Rectangle of the first face detected
             Rect faceRect = facesArray[0];
-            int eyeAreaMargin = 16;
 
+            // Builds a rectangle to cut the eyes area
+            // inside the face rectangle
+            int eyeAreaMargin = 16;
             Rect eyearea_right = new Rect(faceRect.x + faceRect.width / eyeAreaMargin, (int) (faceRect.y + (faceRect.height / 4.5)), (faceRect.width - 2 * faceRect.width / eyeAreaMargin) / 2, (int) (faceRect.height / 3.0));
             Rect eyearea_left = new Rect(faceRect.x + faceRect.width / eyeAreaMargin + (faceRect.width - 2 * faceRect.width / eyeAreaMargin) / 2, (int) (faceRect.y + (faceRect.height / 4.5)), (faceRect.width - 2 * faceRect.width / 16) / 2, (int) (faceRect.height / 3.0));
 
-            if (learn_frames < 5) {
+            // Still in learning phase
+            if (learn_frames < mLearningFrames) {
                 teplateR = get_template(mJavaDetectorEye, eyearea_right, 24);
                 teplateL = get_template(mJavaDetectorEye, eyearea_left, 24);
                 learn_frames++;
             }
             else {
-                // Learning finished, use the new templates for template matching
-
+                // Learning finished, use the new templates for eye matching
                 switch (mAlgorithm) {
                     case JAVA:
+                        // Use Java algorithm to match eyes
                         lMatchedEye = match_eye(eyearea_left, teplateL, method, mJavaDetectorEye);
                         rMatchedEye = match_eye(eyearea_right, teplateR, method, mJavaDetectorEye);
                         if (!eyesFound) {
                             if (lMatchedEye != null && rMatchedEye != null) {
                                 eyesFound = true;
+                                // Eyes matched: calibration can start
                                 updateUI();
                             }
                             else {
@@ -396,10 +509,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         }
                         break;
                     case CPP:
+                        // Use C++ algorithm to match eyes
                         lMatchedEye = cpp_match_eye(eyearea_left);
                         rMatchedEye = cpp_match_eye(eyearea_right);
                         if (!eyesFound) {
                             eyesFound = true;
+                            // Eyes matched: calibration can start
                             updateUI();
                         }
                         break;
@@ -407,10 +522,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         break;
                 }
 
-                String pointTag = "PointTag";
-                if (lMatchedEye != null)
-                    Log.i(pointTag, "Center CPP = ("+lMatchedEye.x+","+lMatchedEye.y+")");
-                }
+            }
 
             // Cut eye areas and put them to zoom windows
             if (!mZoomWindow.empty() && !mZoomWindow2.empty()) {
@@ -419,13 +531,21 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             }
         }
 
+        // Launches a separate thread with the coordinates of the center of the pupil
+        // of the matched eyes
         launchThread(lMatchedEye, rMatchedEye);
 
         return mRgba;
     }
 
-
-    private void launchThread(Point lMatchedEye, Point rMatchedEye){
+    /**
+     * Launches a separate thread to update images of the eyes and call
+     * the "onEyeFound method used during both the calibration and the recognition phases
+     * @param lMatchedEye Point that represents the center of the pupil of the left eye
+     * @param rMatchedEye Point that represents the center of the pupil of the right eye
+     */
+    private void launchThread(Point lMatchedEye, Point rMatchedEye) {
+        
         final Point finalLMatchedEye = lMatchedEye;
         final Point finalRMatchedEye = rMatchedEye;
 
@@ -447,48 +567,37 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                 }
             }
         };
+        
         mainHandler.post(myRunnable);
         threadList.add(myRunnable);
     }
-
-    public void setAlgorithm(Algorithm algorithm) {
-        mAlgorithm = algorithm;
-    }
-
+    
     /**
      * Called to recognize eyes after training is complete. It uses the CPP algorithm
      * with calls to OpenCV.
      * @param area Rectangle of the face
      */
-    private Point cpp_match_eye(Rect area){
-
-        String t = "PointTag";
+    private Point cpp_match_eye(Rect area) {
+        
+        // The C++ algorithm returns an int array that represents a point
         int[] result = findEyeCenter(mGray.getNativeObjAddr(), area.x, area.y, area.width, area.height);
-        //Log.i(t, "mZoomWindow dimensions -> cols =" + mZoomWindow.cols())
-        //Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-        //Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
-        //Utils.matToBitmap(mZoomWindow.clone(), le);
-        //Utils.matToBitmap(mZoomWindow2.clone(), re);
-        //Point leftEye = new Point(result[0]+area.x, result[1]+area.y);
-        //Imgproc.circle(mGray, leftEye, 5, new Scalar(0, 255, 255, 255));
-        //onEyeFound(leftEye, leftEye, le, re);
-
         return new Point(result[0], result[1]);
     }
 
 
     /**
-     * Called to recognize eyes after training is complete. It uses the Java algorithm
+     * Called to recognize a single eye after training is complete. It uses the Java algorithm
      * with calls to OpenCV.
      * @param area Rectangle of the face
      * @param mTemplate Template Mat used by the algorithm to match eyes from the
      *                  original image
      * @param type Method used to recognize the eye (SQDIFF, CCOEFF...)
-     * @param clasificator Cascade classificator used by the algorithm to detect
+     * @param classifier Cascade classifier used by the algorithm to detect
      *                     the eye
      */
-    private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier clasificator) {
-        //Point matchLoc;
+    private Point match_eye(Rect area, Mat mTemplate, int type, CascadeClassifier classifier) {
+
+        // Gets the eyes area that is the region of interest
         Mat mROI = mGray.submat(area);
         int result_cols = mROI.cols() - mTemplate.cols() + 1;
         int result_rows = mROI.rows() - mTemplate.rows() + 1;
@@ -524,11 +633,13 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         MatOfRect eyes = new MatOfRect();
         Point iris = new Point();
-        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
+        classifier.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
 
-        // It is > 0 if it detects an eye (I suppose). Recorded value: 0 or 1
         Rect[] eyesArray = eyes.toArray();
 
+        // Checks if the eye has been detected.
+        // If yes, cuts the area surrounding the eyes and detects
+        // and returns the center of the pupil.
         if (eyesArray.length > 0) {
             Rect e = eyesArray[0];
             e.x += area.x;
@@ -542,56 +653,55 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             iris.x = mmG.minLoc.x + eye_only_rectangle.x;
             iris.y = mmG.minLoc.y + eye_only_rectangle.y;
             Imgproc.circle(yyrez, mmG.minLoc, 1, new Scalar(255, 255, 255, 255), 1);
-            //Log.i(TAG, (eye == 0) ? "Left" : "Right" + " eye detected\t Center = ( " + mmG.minLoc.x + ", " + mmG.minLoc.y + " )");
-
 
             return mmG.minLoc;
-            // Prendere un punto di riferimento del rettangolo e tracciare i movimenti dell'iride rispetto a quel punto
-            // Tracciare i vari punti sullo schermo
         }
 
         return null;
     }
 
-    // First 6 frames to train the model
-    private Mat get_template(CascadeClassifier clasificator, Rect area, int size) {
+    /**
+     * Used during the first frames in order to train the model
+     * @param classifier Eye classifier
+     * @param area Rectangle area of the eye used for training and then detection
+     * @param size Size of the eye square area
+     */
+    private Mat get_template(CascadeClassifier classifier, Rect area, int size) {
         Mat template = new Mat();
         Mat mROI = mGray.submat(area);
         MatOfRect eyes = new MatOfRect();
         Point iris = new Point();
         Rect eye_template;
-        clasificator.detectMultiScale(mROI, eyes, 1.15, 2, Objdetect.CASCADE_FIND_BIGGEST_OBJECT | Objdetect.CASCADE_SCALE_IMAGE, new Size(30, 30), new Size());
+        classifier.detectMultiScale(mROI, eyes, 1.15, 2,
+                                    Objdetect.CASCADE_FIND_BIGGEST_OBJECT
+                                            | Objdetect.CASCADE_SCALE_IMAGE,
+                                    new Size(30, 30), new Size());
 
         Rect[] eyesArray = eyes.toArray();
+
+        // Eye detected by the model
         if (eyesArray.length > 0) {
             Rect e = eyesArray[0];
             e.x = area.x + e.x;
             e.y = area.y + e.y;
-            Rect eye_only_rectangle = new Rect((int) e.tl().x, (int) (e.tl().y + e.height * 0.4), (int) e.width, (int) (e.height * 0.6));
+            Rect eye_only_rectangle = new Rect((int) e.tl().x,
+                    (int) (e.tl().y + e.height * 0.4),
+                    (int) e.width, (int) (e.height * 0.6));
             mROI = mGray.submat(eye_only_rectangle);
-            Mat vyrez = mRgba.submat(eye_only_rectangle);
 
             Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);
 
-            // Draws a point in the center of the eye
-            //Imgproc.circle(vyrez, mmG.minLoc, 2, new Scalar(255, 255, 255, 255), 2);
             iris.x = mmG.minLoc.x + eye_only_rectangle.x;
             iris.y = mmG.minLoc.y + eye_only_rectangle.y;
-            eye_template = new Rect((int) iris.x - size / 2, (int) iris.y - size / 2, size, size);
+            eye_template = new Rect((int) iris.x - size / 2,
+                                    (int) iris.y - size / 2, size, size);
 
-            // Draws a red rectangle around the center of the eye
-           // Imgproc.rectangle(mRgba, eye_template.tl(), eye_template.br(), new Scalar(255, 0, 0, 255), 2);
             template = (mGray.submat(eye_template)).clone();
 
             return template;
         }
 
         return template;
-    }
-
-    private void setMinFaceSize(float faceSize) {
-        mRelativeFaceSize = faceSize;
-        mAbsoluteFaceSize = 0;
     }
 
     private void CreateAuxiliaryMats() {
@@ -644,6 +754,15 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return true;
     }
 
+    private void setMinFaceSize(float faceSize) {
+        mRelativeFaceSize = faceSize;
+        mAbsoluteFaceSize = 0;
+    }
+
+    /**
+     * Recreate button listener, resets the number of frames
+     * used for learning.
+     */
     public void onRecreateClick(View v) {
         learn_frames = 0;
     }
@@ -652,6 +771,14 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         System.loadLibrary("main-jni");
     }
 
+    /**
+     * Native method used to find the center of the eye of the input frame.
+     * @param matAddr Memory address of the input matrix representing the input frame
+     * @param x x coordinate of the rect representing the eye to detect area
+     * @param y y coordinate of the rect representing the eye to detect area
+     * @param height height of the rect representing the eye to detect area
+     * @param width width of the rect representing the eye to detect area
+     */
     private native int[] findEyeCenter(long matAddr, int x, int y, int width, int height);
 
 }

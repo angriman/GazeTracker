@@ -21,18 +21,81 @@ import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.JAVA;
  */
 public class CalibrationActivity extends MainActivity {
 
+    /**
+     * Number of samples for each eye to collect during the calibration
+     */
     private static final int mSamplePerEye = 15;
+
+    /**
+     * Number of samples per single eye collected until now. Note that
+     * new samples are recorded in couples simultaneously for both eyes. */
     private static int currentEyeSamples = 0;
+
+    /**
+     * If the calibration phase has started
+     */
     private boolean calibrating = false;
-    private static final String TAG3 = "CalibActivity_lifeCycle";
+
+    /**
+     * Regions of the screen that can be observed by the user
+     */
     public enum SRegion {UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, NONE}
+
+    /**
+     * Region currently observed by the user (used during the calibration phase
+     */
     SRegion currentRegion = SRegion.UP_LEFT;
+
+    /**
+     * Instance of the class used to store samples
+     */
     TrainedEyesContainer mTrainedEyesContainer = new TrainedEyesContainer();
-    private static final String TAG = "CalibrationActivity";
+
+    /**
+     * Currently used algorithm for eye recognition
+     */
     private Algorithm mAlgorithm;
+
+    /**
+     * SeekBar used to switch eye recognition model if using the Java algorithm
+     */
     private SeekBar methodSeekBar;
+
+    /**
+     * TextView that indicates the algorithm chosen with the SeekBar
+     */
     private TextView mValue;
+
+    /**
+     * Number of dots at the end of the text of the TextView at the center of the screen.
+     * This variable is used to correctly update the dots.
+     */
     private int locatingEyesTextViewStatus = 0;
+
+    /**
+     * Blue color of the enabled "Start calibration button" text
+     */
+    private static final String mBlueColorString = "#FF1C8AD9";
+
+    /**
+     * SeekBar methods names
+     */
+    private static final String TMSQDIFF = "TM_SQDIFF";
+    private static final String TMSQDIFFNORMED = "TM_SQDIFF_NORMED";
+    private static final String TMCCOEFF = "TM_CCOEFF";
+    private static final String TMCCOEFFNORMED = "TM_CCOEFF_NORMED";
+    private static final String TMCCORR = "TM_CCORR";
+    private static final String TMCCORRNORMED = "TM_CCORR_NORMED";
+
+    /**
+     * Debug tags
+     */
+    private static final String TAG = "CalibrationActivity";
+    private static final String TAG3 = "CalibActivity_lifeCycle";
+
+
+
+
     /**
      * Called each time the parent activity matches the eyes of the user
      * @param rightEye Coordinates of the center of the right eye
@@ -47,8 +110,12 @@ public class CalibrationActivity extends MainActivity {
         ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
         ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
 
+        // Calibration is taking place and both eyes are not null.
+        // Saving them into the container.
         if (calibrating && leftEye != null && rightEye != null) {
             Log.i(TAG, "Left eye = (" + leftEye.x + "," + leftEye.y +")");
+            // On the base of which region is being watched, saves the pair of samples
+            // in the container.
             switch (currentRegion) {
                 case UP_LEFT:
                     mTrainedEyesContainer.addSample(0, 0, leftEye);
@@ -112,21 +179,11 @@ public class CalibrationActivity extends MainActivity {
 
     /**
      * Launches the recognition activity. Called when
-     * the calibration has beeen completed
+     * the calibration has been completed
      */
     private void launchRecognitionActivity() {
         super.closeCamera();
         Log.i(TAG, "Creating new activity");
-
-/*        Point[] pointsArray = mTrainedEyesContainer.getPoints();
-        R_upRight = pointsArray[0];
-        L_upRight= pointsArray[1];
-        R_upLeft = pointsArray[2];
-        L_upLeft = pointsArray[3];
-        R_downRight = pointsArray[4];
-        L_downRight = pointsArray[5];
-        R_downLeft = pointsArray[6];
-        L_downLeft = pointsArray[7];*/
 
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         launchMainIntent.putExtra("algorithm", mAlgorithm);
@@ -156,12 +213,15 @@ public class CalibrationActivity extends MainActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG3, "CalibActivity onCreate() called");
 
+        // Gets which algorithm is used from the parent Activity
         mAlgorithm = super.getAlgorithm();
         methodSeekBar = (SeekBar) findViewById(R.id.methodSeekBar);
         mValue = (TextView) findViewById(R.id.method);
 
         ((ImageView) findViewById(R.id.top_left_image)).setImageResource(R.drawable.lena1);
 
+        // When the calibration button is pressed the calibration starts, the button and the
+        // SeekBar disappear.
         final Button calibrationButton = (Button) findViewById(R.id.calibrate_button);
         calibrationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,16 +234,21 @@ public class CalibrationActivity extends MainActivity {
             }
         });
 
-
         if (mAlgorithm == JAVA) {
             methodSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
                 @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {}
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    // Implemented but not used method
+                }
 
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {}
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    // Implemented but not used method
+                }
 
+                // When the progress changes it updates the algorithm and updates
+                // the corresponding TextView
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress,
                                               boolean fromUser) {
@@ -193,18 +258,25 @@ public class CalibrationActivity extends MainActivity {
             });
         }
         else {
+            // C++ method: SeekBar not needed
             methodSeekBar.setVisibility(View.INVISIBLE);
             mValue.setVisibility(View.INVISIBLE);
         }
 
+        // Sets the last method as the default selected by the SeekBar
         int initialMethod = 5;
         setMethod(initialMethod);
         updateMethodLabelText(initialMethod);
 
+        // Start a recursive thread to animate the TextView at the center of the screen
         startTexViewUpdate();
-
     }
 
+    /**
+     * Creates a recursive thread that changes the text
+     * at the center of the screen every time it is called
+     * adding 0, 1, 2, and 3 dots
+     */
     private void startTexViewUpdate() {
         final Runnable runnable = new Runnable() {
             @Override
@@ -241,9 +313,12 @@ public class CalibrationActivity extends MainActivity {
 
         mainHandler.postDelayed(runnable, 0);
         threadList.add(runnable);
-
     }
 
+    /**
+     * Enables the "start calibration" button and changes the text
+     * of the string in the center of the screen
+     */
     @Override
     protected void updateUI() {
         Runnable myRunnable = new Runnable() {
@@ -251,7 +326,7 @@ public class CalibrationActivity extends MainActivity {
             public void run() {
                 Button startCalibrationButton = (Button)findViewById(R.id.calibrate_button);
                 if (startCalibrationButton != null) {
-                    startCalibrationButton.setTextColor(Color.parseColor("#FF1C8AD9"));
+                    startCalibrationButton.setTextColor(Color.parseColor(mBlueColorString));
                     startCalibrationButton.setEnabled(true);
                     ((TextView) findViewById(R.id.status_text_view)).setText(getResources().getString(R.string.ready_text_view));
                 }
@@ -267,22 +342,22 @@ public class CalibrationActivity extends MainActivity {
     private void updateMethodLabelText(int newMethod) {
         switch (newMethod) {
             case 0:
-                mValue.setText("TM_SQDIFF");
+                mValue.setText(TMSQDIFF);
                 break;
             case 1:
-                mValue.setText("TM_SQDIFF_NORMED");
+                mValue.setText(TMSQDIFFNORMED);
                 break;
             case 2:
-                mValue.setText("TM_CCOEFF");
+                mValue.setText(TMCCOEFF);
                 break;
             case 3:
-                mValue.setText("TM_CCOEFF_NORMED");
+                mValue.setText(TMCCOEFFNORMED);
                 break;
             case 4:
-                mValue.setText("TM_CCORR");
+                mValue.setText(TMCCORR);
                 break;
             case 5:
-                mValue.setText("TM_CCORR_NORMED");
+                mValue.setText(TMCCORRNORMED);
                 break;
         }
     }
