@@ -61,6 +61,7 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignLeft="@id/recognition_front_camera_view"
+        android:alpha="0"
         android:scaleType="fitXY" />
 
     <ImageView
@@ -70,6 +71,7 @@
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/recognition_front_camera_view"
         android:scaleType="fitXY"
+        android:alpha="0"
         android:contentDescription="@string/right_eye_description"/>
 
 

@@ -98,8 +98,6 @@ public class CalibrationActivity extends MainActivity {
     private static final String TAG3 = "CalibActivity_lifeCycle";
 
 
-
-
     /**
      * Called each time the parent activity matches the eyes of the user
      * @param rightEye Coordinates of the center of the right eye
@@ -117,6 +115,7 @@ public class CalibrationActivity extends MainActivity {
         // Calibration is taking place and both eyes are not null.
         // Saving them into the container.
         if (calibrating && leftEye != null && rightEye != null) {
+
             Log.i(TAG, "Left eye = (" + leftEye.x + "," + leftEye.y +")");
             // On the base of which region is being watched, saves the pair of samples
             // in the container.
