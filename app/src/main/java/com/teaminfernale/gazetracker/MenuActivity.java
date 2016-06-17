@@ -7,9 +7,13 @@ import android.view.View;
 
 /**
  * Created by the awesome Eugenio on 6/12/16.
+ * Activity to choose the eye recognition algorithm.
  */
 public class MenuActivity extends Activity {
 
+    /**
+     * Available algorithms: Java or C++.
+     */
     public enum Algorithm {CPP, JAVA}
 
     @Override
