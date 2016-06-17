@@ -7,10 +7,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
-import android.widget.ToggleButton;
 
 import com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
@@ -18,18 +16,47 @@ import org.opencv.core.Point;
 
 /**
  * Created by the awesome Leonardo on 31/05/2016.
+ * Activity for the simulation of the recognition algorithm. It uses the data
+ * collected during the calibration to calculate the region of the screen currently
+ * watched by the user.
  */
 
 public class RecognitionActivity extends MainActivity {
 
+    /**
+     * Instance of the object that contains the samples.
+     */
     private  TrainedEyesContainer mTrainedEyesContainer;
-    private static final String TAG = "RecognitionActivity";
-    private int imageID = 0;
-    private boolean simulationStarted = false;
-    private static final String TAG4 = "RecogActivity_lifeCycle";
-    private enum RecognitionMetric {MEDIAN, THRESHOLD};
-    private RecognitionMetric metric;
 
+    /**
+     * ID of the image that have to be changed when the user
+     * looks to a different region of the screen.
+     */
+    private int imageID = 0;
+
+    /**
+     * If the simulation phase has started.
+     */
+    private boolean simulationStarted = false;
+
+    /**
+     * Represents which method is being used for the recognition
+     * Median: uses the median of the sorted array of samples.
+     * Threshold: calculates four thresholds to discriminate from up VS down and
+     *            left VS right for both right and left eyes
+     */
+    private enum RecognitionMetric {MEDIAN, THRESHOLD}
+
+    /**
+     * Currently used recognition metric
+     */
+    private RecognitionMetric metric = RecognitionMetric.THRESHOLD;
+
+    /**
+     * Debug tag.
+     */
+    private static final String TAG = "RecognitionActivity";
+    private static final String TAG4 = "RecogActivity_lifeCycle";
 
     /**
      * Sets the corresponding layout and initializes the images of the ImageViews
@@ -37,9 +64,12 @@ public class RecognitionActivity extends MainActivity {
     @Override
     protected void setLayout() {
         super.setModeRecognition();
+
         setContentView(R.layout.recognition_activity_layout);
         ((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);
+
+        // Initialize the images in the four corners of the screen
         initializeCornerImages();
     }
 
@@ -52,9 +82,6 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_down_left_image)).setImageResource(R.drawable.lena1);
         ((ImageView) findViewById(R.id.rec_down_right_image)).setImageResource(R.drawable.lena1);
     }
-
-    @Override
-    protected void updateUI() {}
 
     /**
      * Called each time the parent activity matches the eyes of the user
@@ -73,71 +100,91 @@ public class RecognitionActivity extends MainActivity {
         if (simulationStarted) {
             Log.i("CalibrationActivity", "Left eye = (" + leftEye.x + "," + leftEye.y +")");
 
-            final Point finalLMatchedEye = leftEye;
-            final Point finalRMatchedEye = rightEye;
-
-            Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
-
-            Runnable changePicture = new Runnable() {
-                @Override
-                public void run() {
-                    if (finalLMatchedEye != null && finalRMatchedEye != null) {
-                        String result = "You are watching ";
-                        ImageView imageView = null;
-                        TrainedEyesContainer.ScreenRegion choosenRegion = null;
-                        if (metric==RecognitionMetric.MEDIAN)
-                            choosenRegion = mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye);
-                        else
-                            choosenRegion = mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye);
-                        switch (choosenRegion) {
-                            case UP_LEFT:
-                                Log.i(TAG, result + "up left");
-                                imageView = (ImageView) findViewById(R.id.rec_top_left_image);
-                                break;
-                            case UP_RIGHT:
-                                Log.i(TAG, result + "up right");
-                                imageView = (ImageView) findViewById(R.id.rec_top_right_image);
-                                break;
-                            case DOWN_LEFT:
-                                Log.i(TAG, result + "down left");
-                                imageView = (ImageView) findViewById(R.id.rec_down_left_image);
-                                break;
-                            case DOWN_RIGHT:
-                                Log.i(TAG, result + "down right");
-                                imageView = (ImageView) findViewById(R.id.rec_down_right_image);
-                                break;
-                            default:
-                                Log.i(TAG, "somewhere I don't know");
-                                break;
-                        }
-
-                        if (imageID != 0) {
-                            ((ImageView) findViewById(imageID)).setImageResource(R.drawable.lena1);
-                        }
-                        imageID = imageView.getId();
-                        imageView.setImageResource(R.drawable.arianna);
-
-                    }
-                }
-            };
-
-            mainHandler.post(changePicture);
+            // Updates one of the images placed at the corners of the screen
+            updateCornerImages(leftEye, rightEye);
         }
+    }
+
+    /**
+     * Updates one of the four corner images depending on which part of the screen is
+     * currently watched by the user.
+     * @param lMatchedEye Coordinates of the center of the pupil of the left eye
+     * @param rMatchedEye Coordinates of the center of the pupil of the right eye
+     */
+    private void updateCornerImages(Point lMatchedEye, Point rMatchedEye) {
+
+        // Final variables requested for separate threads
+        final Point finalLMatchedEye = lMatchedEye;
+        final Point finalRMatchedEye = rMatchedEye;
+
+        Handler mainHandler = new Handler(getApplicationContext().getMainLooper());
+
+        // On a separate thread changes the corner images
+        Runnable changePicture = new Runnable() {
+            @Override
+            public void run() {
+
+                if (finalLMatchedEye != null && finalRMatchedEye != null) {
+
+                    String result = "You are watching ";
+                    ImageView imageView = null;
+                    TrainedEyesContainer.ScreenRegion choosenRegion = null;
+
+                    // Computes watched region with the selected method
+                    if (metric == RecognitionMetric.MEDIAN) {
+                        choosenRegion = mTrainedEyesContainer.computeCorner(finalLMatchedEye, finalRMatchedEye);
+                    }
+                    else {
+                        choosenRegion = mTrainedEyesContainer.computeCorner2(finalLMatchedEye, finalRMatchedEye);
+                    }
+
+                    switch (choosenRegion) {
+                        case UP_LEFT:
+                            Log.i(TAG, result + "up left");
+                            imageView = (ImageView) findViewById(R.id.rec_top_left_image);
+                            break;
+                        case UP_RIGHT:
+                            Log.i(TAG, result + "up right");
+                            imageView = (ImageView) findViewById(R.id.rec_top_right_image);
+                            break;
+                        case DOWN_LEFT:
+                            Log.i(TAG, result + "down left");
+                            imageView = (ImageView) findViewById(R.id.rec_down_left_image);
+                            break;
+                        case DOWN_RIGHT:
+                            Log.i(TAG, result + "down right");
+                            imageView = (ImageView) findViewById(R.id.rec_down_right_image);
+                            break;
+                        default:
+                            Log.i(TAG, "somewhere I don't know");
+                            break;
+                    }
+
+                    if (imageID != 0) {
+                        ((ImageView) findViewById(imageID)).setImageResource(R.drawable.lena1);
+                    }
+
+                    imageID = imageView.getId();
+                    imageView.setImageResource(R.drawable.arianna);
+                }
+            }
+        };
+
+        mainHandler.post(changePicture);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG4, "RecogActivity onCreate() called");
-        metric = RecognitionMetric.THRESHOLD;
 
         // Restore the simulation button state from the savedInstanceState
         if (savedInstanceState != null) {
             String buttonValue = savedInstanceState.getString("button");
-            if (buttonValue != null)
+            if (buttonValue != null) {
                 ((Button) findViewById(R.id.simulation_button)).setText(buttonValue);
-            boolean previousState = savedInstanceState.getBoolean("buttonState");
-            simulationStarted = previousState;
+            }
+            simulationStarted = savedInstanceState.getBoolean("buttonState");
             metric = (RecognitionMetric)savedInstanceState.getSerializable("metric");
             Switch s = (Switch) findViewById(R.id.recognition_method_switch);
             if (metric == RecognitionMetric.MEDIAN) {
@@ -149,9 +196,9 @@ public class RecognitionActivity extends MainActivity {
 
         Intent intent = getIntent();
         double[] pointsCoordinates = intent.getDoubleArrayExtra("trainedEyesContainer");
-        int[] tresholds = intent.getIntArrayExtra("tresholdsEyesContainer");
+        int[] thresholds = intent.getIntArrayExtra("tresholdsEyesContainer");
         setAlgorithm((Algorithm) intent.getSerializableExtra("algorithm"));
-        mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates, tresholds);
+        mTrainedEyesContainer = new TrainedEyesContainer(pointsCoordinates, thresholds);
 
         findViewById(R.id.simulation_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,7 +241,6 @@ public class RecognitionActivity extends MainActivity {
 
     }
 
-    // Save the instance state
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         String button = ((Button)findViewById(R.id.simulation_button)).getText().toString();
@@ -204,4 +250,9 @@ public class RecognitionActivity extends MainActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    /**
+     * Used for the calibration activity, implementation not needed here
+     */
+    @Override
+    protected void updateUI() {}
 }

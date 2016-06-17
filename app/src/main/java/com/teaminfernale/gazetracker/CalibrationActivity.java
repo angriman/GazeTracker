@@ -19,6 +19,10 @@ import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.JAVA;
 /**
  * Created by the awesome Leonardo on 31/05/2016.
  */
+
+/**
+ * Activity for the calibration of the user eyes.
+ */
 public class CalibrationActivity extends MainActivity {
 
     /**
@@ -366,51 +370,6 @@ public class CalibrationActivity extends MainActivity {
     public void onPause() {
         super.onPause();
         Log.i(TAG3, "CalibActivity onPause() called");
-
-        // Saves calibration
-        //SharedPreferences sp = getPreferences(MODE_PRIVATE);
-
-        //StringBuilder str_X = new StringBuilder();
-        //StringBuilder str_Y = new StringBuilder();
-
-        //for (Point aPointsArray : mTrainedEyesContainer.getPoints()) {
-        //    str_X.append((int)aPointsArray.x).append(",");
-        //    str_Y.append((int)aPointsArray.y).append(",");
-        //}
-
-        //String[] strings = getStrings();
-
-        //sp.edit().putString(strings[0], str_X.toString()).apply();
-        //sp.edit().putString(strings[1], str_Y.toString()).apply();
-
-        Log.i(TAG, "Calibration saved");
-
-    }
-
-    /**
-     * Returns the pair of string which identify the saved calibration
-     */
-    private String[] getStrings() {
-        String idX = "stringX";
-        String idY = "stringY";
-        String java = "JAVA";
-
-        switch (mAlgorithm) {
-            case CPP:
-                String cpp = "CPP";
-                idX += cpp;
-                idY += cpp;
-                break;
-            case JAVA:
-                idX += java;
-                idY += java;
-                break;
-            default:
-                idX += java;
-                idY += java;
-                break;
-        }
-        return new String[] {idX, idY};
     }
 
 }

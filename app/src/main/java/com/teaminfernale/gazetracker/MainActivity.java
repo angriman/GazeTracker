@@ -686,7 +686,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             e.y = area.y + e.y;
             Rect eye_only_rectangle = new Rect((int) e.tl().x,
                     (int) (e.tl().y + e.height * 0.4),
-                    (int) e.width, (int) (e.height * 0.6));
+                    e.width, (int) (e.height * 0.6));
             mROI = mGray.submat(eye_only_rectangle);
 
             Core.MinMaxLocResult mmG = Core.minMaxLoc(mROI);

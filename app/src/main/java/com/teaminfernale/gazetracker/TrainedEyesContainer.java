@@ -191,7 +191,8 @@ public class TrainedEyesContainer {
      * @param arr list of points used to compute the median point
      */
     private Point meanPointArrayList(ArrayList<Point> arr){
-        //If I have no points returns a default point (0,0)
+
+        //If there are no points returns a default point (0,0)
         if (arr.size() == 0) {
             return new Point(0, 0);
         }
@@ -212,6 +213,7 @@ public class TrainedEyesContainer {
 
         int medianX = sorter.getMedian(listX);
         int medianY = sorter.getMedian(listY);
+
         Log.i(TAG, "Median x = " + medianX);
         Log.i(TAG, "Median y = " + medianY);
 
@@ -228,7 +230,6 @@ public class TrainedEyesContainer {
      * */
     public void addSample(int eye, int position, Point center) {
 
-        //Log.i(TAG, "Added sample: eye" + eye + " position " + position + " Center = (" + center.x + "," + center.y + ")");
         if (eye == 0) { // left eye
             switch (position) {
                 case 0://up left
