@@ -2,17 +2,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include <iostream>
-#include <queue>
-#include <stdio.h>
-
-#include "constants.h"
-
-bool rectInImage(cv::Rect rect, cv::Mat image) {
-  return rect.x > 0 && rect.y > 0 && rect.x+rect.width < image.cols &&
-  rect.y+rect.height < image.rows;
-}
-
 bool inMat(cv::Point p,int rows,int cols) {
   return p.x >= 0 && p.x < cols && p.y >= 0 && p.y < rows;
 }
