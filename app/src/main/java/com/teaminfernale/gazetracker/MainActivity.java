@@ -46,6 +46,11 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
 
+    /**
+     * Debug variable
+     */
+    private static final boolean DEBUG = true;
+
     public static final int JAVA_DETECTOR = 0;
 
     /**
@@ -190,8 +195,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
-
+                    if (DEBUG) Log.i(TAG, "OpenCV loaded successfully");
                     try {
                         // Load cascade file from application resources
                         InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
@@ -228,25 +232,25 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         mJavaDetector = new CascadeClassifier(
                                 cascadeFile.getAbsolutePath());
                         if (mJavaDetector.empty()) {
-                            Log.e(TAG, "Failed to load cascade classifier");
+                            if(DEBUG) Log.e(TAG, "Failed to load cascade classifier");
                             mJavaDetector = null;
                         } else
-                            Log.i(TAG, "Loaded cascade classifier from "
-                                    + cascadeFile.getAbsolutePath());
+                        if(DEBUG) Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
 
                         mJavaDetectorEye = new CascadeClassifier(
                                 cascadeFileER.getAbsolutePath());
                         if (mJavaDetectorEye.empty()) {
-                            Log.e(TAG, "Failed to load cascade classifier");
+                            if(DEBUG) Log.e(TAG, "Failed to load cascade classifier");
+
                             mJavaDetectorEye = null;
                         } else
-                            Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
+                            if(DEBUG) Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
 
                         cascadeDir.delete();
 
                     } catch (IOException e) {
                         e.printStackTrace();
-                        Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
+                        if(DEBUG) Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
                     mOpenCvCameraView.setCameraIndex(0);
@@ -291,7 +295,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public MainActivity() {
         mDetectorName = new String[2];
         mDetectorName[JAVA_DETECTOR] = "Java";
-        Log.i(TAG, "Instantiated new " + this.getClass());
+        if(DEBUG) Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
     /**
@@ -306,7 +310,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.i(TAG2, "MainActivity onCreate() called");
+        if(DEBUG) Log.i(TAG2, "MainActivity onCreate() called");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setLayout();
 
@@ -327,9 +331,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         }
 
         if (mOpenCvCameraView == null)
-            Log.i(TAG, "Capito er bug");
+            if(DEBUG) Log.i(TAG, "Capito er bug");
         mOpenCvCameraView.setCvCameraViewListener(this);
-        Log.i(TAG, "camera view cameraview initializated");
+        if(DEBUG) Log.i(TAG, "camera view cameraview initializated");
 
     }
 
@@ -342,7 +346,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         if (mOpenCvCameraView != null) {
             mOpenCvCameraView.disableView();
         }
-        Log.i(TAG, "Camera closed");
+        if(DEBUG) Log.i(TAG, "Camera closed");
     }
 
     /**
@@ -351,7 +355,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     @Override
     public void onStart() {
         super.onStart();
-        Log.i(TAG2, "Main Activity onStart() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onStart() called");
     }
 
     /**
@@ -360,7 +364,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     @Override
     public void onStop() {
         super.onStop();
-        Log.i(TAG2, "Main Activity onStop() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onStop() called");
     }
 
     /**
@@ -369,13 +373,13 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     @Override
     public void onRestart() {
         super.onRestart();
-        Log.i(TAG2, "Main Activity onRestart() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onRestart() called");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.i(TAG2, "Main Activity onPause() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onPause() called");
         closeCamera();
 
         //Close all the opened threads
@@ -383,26 +387,26 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             Runnable currentR = threadList.get(i);
             mainHandler.removeCallbacks(currentR);
         }
-        Log.i(TAG2, "All threads closed!");
+        if(DEBUG) Log.i(TAG2, "All threads closed!");
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            if(DEBUG) Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
         } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            if(DEBUG) Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        Log.i(TAG2, "Main Activity onResume() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onResume() called");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG2, "Main Activity onDestroy() called");
+        if(DEBUG) Log.i(TAG2, "Main Activity onDestroy() called");
         closeCamera();
     }
 
@@ -540,7 +544,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     /**
      * Launches a separate thread to update images of the eyes and call
-     * the "onEyeFound method used during both the calibration and the recognition phases
+     * the "onEyeFound" method used during both the calibration and the recognition phases
      * @param lMatchedEye Point that represents the center of the pupil of the left eye
      * @param rMatchedEye Point that represents the center of the pupil of the right eye
      */
@@ -554,7 +558,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             public void run() {
 
                 try {
-                    Log.i(TAG3, "mZoomWindow = (" + mZoomWindow.toString() + ")");
+                    if(DEBUG) Log.i(TAG3, "mZoomWindow = (" + mZoomWindow.toString() + ")");
                     Bitmap le = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Bitmap re = Bitmap.createBitmap(mZoomWindow.cols(), mZoomWindow.rows(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(mZoomWindow.clone(), le);
@@ -563,7 +567,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         onEyeFound(finalLMatchedEye, finalRMatchedEye, le, re);
                 }
                 catch (IllegalArgumentException e) {
-                    Log.i(TAG, "THREAD EXCEPTION");
+                    if(DEBUG) Log.i(TAG, "THREAD EXCEPTION");
                 }
             }
         };
@@ -705,7 +709,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     }
 
     private void CreateAuxiliaryMats() {
-        Log.i(TAG3, "CreateAuxiliaryMats");
+        if(DEBUG) Log.i(TAG3, "CreateAuxiliaryMats");
         if (mGray.empty())
             return;
 
@@ -727,7 +731,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "called onCreateOptionsMenu");
+        if(DEBUG) Log.i(TAG, "called onCreateOptionsMenu");
         mItemFace50 = menu.add("Face size 50%");
         mItemFace40 = menu.add("Face size 40%");
         mItemFace30 = menu.add("Face size 30%");
@@ -738,7 +742,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
+        if(DEBUG) Log.i(TAG, "called onOptionsItemSelected; selected item: " + item);
         if (item == mItemFace50)
             setMinFaceSize(0.5f);
         else if (item == mItemFace40)

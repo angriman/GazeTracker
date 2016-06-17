@@ -14,6 +14,11 @@ import android.view.View;
  */
 public class AskPermissionActivity extends Activity {
 
+    /**
+     * Debug variable
+     */
+    private static final boolean DEBUG = false;
+
     private final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String TAG = "AskPermissionActivity";
 
@@ -42,7 +47,7 @@ public class AskPermissionActivity extends Activity {
         if (requestCode == REQUEST_CAMERA_PERMISSION){
             if (grantResults.length != 1 ||
                     grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "CAMERA permission has been DENIED.");
+                if (DEBUG) Log.i(TAG, "CAMERA permission has been DENIED.");
                 findViewById(R.id.askPermissionsButton).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -51,7 +56,7 @@ public class AskPermissionActivity extends Activity {
                 });
             }
             else {
-                Log.i(TAG, "CAMERA permission has been GRANTED.");
+                if (DEBUG)Log.i(TAG, "CAMERA permission has been GRANTED.");
 
                 launchActivity();
             }

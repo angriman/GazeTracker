@@ -14,6 +14,11 @@ import java.util.Arrays;
  */
 public class TrainedEyesContainer {
 
+    /**
+     * Debug variable
+     */
+    private static final boolean DEBUG = false;
+
     private static final String TAG = "TrainedEyesContainer";
 
     /**
@@ -134,14 +139,16 @@ public class TrainedEyesContainer {
      * the eight points declared as class variables
      */
     private void computeThresholds() {
-        Log.i(TAG, "Results: R_upRight = (" + R_upRight.x + "," + R_upRight.y + ")");
-        Log.i(TAG, "Results: L_upRight = (" + L_upRight.x + "," + L_upRight.y + ")");
-        Log.i(TAG, "Results: R_upLeft = (" + R_upLeft.x + "," + R_upLeft.y + ")");
-        Log.i(TAG, "Results: L_upLeft = (" + L_upLeft.x + "," + L_upLeft.y + ")");
-        Log.i(TAG, "Results: R_downRight = (" + R_downRight.x + "," + R_downRight.y + ")");
-        Log.i(TAG, "Results: L_downRight = (" + L_downRight.x + "," + L_downRight.y + ")");
-        Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
-        Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
+        if (DEBUG){
+            Log.i(TAG, "Results: R_upRight = (" + R_upRight.x + "," + R_upRight.y + ")");
+            Log.i(TAG, "Results: L_upRight = (" + L_upRight.x + "," + L_upRight.y + ")");
+            Log.i(TAG, "Results: R_upLeft = (" + R_upLeft.x + "," + R_upLeft.y + ")");
+            Log.i(TAG, "Results: L_upLeft = (" + L_upLeft.x + "," + L_upLeft.y + ")");
+            Log.i(TAG, "Results: R_downRight = (" + R_downRight.x + "," + R_downRight.y + ")");
+            Log.i(TAG, "Results: L_downRight = (" + L_downRight.x + "," + L_downRight.y + ")");
+            Log.i(TAG, "Results: R_downLeft = (" + R_downLeft.x + "," + R_downLeft.y + ")");
+            Log.i(TAG, "Results: L_downLeft = (" + L_downLeft.x + "," + L_downLeft.y + ")");
+        }
 
         upperLeftThreshold = (int)((L_upLeft.y + L_upRight.y) / 2 + (L_downLeft.y + L_downRight.y) / 2) / 2;
         upperRightThreshold = (int)((R_upLeft.y + R_upLeft.y) / 2 + (R_downLeft.y + R_downRight.y) / 2 )/2;
@@ -149,8 +156,10 @@ public class TrainedEyesContainer {
         leftLeftThreshold = (int)((L_upLeft.x + L_downLeft.x) / 2 + (L_upRight.x + L_downRight.x) / 2) / 2;
         leftRightThreshold = (int)((R_upLeft.x + R_downLeft.x) / 2 + (R_upRight.x + R_downRight.x) / 2) / 2;
 
-        Log.i(TAG, "Thresholds = upperLeftThreshold: " + upperLeftThreshold + "\n leftLefThresholdt: " + leftLeftThreshold);
-        Log.i(TAG, "Thresholds = upperRightThreshold: " + upperRightThreshold + "\n upperRightThreshold: " + leftRightThreshold);
+        if (DEBUG) {
+            Log.i(TAG, "Thresholds = upperLeftThreshold: " + upperLeftThreshold + "\n leftLefThresholdt: " + leftLeftThreshold);
+            Log.i(TAG, "Thresholds = upperRightThreshold: " + upperRightThreshold + "\n upperRightThreshold: " + leftRightThreshold);
+        }
 
     }
 
@@ -208,14 +217,18 @@ public class TrainedEyesContainer {
         Arrays.sort(listX);
         Arrays.sort(listY);
 
-        Log.i(TAG, "X array: " + Arrays.toString(listX));
-        Log.i(TAG, "Y array: " + Arrays.toString(listY));
+        if(DEBUG){
+            Log.i(TAG, "X array: " + Arrays.toString(listX));
+            Log.i(TAG, "Y array: " + Arrays.toString(listY));
+        }
 
         int medianX = sorter.getMedian(listX);
         int medianY = sorter.getMedian(listY);
 
-        Log.i(TAG, "Median x = " + medianX);
-        Log.i(TAG, "Median y = " + medianY);
+        if(DEBUG){
+            Log.i(TAG, "Median x = " + medianX);
+            Log.i(TAG, "Median y = " + medianY);
+        }
 
         return new Point(medianX, medianY);
     }
@@ -320,11 +333,13 @@ public class TrainedEyesContainer {
      * @param rightEyeY the Y coordinate of the center of the pupil of the right eye
      */
     private boolean isUp(int leftEyeY, int rightEyeY) {
-        Log.i(TAG, "upperLeftThreshold = " + upperLeftThreshold);
+        if(DEBUG) Log.i(TAG, "upperLeftThreshold = " + upperLeftThreshold);
         int leftUpperDistance = leftEyeY - upperLeftThreshold;
         int rightUpperDistance = rightEyeY - upperRightThreshold;
-        Log.i(TAG, "left upper distance = " + leftEyeY + " - " + upperLeftThreshold);
-        Log.i(TAG, "right upper distance = " + rightEyeY + " - " + upperRightThreshold);
+        if(DEBUG){
+            Log.i(TAG, "left upper distance = " + leftEyeY + " - " + upperLeftThreshold);
+            Log.i(TAG, "right upper distance = " + rightEyeY + " - " + upperRightThreshold);
+        }
         return leftUpperDistance + rightUpperDistance < 0;
     }
 

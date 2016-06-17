@@ -26,6 +26,11 @@ import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.JAVA;
 public class CalibrationActivity extends MainActivity {
 
     /**
+     * Debug variable
+     */
+    private static final boolean DEBUG = true;
+
+    /**
      * Number of samples for each eye to collect during the calibration
      */
     private static final int mSamplePerEye = 15;
@@ -116,7 +121,7 @@ public class CalibrationActivity extends MainActivity {
         // Saving them into the container.
         if (calibrating && leftEye != null && rightEye != null) {
 
-            Log.i(TAG, "Left eye = (" + leftEye.x + "," + leftEye.y +")");
+            if(DEBUG) Log.i(TAG, "Left eye = (" + leftEye.x + "," + leftEye.y +")");
             // On the base of which region is being watched, saves the pair of samples
             // in the container.
             switch (currentRegion) {
@@ -202,12 +207,12 @@ public class CalibrationActivity extends MainActivity {
      */
     private void launchRecognitionActivity() {
         super.closeCamera();
-        Log.i(TAG, "Creating new activity");
+        if(DEBUG) Log.i(TAG, "Creating new activity");
 
         Intent launchMainIntent = new Intent(CalibrationActivity.this, RecognitionActivity.class);
         launchMainIntent.putExtra("algorithm", mAlgorithm);
         Point[] points = mTrainedEyesContainer.getPoints();
-        Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
+        if(DEBUG) Log.i(TAG,"Calibration points: "+points[0]+" "+points[1]+" "+points[2]+" "+points[3]+" "+points[4]+" "+points[5]+" "+points[6]+" "+points[7]);
         double[] pointsCoordinates = mTrainedEyesContainer.getPointsCoordinates();
         int[] thresholds = mTrainedEyesContainer.getThresholds();
         launchMainIntent.putExtra("trainedEyesContainer", pointsCoordinates);
@@ -230,7 +235,7 @@ public class CalibrationActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG3, "CalibActivity onCreate() called");
+        if(DEBUG) Log.i(TAG3, "CalibActivity onCreate() called");
 
         // Gets which algorithm is used from the parent Activity
         mAlgorithm = super.getAlgorithm();
@@ -384,9 +389,7 @@ public class CalibrationActivity extends MainActivity {
     @Override
     public void onPause() {
         super.onPause();
-        Log.i(TAG3, "CalibActivity onPause() called");
-
-
+        if(DEBUG) Log.i(TAG3, "CalibActivity onPause() called");
     }
 
 }

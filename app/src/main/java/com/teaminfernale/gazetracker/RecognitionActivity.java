@@ -24,6 +24,11 @@ import org.opencv.core.Point;
 public class RecognitionActivity extends MainActivity {
 
     /**
+     * Debug variable
+     */
+    private static final boolean DEBUG = true;
+
+    /**
      * Instance of the object that contains the samples.
      */
     private  TrainedEyesContainer mTrainedEyesContainer;
@@ -98,7 +103,7 @@ public class RecognitionActivity extends MainActivity {
         ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);
 
         if (simulationStarted) {
-            Log.i("CalibrationActivity", "Left eye = (" + leftEye.x + "," + leftEye.y +")");
+            if (DEBUG) Log.i("CalibrationActivity", "Left eye = (" + leftEye.x + "," + leftEye.y +")");
 
             // Updates one of the images placed at the corners of the screen
             updateCornerImages(leftEye, rightEye);
@@ -140,23 +145,23 @@ public class RecognitionActivity extends MainActivity {
 
                     switch (choosenRegion) {
                         case UP_LEFT:
-                            Log.i(TAG, result + "up left");
+                            if (DEBUG) Log.i(TAG, result + "up left");
                             imageView = (ImageView) findViewById(R.id.rec_top_left_image);
                             break;
                         case UP_RIGHT:
-                            Log.i(TAG, result + "up right");
+                            if (DEBUG) Log.i(TAG, result + "up right");
                             imageView = (ImageView) findViewById(R.id.rec_top_right_image);
                             break;
                         case DOWN_LEFT:
-                            Log.i(TAG, result + "down left");
+                            if (DEBUG) Log.i(TAG, result + "down left");
                             imageView = (ImageView) findViewById(R.id.rec_down_left_image);
                             break;
                         case DOWN_RIGHT:
-                            Log.i(TAG, result + "down right");
+                            if (DEBUG) Log.i(TAG, result + "down right");
                             imageView = (ImageView) findViewById(R.id.rec_down_right_image);
                             break;
                         default:
-                            Log.i(TAG, "somewhere I don't know");
+                            if (DEBUG)Log.i(TAG, "somewhere I don't know");
                             break;
                     }
 
@@ -176,7 +181,7 @@ public class RecognitionActivity extends MainActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG4, "RecogActivity onCreate() called");
+        if (DEBUG) Log.i(TAG4, "RecogActivity onCreate() called");
 
         // Restore the simulation button state from the savedInstanceState
         if (savedInstanceState != null) {
