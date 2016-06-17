@@ -45,7 +45,6 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG = "MainActivity";
     private static final String TAG2 = "MainActivity_lifeCycle";
     private static final String TAG3 = "ZoomedWindow";
-    private static final String TAG4 = "MainActivityDebug";
 
     public static final int JAVA_DETECTOR = 0;
 
