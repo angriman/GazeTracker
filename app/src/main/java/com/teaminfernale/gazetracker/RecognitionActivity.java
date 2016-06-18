@@ -26,7 +26,7 @@ public class RecognitionActivity extends MainActivity {
     /**
      * Debug variable
      */
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * Instance of the object that contains the samples.
@@ -71,8 +71,10 @@ public class RecognitionActivity extends MainActivity {
         super.setModeRecognition();
 
         setContentView(R.layout.recognition_activity_layout);
-        ((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);
+        if(DEBUG){
+            ((ImageView) findViewById(R.id.rec_left_eye)).setImageResource(R.drawable.lena1);
+            ((ImageView) findViewById(R.id.rec_right_eye)).setImageResource(R.drawable.lena1);
+        }
 
         // Initialize the images in the four corners of the screen
         initializeCornerImages();
@@ -99,8 +101,10 @@ public class RecognitionActivity extends MainActivity {
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
         // To show the eyes for debug
-        ((ImageView) findViewById(R.id.rec_left_eye)).setImageBitmap(le);
-        ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);
+        if(DEBUG){
+            ((ImageView) findViewById(R.id.rec_left_eye)).setImageBitmap(le);
+            ((ImageView) findViewById(R.id.rec_right_eye)).setImageBitmap(re);
+        }
 
         if (simulationStarted) {
             if (DEBUG) Log.i("CalibrationActivity", "Left eye = (" + leftEye.x + "," + leftEye.y +")");

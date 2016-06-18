@@ -64,8 +64,9 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignLeft="@id/fd_activity_surface_view"
-        android:alpha="0"
+
         android:scaleType="fitXY" />
+    <!--android:alpha="0"-->
 
     <ImageView
         android:id="@+id/right_eye"
@@ -73,22 +74,23 @@
         android:layout_height="150dp"
         android:layout_centerVertical="true"
         android:layout_alignRight="@id/fd_activity_surface_view"
-        android:alpha="0"
-        android:scaleType="fitXY" />
 
-<!--    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:onClick="onRecreateClick"
-        android:text="@string/recreate_button"
-        android:background="@drawable/mybutton"
-        android:textColor="#1c8ad9"
-        android:drawableRight="@drawable/refresh"
-        android:elevation="5dp"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:id="@+id/button"/>-->
+        android:scaleType="fitXY" />
+    <!--android:alpha="0"-->
+
+    <!--    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:onClick="onRecreateClick"
+            android:text="@string/recreate_button"
+            android:background="@drawable/mybutton"
+            android:textColor="#1c8ad9"
+            android:drawableRight="@drawable/refresh"
+            android:elevation="5dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/button"/>-->
 
     <TextView
         android:id="@+id/status_text_view"

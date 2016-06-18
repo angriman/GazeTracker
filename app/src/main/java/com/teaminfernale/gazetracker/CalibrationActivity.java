@@ -28,7 +28,7 @@ public class CalibrationActivity extends MainActivity {
     /**
      * Debug variable
      */
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * Number of samples for each eye to collect during the calibration
@@ -114,8 +114,10 @@ public class CalibrationActivity extends MainActivity {
     protected void onEyeFound(Point leftEye, Point rightEye, Bitmap le, Bitmap re) {
 
         //to show the eyes for debug
-        ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
-        ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+        if(DEBUG){
+            ((ImageView) findViewById(R.id.left_eye)).setImageBitmap(le);
+            ((ImageView) findViewById(R.id.right_eye)).setImageBitmap(re);
+        }
 
         // Calibration is taking place and both eyes are not null.
         // Saving them into the container.
@@ -227,8 +229,10 @@ public class CalibrationActivity extends MainActivity {
     @Override
     protected void setLayout() {
         setContentView(R.layout.calibration_activity_layout);
-        ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
-        ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+        if(DEBUG){
+            ((ImageView) findViewById(R.id.left_eye)).setImageResource(R.drawable.lena1);
+            ((ImageView) findViewById(R.id.right_eye)).setImageResource(R.drawable.lena1);
+        }
     }
 
 
