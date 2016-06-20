@@ -708,8 +708,12 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
         return template;
     }
 
+    /**
+     * Initialization of the zoom windows, it also assigns the
+     * proper eye images for the current frame
+     */
     private void CreateAuxiliaryMats() {
-        if(DEBUG) Log.i(TAG3, "CreateAuxiliaryMats");
+
         if (mGray.empty())
             return;
 
@@ -720,12 +724,10 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
             mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
             mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
         }
-        if (mZoomWindow.empty()){
+        if (mZoomWindow.empty()) {
             mZoomWindow = mRgba.submat(rows / 2 + rows / 10, rows, cols / 2 + cols / 10, cols);
             mZoomWindow2 = mRgba.submat(0, rows / 2 - rows / 10, cols / 2 + cols / 10, cols);
         }
-
-
     }
 
 
