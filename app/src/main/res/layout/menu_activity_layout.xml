@@ -15,7 +15,6 @@
             android:drawableRight="@drawable/go_simulation"
             android:textColor="#1c8ad9"
             android:elevation="5dp"
-            style="@style/Widget.AppCompat.Button.Borderless"
             />
 
         <Button
@@ -28,7 +27,6 @@
             android:drawableRight="@drawable/go_simulation"
             android:textColor="#1c8ad9"
             android:elevation="5dp"
-            style="@style/Widget.AppCompat.Button.Borderless"
             />
 
 </LinearLayout>
