@@ -51,9 +51,9 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
     /**
      * Index that tells what camera to open (0 := back, 1 := frontal).
-     * We want to use the frontal camera in the phone.
+     * We want to use the frontal camera in the phone (so index = 1).
      * Since OpenCv camera has a bug, when running the application in the virtual device the index
-     * needs to be set to 1.
+     * needs to be set to 0.
      */
     private static final int cameraIndex = 1;
 
