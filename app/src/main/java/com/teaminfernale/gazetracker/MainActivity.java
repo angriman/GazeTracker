@@ -129,8 +129,14 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private CascadeClassifier mJavaDetector;
     private CascadeClassifier mJavaDetectorEye;
 
-    private int mDetectorType = JAVA_DETECTOR;
+    /**
+     * Detector name, used for debugging strings
+     */
     private String[] mDetectorName;
+
+    /**
+     * Index to navigate mDetectorName array*/
+    private int mDetectorType = JAVA_DETECTOR;
 
     private float mRelativeFaceSize = 0.2f;
     private int mAbsoluteFaceSize = 0;
@@ -264,6 +270,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         if(DEBUG) Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
+
                     mOpenCvCameraView.setCameraIndex(cameraIndex);
                     mOpenCvCameraView.enableView();
 
@@ -343,6 +350,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
 
         if (mOpenCvCameraView == null)
             if(DEBUG) Log.i(TAG, "Capito er bug");
+        assert mOpenCvCameraView != null;
         mOpenCvCameraView.setCvCameraViewListener(this);
         if(DEBUG) Log.i(TAG, "camera view cameraview initializated");
 
