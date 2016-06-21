@@ -381,6 +381,8 @@ public class TrainedEyesContainer {
         if (pRegion != null && p != null) {
             return Math.sqrt(((pRegion.x - p.x) * (pRegion.x - p.x)) + ((pRegion.y - p.y) * (pRegion.y - p.y)));
         }
+
+        // Infinite distance
         return Double.MAX_VALUE;
     }
 
