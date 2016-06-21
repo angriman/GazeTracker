@@ -15,7 +15,6 @@ import com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 import org.opencv.core.Point;
 
 /**
- * Created by the awesome Leonardo on 31/05/2016.
  * Activity for the simulation of the recognition algorithm. It uses the data
  * collected during the calibration to calculate the region of the screen currently
  * watched by the user.

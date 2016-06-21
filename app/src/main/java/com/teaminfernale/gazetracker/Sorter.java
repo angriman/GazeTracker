@@ -3,10 +3,14 @@ package com.teaminfernale.gazetracker;
 import org.opencv.core.Point;
 
 /**
- * Created by the awesome Eugenio on 6/7/16.
+ * Class used to sort the eyes-point array
  */
 public class Sorter {
 
+    /**
+     * Return the median value given an array list of int
+     * @param list Array of numbers to find find the median of
+     */
     public int getMedian(int[] list) {
         if (list.length > 0) {
             if (isOdd(list.length)) {
@@ -20,11 +24,19 @@ public class Sorter {
     }
 
 
+    /**
+     * True if the number is odd, false otherwise
+     * @param i number to check
+     */
     private boolean isOdd(int i) {
         return i % 2 == 0;
     }
 
 
+    /**
+     * Sort an array of points.
+     * @param list Array of points to sort
+     */
     public Point[] sort(Point[] list) {
         if (list.length == 1) {
             return list;
@@ -42,6 +54,12 @@ public class Sorter {
         return merge(firstList, secondList);
     }
 
+
+    /**
+     * Ausiliar method for merge sort. Returns a single array of the points in the two list merged.
+     * @param list1 first array of points to merge
+     * @param list2 second array of points to merge
+     */
     private Point[] merge(Point[] list1, Point[] list2) {
         int i = 0;
         int j = 0;
@@ -84,6 +102,13 @@ public class Sorter {
         return result;
     }
 
+
+    /**
+     * Ausiliar method for merge sort. Returns 1 if p1 > p2, 0 if p1 = p2, -1 if p1 < p2.
+     * Checks the x values first, then the y ones.
+     * @param p1 first array of points to merge
+     * @param p2 second array of points to merge
+     */
     private int comparePoints(Point p1, Point p2) {
         if (p1.x > p2.x) {
             return 1;

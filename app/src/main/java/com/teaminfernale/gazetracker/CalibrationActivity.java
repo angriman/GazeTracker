@@ -17,10 +17,6 @@ import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 import static com.teaminfernale.gazetracker.MenuActivity.Algorithm.JAVA;
 
 /**
- * Created by the awesome Leonardo on 31/05/2016.
- */
-
-/**
  * Activity for the calibration of the user eyes.
  */
 public class CalibrationActivity extends MainActivity {
@@ -33,7 +29,7 @@ public class CalibrationActivity extends MainActivity {
     /**
      * Number of samples for each eye to collect during the calibration
      */
-    private static final int mSamplePerEye = 15;
+    private static final int mSamplePerEye = 25;
 
     /**
      * Number of samples per single eye collected until now. Note that

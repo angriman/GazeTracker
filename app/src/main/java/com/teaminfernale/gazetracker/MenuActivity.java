@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 
 /**
- * Created by the awesome Eugenio on 6/12/16.
  * Activity to choose the eye recognition algorithm.
  */
 public class MenuActivity extends Activity {

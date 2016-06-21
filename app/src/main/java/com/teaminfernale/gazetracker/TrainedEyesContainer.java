@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Created by Leonardo on 24/05/2016.
  * Class used to store the first 8 points (4 for left eye and 4 for right eye) acquired during the
  * initial 4-points acquisition.
  */

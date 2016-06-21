@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * Created by Leonardo on 23/05/2016.
+ * Initial activity that asks the camera permission to the user the first time the app is used.
  */
 public class AskPermissionActivity extends Activity {
 

@@ -36,7 +36,10 @@ import java.util.ArrayList;
 
 import static com.teaminfernale.gazetracker.MenuActivity.Algorithm;
 
-
+/**
+ * Abstract activity that starts the opencv camera view and find the points of the eyes
+ * found in the frames. Then in the implementation you can decide what to do with these informations.
+ */
 public abstract class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     /**
@@ -47,9 +50,17 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
     private static final String TAG3 = "ZoomedWindow";
 
     /**
+     * Index that tells what camera to open (0 := back, 1 := frontal).
+     * We want to use the frontal camera in the phone.
+     * Since OpenCv camera has a bug, when running the application in the virtual device the index
+     * needs to be set to 1.
+     */
+    private static final int cameraIndex = 1;
+
+    /**
      * Debug variable
      */
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public static final int JAVA_DETECTOR = 0;
 
@@ -253,7 +264,7 @@ public abstract class MainActivity extends Activity implements CameraBridgeViewB
                         if(DEBUG) Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                     }
 
-                    mOpenCvCameraView.setCameraIndex(0);
+                    mOpenCvCameraView.setCameraIndex(cameraIndex);
                     mOpenCvCameraView.enableView();
 
                 }
