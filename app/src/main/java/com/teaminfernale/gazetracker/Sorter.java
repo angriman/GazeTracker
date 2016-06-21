@@ -56,7 +56,7 @@ public class Sorter {
 
 
     /**
-     * Ausiliar method for merge sort. Returns a single array of the points in the two list merged.
+     * Auxiliary method for merge sort. Returns a single array of the points in the two list merged.
      * @param list1 first array of points to merge
      * @param list2 second array of points to merge
      */
@@ -104,7 +104,7 @@ public class Sorter {
 
 
     /**
-     * Ausiliar method for merge sort. Returns 1 if p1 > p2, 0 if p1 = p2, -1 if p1 < p2.
+     * Auxiliary method for merge sort. Returns 1 if p1 > p2, 0 if p1 = p2, -1 if p1 < p2.
      * Checks the x values first, then the y ones.
      * @param p1 first array of points to merge
      * @param p2 second array of points to merge
